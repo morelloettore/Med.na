@@ -10,6 +10,9 @@ bibliotecas de componentes.
 - **[Backend](backend.md)**: Arquitetura do servidor, autenticação, controle de acesso (RBAC) e API
 REST.
 - **[Banco de Dados](database.md)**: SGBD relacional, ORM, caching e modelagem de dados.
+
+Obs:Links não estam funcionando, pórem não afeta o desenvolvimento da aplicação!
+
 ---
 ## Resumo Geral da Stack
 | Camada | Tecnologias Principais
