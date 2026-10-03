@@ -22,6 +22,46 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
 });
 
+// Demo users for testing when Supabase is not available
+const DEMO_USERS: User[] = [
+  {
+    id: "patient-joao-001",
+    email: "joao.silva@example.com",
+    role: "PATIENT",
+    first_name: "João",
+    last_name: "Silva",
+    phone: "(11) 99999-0001",
+    is_active: true,
+  },
+  {
+    id: "doctor-maria-001",
+    email: "maria.santos@example.com",
+    role: "DOCTOR",
+    first_name: "Maria",
+    last_name: "Santos",
+    phone: "(11) 99999-0002",
+    is_active: true,
+  },
+  {
+    id: "employee-pedro-001",
+    email: "pedro.oliveira@example.com",
+    role: "EMPLOYEE",
+    first_name: "Pedro",
+    last_name: "Oliveira",
+    phone: "(11) 99999-0003",
+    is_active: true,
+  },
+  {
+    id: "admin-carol-001",
+    email: "carol.admin@example.com",
+    role: "ADMIN",
+    first_name: "Carolina",
+    last_name: "Admin",
+    phone: "(11) 99999-0004",
+    is_active: true,
+  },
+];
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
@@ -50,9 +90,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setCurrentUser(defaultUser);
             localStorage.setItem("medna_active_user_id", defaultUser.id);
           }
+        } else {
+          throw new Error("No users found in database");
         }
       } catch (err) {
-        console.error("Failed to load users from Supabase", err);
+        console.warn("Failed to load users from Supabase, using demo users:", err);
+        
+        // Fallback to demo users when Supabase is not available
+        setAvailableUsers(DEMO_USERS);
+        
+        // Restore saved session or set default demo user
+        const savedUserId = localStorage.getItem("medna_active_user_id");
+        const found = DEMO_USERS.find((u) => u.id === savedUserId);
+        if (found) {
+          setCurrentUser(found);
+        } else {
+          // Default to Patient João
+          const defaultUser = DEMO_USERS.find((u) => u.role === "PATIENT") || DEMO_USERS[0];
+          setCurrentUser(defaultUser);
+          localStorage.setItem("medna_active_user_id", defaultUser.id);
+        }
       } finally {
         setLoading(false);
       }
