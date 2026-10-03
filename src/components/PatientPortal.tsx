@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Doctor, Specialty, Location, HealthInsurance, PatientInsurance, Appointment, DoctorSchedule } from "@/types";
@@ -51,12 +51,7 @@ export const PatientPortal = () => {
   const [newCardNumber, setNewCardNumber] = useState<string>("");
   const [newValidUntil, setNewValidUntil] = useState<string>("");
 
-  useEffect(() => {
-    if (!currentUser) return;
-    loadData();
-  }, [currentUser]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       // 1. Fetch Specialties
       const { data: specs } = await supabase.from("specialties").select("*").order("name");
@@ -101,7 +96,12 @@ export const PatientPortal = () => {
     } catch (err) {
       console.error("Error loading patient portal data:", err);
     }
-  };
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    loadData();
+  }, [currentUser, loadData]);
 
   // Generate Available Time Slots when Doctor and Date change
   useEffect(() => {
