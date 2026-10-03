@@ -29,8 +29,7 @@ Criar um sistema para gerenciar as principais áreas que um hospital pode oferec
 
 
 ### O que o sistema não precisa fazer:
-  1. Consultas online com médicos
-  2. Não obteremos a opção de agendamentos cirúrgicos 
-  3. E também não teremos agendamentos a longa data, como nutricionistas e psicólogos (rotina)
+  1. Não obteremos a opção de agendamentos cirúrgicos 
+  2. E também não teremos agendamentos a longa data, como nutricionistas e psicólogos (rotina)
 
 ### Backlog #01 
