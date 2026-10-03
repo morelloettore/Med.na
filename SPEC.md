@@ -13,8 +13,8 @@ O sistema possui três áreas distintas, sendo elas:
 
 
 ## Problemas a serem resolvidos
-A maneira de se organizar em compromissos com a sua saúde por meios considerados difíceis de se estruturar, vem sendo um constante problema na sociedade, pois papéis são descartáveis e facilmente podem se perder, por isso a nossa clínica tende a alterar este padrão através de uma agenda virtual.
- 
+A maneira de se organizar em compromissos com a sua saúde por meios considerados difíceis de se estruturar, vem sendo um constante problema na sociedade, pois papéis são descartáveis e facilm[...]
+  
 ## Escopo
 Criar um sistema para gerenciar as principais áreas que um hospital pode oferecer para seus pacientes e funcionários, através de nossa aplicação
 
@@ -33,3 +33,9 @@ Criar um sistema para gerenciar as principais áreas que um hospital pode oferec
   2. E também não teremos agendamentos a longa data, como nutricionistas e psicólogos (rotina)
 
 ### Backlog #01 
+- Implementar autenticação real com tela de login, substituindo o fallback de usuários demo atual.
+- Garantir que a tela inicial apresente a tela de login e não a interface principal sem autenticação.
+- Validar antes de inserir uma especialidade para impedir duplicidade e exibir mensagem amigável ao usuário.
+- Corrigir o fluxo de agendamento para que os horários disponíveis apareçam corretamente após selecionar médico e data.
+- Investigar e corrigir a tela do admin em branco, garantindo o carregamento dos dados de especialidades, locais, convênios e usuários.
+- Revisar a consistência dos dados vindos do Supabase para as operações de cadastro e consulta.
