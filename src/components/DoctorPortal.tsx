@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Appointment, MedicalRecord, MedicationItem, Prescription } from "@/types";
@@ -38,12 +38,7 @@ export const DoctorPortal = () => {
   const [saving, setSaving] = useState<boolean>(false);
   const [existingRecord, setExistingRecord] = useState<MedicalRecord | null>(null);
 
-  useEffect(() => {
-    if (!currentUser) return;
-    loadDoctorAppointments();
-  }, [currentUser]);
-
-  const loadDoctorAppointments = async () => {
+  const loadDoctorAppointments = useCallback(async () => {
     if (!currentUser) return;
 
     try {
@@ -62,7 +57,12 @@ export const DoctorPortal = () => {
     } catch (err) {
       console.error("Error loading doctor appointments:", err);
     }
-  };
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    loadDoctorAppointments();
+  }, [currentUser, loadDoctorAppointments]);
 
   const handleSelectAppointment = async (app: Appointment) => {
     setSelectedAppointment(app);
