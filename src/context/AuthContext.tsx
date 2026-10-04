@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { User, UserRole } from "@/types";
+import { User } from "@/types";
 import { supabase } from "@/lib/supabase";
 
 interface AuthContextType {
@@ -9,6 +9,7 @@ interface AuthContextType {
   setCurrentUser: (user: User | null) => void;
   availableUsers: User[];
   loginAs: (userId: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
   loading: boolean;
 }
@@ -18,11 +19,11 @@ const AuthContext = createContext<AuthContextType>({
   setCurrentUser: () => {},
   availableUsers: [],
   loginAs: async () => {},
+  signIn: async () => ({ ok: false, error: "Não inicializado" }),
   logout: () => {},
   loading: true,
 });
 
-// Demo users for testing when Supabase is not available
 const DEMO_USERS: User[] = [
   {
     id: "patient-joao-001",
@@ -62,53 +63,57 @@ const DEMO_USERS: User[] = [
   },
 ];
 
+const DEMO_CREDENTIALS: Record<string, string> = {
+  "joao.silva@example.com": "joao123",
+  "maria.santos@example.com": "medna123",
+  "pedro.oliveira@example.com": "func123",
+  "carol.admin@example.com": "admin123",
+  "paciente1@medna.com": "paciente123",
+  "funcionario@medna.com": "funcionario123",
+  "admin@medna.com": "admin123",
+};
+
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUserState] = useState<User | null>(null);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const setCurrentUser = (user: User | null) => {
+    setCurrentUserState(user);
+    if (user) {
+      localStorage.setItem("medna_active_user_id", user.id);
+    } else {
+      localStorage.removeItem("medna_active_user_id");
+    }
+  };
 
   useEffect(() => {
     async function loadUsers() {
       try {
-        const { data, error } = await supabase
-          .from("users")
-          .select("*")
-          .order("first_name");
+        const { data, error } = await supabase.from("users").select("*").order("first_name");
 
-        if (error) throw error;
-        if (data && data.length > 0) {
+        if (!error && data && data.length > 0) {
           setAvailableUsers(data);
 
-          // Restore saved session or set default user (e.g. Patient João or Admin)
           const savedUserId = localStorage.getItem("medna_active_user_id");
           const found = data.find((u) => u.id === savedUserId);
           if (found) {
-            setCurrentUser(found);
-          } else {
-            // Default to Patient João or first user
-            const defaultUser = data.find((u) => u.role === "PATIENT") || data[0];
-            setCurrentUser(defaultUser);
-            localStorage.setItem("medna_active_user_id", defaultUser.id);
+            setCurrentUserState(found);
           }
-        } else {
-          throw new Error("No users found in database");
+          return;
         }
+
+        throw error || new Error("No users found in database");
       } catch (err) {
         console.warn("Failed to load users from Supabase, using demo users:", err);
-        
-        // Fallback to demo users when Supabase is not available
         setAvailableUsers(DEMO_USERS);
-        
-        // Restore saved session or set default demo user
+
         const savedUserId = localStorage.getItem("medna_active_user_id");
         const found = DEMO_USERS.find((u) => u.id === savedUserId);
         if (found) {
-          setCurrentUser(found);
-        } else {
-          // Default to Patient João
-          const defaultUser = DEMO_USERS.find((u) => u.role === "PATIENT") || DEMO_USERS[0];
-          setCurrentUser(defaultUser);
-          localStorage.setItem("medna_active_user_id", defaultUser.id);
+          setCurrentUserState(found);
         }
       } finally {
         setLoading(false);
@@ -122,13 +127,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const user = availableUsers.find((u) => u.id === userId);
     if (user) {
       setCurrentUser(user);
-      localStorage.setItem("medna_active_user_id", user.id);
     }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    const normalizedEmail = normalizeEmail(email);
+    const users = availableUsers.length > 0 ? availableUsers : DEMO_USERS;
+    const user = users.find((u) => normalizeEmail(u.email) === normalizedEmail);
+    const isDemoPasswordValid = DEMO_CREDENTIALS[normalizedEmail] === password;
+
+    if (!user) {
+      return { ok: false, error: "E-mail ou senha inválidos." };
+    }
+
+    if (!isDemoPasswordValid) {
+      return { ok: false, error: "E-mail ou senha inválidos." };
+    }
+
+    setCurrentUser(user);
+    return { ok: true };
   };
 
   const logout = () => {
     setCurrentUser(null);
-    localStorage.removeItem("medna_active_user_id");
   };
 
   return (
@@ -138,6 +159,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setCurrentUser,
         availableUsers,
         loginAs,
+        signIn,
         logout,
         loading,
       }}
