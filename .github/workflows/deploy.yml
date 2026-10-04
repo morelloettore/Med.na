@@ -36,13 +36,18 @@ jobs:
           cache: "pnpm"
 
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v5
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
       - name: Build Next.js app
-        run: pnpm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: |
+          pnpm run build
+          touch out/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
