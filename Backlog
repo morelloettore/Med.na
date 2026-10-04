@@ -46,9 +46,10 @@ A aplicação possui mais de 50% das funcionalidades descritas na especificaçã
 
 Para atingir 100% do escopo total da aplicação conforme a especificação do projeto e melhorias sugeridas, faltam as seguintes etapas:
 
-1. **Suporte a Tema Claro / Escuro (Dark Mode & Light Mode)**: Adicionar botão de alternância de tema no cabeçalho com persistência da preferência visual do usuário via Tailwind CSS.
-2. **Gestão de Exclusão (CRUD Completo de Remoção/Exclusão)**: Adicionar botões e confirmações de exclusão/desativação para unidades hospitalares, especialidades, convênios e usuários no painel de administração e desvinculação de carteirinhas no painel do paciente.
-3. **Anexos e Exames Médicos**: Upload e armazenamento de arquivos (PDF e imagens) de laudos de exames laboratoriais diretamente no histórico do paciente.
-4. **Assinatura Digital de Prontuários (ICP-Brasil)**: Funcionalidade de validação de assinatura digital e QR Code para atestados e receitas médicas.
-5. **Integração de Sala de Videochamada Nativa (WebRTC)**: Player de videoconferência embutido diretamente na página da consulta de telemedicina.
-6. **Exportação de Prontuário em PDF**: Opção para o paciente e o médico realizarem o download do histórico do prontuário e receitas formatadas para impressão em formato PDF.
+1. **Painel de Configuração de Horários e Escalas Médicas**: Interface para o próprio médico ou administrador cadastrar e editar seus dias de atendimento, turnos e tempo de duração dos slots de consulta.
+2. **Suporte a Tema Claro / Escuro (Dark Mode & Light Mode)**: Botão de alternância de tema no cabeçalho com persistência da preferência visual do usuário via Tailwind CSS.
+3. **Gestão de Exclusão (CRUD Completo de Remoção/Exclusão)**: Botões e confirmações de exclusão/desativação para unidades hospitalares, especialidades, convênios e usuários no painel de administração e desvinculação de carteirinhas no painel do paciente.
+4. **Anexos e Exames Médicos**: Upload e armazenamento de arquivos (PDF e imagens) de laudos de exames laboratoriais diretamente no histórico do paciente.
+5. **Assinatura Digital de Prontuários (ICP-Brasil)**: Validação de assinatura digital e QR Code para atestados e receitas médicas.
+6. **Integração de Sala de Videochamada Nativa (WebRTC)**: Player de videoconferência embutido diretamente na página da consulta de telemedicina.
+7. **Exportação de Prontuário em PDF**: Opção para o paciente e o médico realizarem o download do histórico do prontuário e receitas formatadas para impressão em formato PDF.
