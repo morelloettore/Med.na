@@ -20,6 +20,11 @@ import {
   FileText
 } from "lucide-react";
 
+const DEFAULT_TIME_SLOTS = [
+  "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+  "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00"
+];
+
 export const PatientPortal = () => {
   const { currentUser } = useAuth();
 
@@ -130,18 +135,6 @@ export const PatientPortal = () => {
       const dateObj = new Date(selectedDate + "T12:00:00");
       const weekday = dateObj.getDay();
 
-      // Fetch doctor schedule for this weekday
-      const { data: schedules } = await supabase
-        .from("doctor_schedules")
-        .select("*")
-        .eq("doctor_id", selectedDoctor)
-        .eq("weekday", weekday);
-
-      if (!schedules || schedules.length === 0) {
-        setAvailableSlots([]);
-        return;
-      }
-
       // Get existing appointments for that doctor on that date
       const startOfDay = `${selectedDate}T00:00:00Z`;
       const endOfDay = `${selectedDate}T23:59:59Z`;
@@ -161,27 +154,40 @@ export const PatientPortal = () => {
         }) || []
       );
 
-      // Generate 30 min slots for schedules
-      const slots: string[] = [];
-      schedules.forEach((sched: DoctorSchedule) => {
-        let current = sched.start_time.substring(0, 5);
-        const end = sched.end_time.substring(0, 5);
+      // Fetch doctor schedule for this weekday
+      const { data: schedules } = await supabase
+        .from("doctor_schedules")
+        .select("*")
+        .eq("doctor_id", selectedDoctor)
+        .eq("weekday", weekday);
 
-        while (current < end) {
-          if (!bookedTimes.has(current)) {
-            slots.push(current);
+      let rawSlots: string[] = [];
+
+      if (schedules && schedules.length > 0) {
+        // Generate slots based on doctor's schedule
+        schedules.forEach((sched: DoctorSchedule) => {
+          let current = sched.start_time.substring(0, 5);
+          const end = sched.end_time.substring(0, 5);
+
+          while (current < end) {
+            rawSlots.push(current);
+            const [h, m] = current.split(":").map(Number);
+            const totalMin = h * 60 + m + (sched.slot_minutes || 30);
+            const nextH = Math.floor(totalMin / 60)
+              .toString()
+              .padStart(2, "0");
+            const nextM = (totalMin % 60).toString().padStart(2, "0");
+            current = `${nextH}:${nextM}`;
           }
-          const [h, m] = current.split(":").map(Number);
-          const totalMin = h * 60 + m + (sched.slot_minutes || 30);
-          const nextH = Math.floor(totalMin / 60)
-            .toString()
-            .padStart(2, "0");
-          const nextM = (totalMin % 60).toString().padStart(2, "0");
-          current = `${nextH}:${nextM}`;
-        }
-      });
+        });
+      } else {
+        // Fallback standard slots for any day (08:00 to 17:00) so user can always schedule
+        rawSlots = DEFAULT_TIME_SLOTS;
+      }
 
-      setAvailableSlots(slots);
+      // Filter out already booked slots
+      const finalSlots = Array.from(new Set(rawSlots)).filter((slot) => !bookedTimes.has(slot)).sort();
+      setAvailableSlots(finalSlots);
     }
 
     generateSlots();
