@@ -1,0 +1,21 @@
+# Login de Demonstração - Med.na
+
+Para facilitar a avaliação pelos professores e utilizadores do sistema, a aplicação conta com botões de **1-Clique para Avaliação** na própria tela inicial de login, além das credenciais abaixo:
+
+---
+
+## 🔑 Credenciais para Acesso por Perfil
+
+| Perfil / Área | E-mail de Teste | Senha | Descrição e Recursos para Teste |
+|:---|:---|:---|:---|
+| 💜 **ADMINISTRADOR** | `admin@medna.com` | `admin123` | Acesso completo à gestão de infraestrutura: cadastrar unidades hospitalares, especialidades médicas, operadoras de saúde e visualização de todos os usuários cadastrados. |
+| 💙 **PACIENTE** | `paciente1@medna.com` | `paciente123` | Acesso à agenda virtual: agendamento de consultas (Presencial ou Telemedicina), seleção de médicos, datas e horários, e inclusão de carteirinhas de convênio. |
+| 💚 **MÉDICO** | `maria.santos@medna.com` | `medna123` | Portal do profissional de saúde: visualização da agenda do dia, acesso às teleconsultas, preenchimento de prontuário eletrônico (Anamnese/Diagnóstico) e emissão de receitas médicas. |
+| 🧡 **RECEPÇÃO / FUNCIONÁRIO** | `funcionario@medna.com` | `func123` | Painel de controle da recepção: confirmação e cancelamento de consultas agendadas, filtro por status e busca de pacientes por nome. |
+
+---
+
+## 💡 Como Alternar entre os Perfis
+
+1. Ao entrar em qualquer perfil, você pode utilizar o seletor **"Alternar Perfil"** localizado na barra superior (Navbar) para mudar de usuário instantaneamente.
+2. Ou clique no botão de **LogOut** (`🚪`) no canto superior direito para retornar à tela inicial de login.

@@ -1,0 +1,40 @@
+# Trilha para 100% de Conclusão do Projeto - Med.na
+
+Este documento detalha o mapa de desenvolvimento futuro (Roadmap) necessário para que a aplicação Med.na atinja 100% de conclusão de escopo e aperfeiçoamento total.
+
+---
+
+## 🎯 Status Atual da Aplicação: > 50% Concluído (Operacional)
+
+Atualmente a aplicação entrega mais de 50% de seu funcionamento total com os seguintes módulos prontos:
+- [x] Autenticação Unificada (RBAC) com 4 perfis (`PATIENT`, `DOCTOR`, `EMPLOYEE`, `ADMIN`).
+- [x] Agenda Virtual de Consultas (Presencial e Telemedicina) com seleção de horários em tempo real.
+- [x] Prontuário Eletrônico & Receituário Médico.
+- [x] Recepção / Gestão de Consultas (Confirmações e Cancelamentos).
+- [x] Painel Administrativo de Unidades, Especialidades e Convênios.
+- [x] Exportação estática Next.js compatível com **GitHub Pages** e **Vercel**.
+
+---
+
+## 🗺️ Etapas Pendentes para Atingir 100%
+
+### 1. 🗓️ Painel de Configuração de Horários e Escalas Médicas
+- Interface dedicada para que o próprio médico ou o administrador defina e edite os dias de atendimento da semana, turnos (início/fim) e duração dos encaixes de consulta.
+
+### 2. 🌗 Suporte a Tema Claro / Escuro (Dark Mode & Light Mode)
+- Botão de alternância de tema no cabeçalho (Navbar) com persistência da preferência do usuário utilizando Tailwind CSS.
+
+### 3. 🗑️ Gestão de Exclusão (CRUD Completo de Remoção/Exclusão)
+- Adição de botões e confirmações de exclusão/desativação para unidades hospitalares, especialidades, convênios e usuários no painel administrativo e remoção de carteirinhas na área do paciente.
+
+### 4. 📄 Anexos e Exames Médicos
+- Módulo de upload e armazenamento de arquivos (PDF e imagens) de laudos de exames laboratoriais e de imagem no perfil histórico do paciente.
+
+### 5. 🔏 Assinatura Digital de Prontuários (ICP-Brasil)
+- Recurso de validação com QR Code e certificado digital para assinaturas de atestados e prescrições médicas.
+
+### 6. 📹 Player de Videochamada Nativo (WebRTC)
+- Integração de sala de conferência embutida diretamente na página da consulta de telemedicina (sem depender de redirecionamento externo).
+
+### 7. 🖨️ Exportação de Prontuário em PDF
+- Funcionalidade para download e impressão formatada do histórico do prontuário médico e receitas médicas em PDF.
