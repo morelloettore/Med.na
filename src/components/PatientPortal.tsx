@@ -33,6 +33,7 @@ export const PatientPortal = () => {
   // Data states
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [doctorSpecialtiesMap, setDoctorSpecialtiesMap] = useState<Record<string, string[]>>({});
   const [locations, setLocations] = useState<Location[]>([]);
   const [patientInsurances, setPatientInsurances] = useState<PatientInsurance[]>([]);
   const [allInsurances, setAllInsurances] = useState<HealthInsurance[]>([]);
@@ -46,7 +47,7 @@ export const PatientPortal = () => {
   const [selectedMode, setSelectedMode] = useState<"IN_PERSON" | "TELEMEDICINE">("IN_PERSON");
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [selectedTime, setSelectedTime] = useState<string>("");
-  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<string[]>(DEFAULT_TIME_SLOTS);
 
   const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
   const [bookingError, setBookingError] = useState<string | null>(null);
@@ -67,7 +68,16 @@ export const PatientPortal = () => {
       const { data: specs } = await supabase.from("specialties").select("*").order("name");
       if (specs) setSpecialties(specs);
 
-      // 2. Fetch Doctors
+      // 2. Fetch Doctor Specialties relation
+      const { data: docSpecs } = await supabase.from("doctor_specialties").select("*");
+      const dsMap: Record<string, string[]> = {};
+      (docSpecs || []).forEach((ds) => {
+        if (!dsMap[ds.doctor_id]) dsMap[ds.doctor_id] = [];
+        dsMap[ds.doctor_id].push(ds.specialty_id);
+      });
+      setDoctorSpecialtiesMap(dsMap);
+
+      // 3. Fetch Doctors
       const { data: docs } = await supabase.from("doctors").select("*");
       if (docs) {
         const enrichedDocs = docs.map((d) => ({
@@ -77,15 +87,15 @@ export const PatientPortal = () => {
         setDoctors(enrichedDocs);
       }
 
-      // 3. Fetch Locations
+      // 4. Fetch Locations
       const { data: locs } = await supabase.from("locations").select("*");
       if (locs) setLocations(locs);
 
-      // 4. Fetch Health Insurances
+      // 5. Fetch Health Insurances
       const { data: ins } = await supabase.from("health_insurances").select("*");
       if (ins) setAllInsurances(ins);
 
-      // 5. Fetch Patient Insurances
+      // 6. Fetch Patient Insurances
       if (currentUser) {
         const { data: patIns } = await supabase
           .from("patient_insurances")
@@ -93,7 +103,7 @@ export const PatientPortal = () => {
           .eq("patient_id", currentUser.id);
         if (patIns) setPatientInsurances(patIns);
 
-        // 6. Fetch Patient Appointments without foreign key relationship error
+        // 7. Fetch Patient Appointments
         const { data: apps } = await supabase
           .from("appointments")
           .select(`
@@ -123,10 +133,27 @@ export const PatientPortal = () => {
     loadData();
   }, [currentUser, loadData]);
 
+  // Filter doctors based on selected specialty
+  const filteredDoctors = doctors.filter((doc) => {
+    if (!selectedSpecialty) return true;
+    const docSpecs = doctorSpecialtiesMap[doc.user_id] || [];
+    return docSpecs.includes(selectedSpecialty);
+  });
+
+  // Automatically reset selected doctor if not in filtered list
+  useEffect(() => {
+    if (selectedDoctor && selectedSpecialty) {
+      const isStillValid = filteredDoctors.some((d) => d.user_id === selectedDoctor);
+      if (!isStillValid) {
+        setSelectedDoctor("");
+      }
+    }
+  }, [selectedSpecialty, filteredDoctors, selectedDoctor]);
+
   // Generate Available Time Slots when Doctor and Date change
   useEffect(() => {
-    if (!selectedDoctor || !selectedDate) {
-      setAvailableSlots([]);
+    if (!selectedDate) {
+      setAvailableSlots(DEFAULT_TIME_SLOTS);
       return;
     }
 
@@ -135,59 +162,62 @@ export const PatientPortal = () => {
       const dateObj = new Date(selectedDate + "T12:00:00");
       const weekday = dateObj.getDay();
 
-      // Get existing appointments for that doctor on that date
-      const startOfDay = `${selectedDate}T00:00:00Z`;
-      const endOfDay = `${selectedDate}T23:59:59Z`;
+      let bookedTimes = new Set<string>();
 
-      const { data: existingApps } = await supabase
-        .from("appointments")
-        .select("scheduled_at")
-        .eq("doctor_id", selectedDoctor)
-        .neq("status", "CANCELED")
-        .gte("scheduled_at", startOfDay)
-        .lte("scheduled_at", endOfDay);
+      if (selectedDoctor) {
+        const startOfDay = `${selectedDate}T00:00:00Z`;
+        const endOfDay = `${selectedDate}T23:59:59Z`;
 
-      const bookedTimes = new Set(
-        existingApps?.map((a) => {
-          const d = new Date(a.scheduled_at);
-          return d.toTimeString().substring(0, 5);
-        }) || []
-      );
+        const { data: existingApps } = await supabase
+          .from("appointments")
+          .select("scheduled_at")
+          .eq("doctor_id", selectedDoctor)
+          .neq("status", "CANCELED")
+          .gte("scheduled_at", startOfDay)
+          .lte("scheduled_at", endOfDay);
 
-      // Fetch doctor schedule for this weekday
-      const { data: schedules } = await supabase
-        .from("doctor_schedules")
-        .select("*")
-        .eq("doctor_id", selectedDoctor)
-        .eq("weekday", weekday);
+        bookedTimes = new Set(
+          existingApps?.map((a) => {
+            const d = new Date(a.scheduled_at);
+            return d.toTimeString().substring(0, 5);
+          }) || []
+        );
+      }
 
       let rawSlots: string[] = [];
 
-      if (schedules && schedules.length > 0) {
-        // Generate slots based on doctor's schedule
-        schedules.forEach((sched: DoctorSchedule) => {
-          let current = sched.start_time.substring(0, 5);
-          const end = sched.end_time.substring(0, 5);
+      if (selectedDoctor) {
+        const { data: schedules } = await supabase
+          .from("doctor_schedules")
+          .select("*")
+          .eq("doctor_id", selectedDoctor)
+          .eq("weekday", weekday);
 
-          while (current < end) {
-            rawSlots.push(current);
-            const [h, m] = current.split(":").map(Number);
-            const totalMin = h * 60 + m + (sched.slot_minutes || 30);
-            const nextH = Math.floor(totalMin / 60)
-              .toString()
-              .padStart(2, "0");
-            const nextM = (totalMin % 60).toString().padStart(2, "0");
-            current = `${nextH}:${nextM}`;
-          }
-        });
+        if (schedules && schedules.length > 0) {
+          schedules.forEach((sched: DoctorSchedule) => {
+            let current = sched.start_time.substring(0, 5);
+            const end = sched.end_time.substring(0, 5);
+
+            while (current < end) {
+              rawSlots.push(current);
+              const [h, m] = current.split(":").map(Number);
+              const totalMin = h * 60 + m + (sched.slot_minutes || 30);
+              const nextH = Math.floor(totalMin / 60)
+                .toString()
+                .padStart(2, "0");
+              const nextM = (totalMin % 60).toString().padStart(2, "0");
+              current = `${nextH}:${nextM}`;
+            }
+          });
+        } else {
+          rawSlots = DEFAULT_TIME_SLOTS;
+        }
       } else {
-        // Fallback standard slots for any day (08:00 to 17:00) so user can always schedule
         rawSlots = DEFAULT_TIME_SLOTS;
       }
 
-      // Filter out already booked slots
       const finalSlots = Array.from(new Set(rawSlots)).filter((slot) => !bookedTimes.has(slot)).sort();
-      setAvailableSlots(finalSlots);
+      setAvailableSlots(finalSlots.length > 0 ? finalSlots : DEFAULT_TIME_SLOTS);
     }
 
     generateSlots();
@@ -411,7 +441,7 @@ export const PatientPortal = () => {
                   className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 >
                   <option value="">Escolha um médico...</option>
-                  {doctors.map((d) => (
+                  {filteredDoctors.map((d) => (
                     <option key={d.user_id} value={d.user_id}>
                       Dr(a). {d.user?.first_name || "Médico"} {d.user?.last_name || ""} — CRM {d.crm}/{d.crm_state}
                     </option>
@@ -513,12 +543,9 @@ export const PatientPortal = () => {
                     value={selectedTime}
                     onChange={(e) => setSelectedTime(e.target.value)}
                     required
-                    disabled={availableSlots.length === 0}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
                   >
-                    <option value="">
-                      {availableSlots.length > 0 ? "Selecione o horário..." : "Nenhum horário disponível"}
-                    </option>
+                    <option value="">Selecione o horário...</option>
                     {availableSlots.map((slot) => (
                       <option key={slot} value={slot}>
                         {slot} hs
