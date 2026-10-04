@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { Doctor, Specialty, Location, HealthInsurance, PatientInsurance, Appointment, DoctorSchedule } from "@/types";
+import { Doctor, Specialty, Location, HealthInsurance, PatientInsurance, Appointment, DoctorSchedule, User } from "@/types";
 import {
   Calendar,
   Clock,
-  User,
+  User as UserIcon,
   Stethoscope,
   MapPin,
   ShieldCheck,
@@ -53,16 +53,24 @@ export const PatientPortal = () => {
 
   const loadData = useCallback(async () => {
     try {
+      // Fetch users map for joining
+      const { data: usersData } = await supabase.from("users").select("*");
+      const usersMap = new Map<string, User>();
+      (usersData || []).forEach((u) => usersMap.set(u.id, u));
+
       // 1. Fetch Specialties
       const { data: specs } = await supabase.from("specialties").select("*").order("name");
       if (specs) setSpecialties(specs);
 
-      // 2. Fetch Doctors with Users and Specialties
-      const { data: docs } = await supabase.from("doctors").select(`
-        *,
-        user:users(*)
-      `);
-      if (docs) setDoctors(docs);
+      // 2. Fetch Doctors
+      const { data: docs } = await supabase.from("doctors").select("*");
+      if (docs) {
+        const enrichedDocs = docs.map((d) => ({
+          ...d,
+          user: usersMap.get(d.user_id),
+        }));
+        setDoctors(enrichedDocs);
+      }
 
       // 3. Fetch Locations
       const { data: locs } = await supabase.from("locations").select("*");
@@ -80,18 +88,25 @@ export const PatientPortal = () => {
           .eq("patient_id", currentUser.id);
         if (patIns) setPatientInsurances(patIns);
 
-        // 6. Fetch Patient Appointments
+        // 6. Fetch Patient Appointments without foreign key relationship error
         const { data: apps } = await supabase
           .from("appointments")
           .select(`
             *,
-            doctor_user:users!doctor_id(*),
             specialty:specialties(*),
             location:locations(*)
           `)
           .eq("patient_id", currentUser.id)
           .order("scheduled_at", { ascending: false });
-        if (apps) setAppointments(apps);
+
+        if (apps) {
+          const enrichedApps = apps.map((app) => ({
+            ...app,
+            patient_user: usersMap.get(app.patient_id),
+            doctor_user: usersMap.get(app.doctor_id),
+          }));
+          setAppointments(enrichedApps);
+        }
       }
     } catch (err) {
       console.error("Error loading patient portal data:", err);
@@ -156,7 +171,6 @@ export const PatientPortal = () => {
           if (!bookedTimes.has(current)) {
             slots.push(current);
           }
-          // Increment by slot_minutes
           const [h, m] = current.split(":").map(Number);
           const totalMin = h * 60 + m + (sched.slot_minutes || 30);
           const nextH = Math.floor(totalMin / 60)
@@ -179,15 +193,30 @@ export const PatientPortal = () => {
     setBookingError(null);
     setBookingSuccess(null);
 
-    if (!selectedDoctor || !selectedDate || !selectedTime) {
-      setBookingError("Por favor, selecione o médico, a data e o horário desejado.");
+    if (!selectedDoctor) {
+      setBookingError("Por favor, selecione o médico desejado.");
+      return;
+    }
+    if (!selectedDate) {
+      setBookingError("Por favor, informe a data da consulta.");
+      return;
+    }
+    if (!selectedTime) {
+      setBookingError("Por favor, selecione o horário da consulta.");
+      return;
+    }
+
+    // Check if chosen date is in the past
+    const today = new Date().toISOString().split("T")[0];
+    if (selectedDate < today) {
+      setBookingError("Não é possível agendar consultas em datas passadas.");
       return;
     }
 
     const scheduledAt = `${selectedDate}T${selectedTime}:00`;
 
     try {
-      const { data, error } = await supabase.from("appointments").insert({
+      const { error } = await supabase.from("appointments").insert({
         patient_id: currentUser.id,
         doctor_id: selectedDoctor,
         specialty_id: selectedSpecialty || null,
@@ -199,13 +228,13 @@ export const PatientPortal = () => {
         status: "SCHEDULED",
         price: selectedInsurance ? 0 : 150.0,
         telemedicine_url: selectedMode === "TELEMEDICINE" ? `https://meet.medna.com.br/consulta-${Date.now()}` : null
-      }).select();
+      });
 
       if (error) throw error;
 
       setBookingSuccess("Consulta agendada com sucesso!");
       setSelectedTime("");
-      loadData();
+      await loadData();
       setActiveTab("appointments");
     } catch (err: any) {
       console.error("Booking error:", err);
@@ -229,7 +258,7 @@ export const PatientPortal = () => {
         .eq("id", appointmentId);
 
       if (error) throw error;
-      loadData();
+      await loadData();
     } catch (err) {
       console.error("Cancel error:", err);
       alert("Erro ao cancelar consulta.");
@@ -238,13 +267,22 @@ export const PatientPortal = () => {
 
   const handleAddInsurance = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser || !newInsuranceId || !newCardNumber) return;
+    if (!currentUser) return;
+
+    if (!newInsuranceId) {
+      alert("Selecione a operadora do convênio.");
+      return;
+    }
+    if (!newCardNumber || newCardNumber.trim().length < 5) {
+      alert("Informe um número de carteirinha válido (mínimo 5 dígitos).");
+      return;
+    }
 
     try {
       const { error } = await supabase.from("patient_insurances").insert({
         patient_id: currentUser.id,
         insurance_id: newInsuranceId,
-        card_number: newCardNumber,
+        card_number: newCardNumber.trim(),
         valid_until: newValidUntil || null,
         status: "ACTIVE"
       });
@@ -254,7 +292,8 @@ export const PatientPortal = () => {
       setNewInsuranceId("");
       setNewCardNumber("");
       setNewValidUntil("");
-      loadData();
+      await loadData();
+      alert("Carteirinha cadastrada com sucesso!");
     } catch (err: any) {
       console.error("Add insurance error:", err);
       alert("Erro ao cadastrar plano de saúde: " + err.message);
@@ -321,14 +360,14 @@ export const PatientPortal = () => {
             </h3>
 
             {bookingSuccess && (
-              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-sm flex items-center gap-2">
+              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-sm flex items-center gap-2 font-medium">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                 {bookingSuccess}
               </div>
             )}
 
             {bookingError && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm flex items-center gap-2">
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm flex items-center gap-2 font-medium">
                 <AlertCircle className="w-5 h-5 text-red-600" />
                 {bookingError}
               </div>
@@ -368,7 +407,7 @@ export const PatientPortal = () => {
                   <option value="">Escolha um médico...</option>
                   {doctors.map((d) => (
                     <option key={d.user_id} value={d.user_id}>
-                      Dr(a). {d.user?.first_name} {d.user?.last_name} — CRM {d.crm}/{d.crm_state}
+                      Dr(a). {d.user?.first_name || "Médico"} {d.user?.last_name || ""} — CRM {d.crm}/{d.crm_state}
                     </option>
                   ))}
                 </select>
@@ -385,7 +424,7 @@ export const PatientPortal = () => {
                     onChange={(e) => setSelectedLocation(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
                   >
-                    <option value="">Hospital Central / Unidade</option>
+                    <option value="">Hospital Central / Unidade Principal</option>
                     {locations.map((l) => (
                       <option key={l.id} value={l.id}>
                         {l.name}
@@ -403,7 +442,7 @@ export const PatientPortal = () => {
                     onChange={(e) => setSelectedInsurance(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
                   >
-                    <option value="">Particular</option>
+                    <option value="">Particular (R$ 150,00)</option>
                     {patientInsurances.map((pi) => (
                       <option key={pi.id} value={pi.id}>
                         {pi.insurance?.name} ({pi.card_number})
@@ -505,7 +544,7 @@ export const PatientPortal = () => {
 
             <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
               <h4 className="font-bold text-slate-900 text-sm mb-3">
-                Seus Convenios Ativos
+                Seus Convênios Ativos
               </h4>
               {patientInsurances.length === 0 ? (
                 <p className="text-xs text-slate-500">Nenhum plano cadastrado ainda.</p>
@@ -565,7 +604,7 @@ export const PatientPortal = () => {
                       </div>
 
                       <h4 className="text-base font-bold text-slate-900">
-                        Dr(a). {app.doctor_user?.first_name} {app.doctor_user?.last_name}
+                        Dr(a). {app.doctor_user?.first_name || "Médico"} {app.doctor_user?.last_name || ""}
                       </h4>
 
                       <div className="text-xs text-slate-600 flex flex-wrap gap-x-4 gap-y-1">

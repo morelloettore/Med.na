@@ -13,7 +13,8 @@ import {
   Trash2,
   CheckCircle2,
   Activity,
-  Calendar
+  Calendar,
+  AlertCircle
 } from "lucide-react";
 
 export const AdminPortal = () => {
@@ -37,6 +38,8 @@ export const AdminPortal = () => {
   const [newInsName, setNewInsName] = useState("");
   const [newAnsCode, setNewAnsCode] = useState("");
   const [newCnpj, setNewCnpj] = useState("");
+
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; msg: string } | null>(null);
 
   useEffect(() => {
     loadAllData();
@@ -62,29 +65,44 @@ export const AdminPortal = () => {
 
   const handleAddSpecialty = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newSpecName) return;
+    setFeedback(null);
+    if (!newSpecName || newSpecName.trim().length < 3) {
+      setFeedback({ type: "error", msg: "O nome da especialidade deve ter pelo menos 3 caracteres." });
+      return;
+    }
 
     try {
-      const { error } = await supabase.from("specialties").insert({ name: newSpecName });
+      const { error } = await supabase.from("specialties").insert({ name: newSpecName.trim() });
       if (error) throw error;
+
       setNewSpecName("");
+      setFeedback({ type: "success", msg: "Especialidade cadastrada com sucesso!" });
       loadAllData();
     } catch (err: any) {
-      alert("Erro ao adicionar especialidade: " + err.message);
+      setFeedback({ type: "error", msg: "Erro ao adicionar especialidade: " + err.message });
     }
   };
 
   const handleAddLocation = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newLocName || !newLocSt || !newLocCity) return;
+    setFeedback(null);
+
+    if (!newLocName || newLocName.trim().length < 3) {
+      setFeedback({ type: "error", msg: "Informe o nome da unidade hospitalar." });
+      return;
+    }
+    if (!newLocSt || !newLocCity) {
+      setFeedback({ type: "error", msg: "Endereço e cidade são campos obrigatórios." });
+      return;
+    }
 
     try {
       const { error } = await supabase.from("locations").insert({
-        name: newLocName,
-        address_st: newLocSt,
-        address_city: newLocCity,
-        address_state: newLocState,
-        phone: newLocPhone
+        name: newLocName.trim(),
+        address_st: newLocSt.trim(),
+        address_city: newLocCity.trim(),
+        address_state: newLocState.trim().toUpperCase(),
+        phone: newLocPhone.trim() || null
       });
       if (error) throw error;
 
@@ -92,30 +110,37 @@ export const AdminPortal = () => {
       setNewLocSt("");
       setNewLocCity("");
       setNewLocPhone("");
+      setFeedback({ type: "success", msg: "Unidade hospitalar cadastrada com sucesso!" });
       loadAllData();
     } catch (err: any) {
-      alert("Erro ao adicionar unidade hospitalar: " + err.message);
+      setFeedback({ type: "error", msg: "Erro ao adicionar unidade: " + err.message });
     }
   };
 
   const handleAddInsurance = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newInsName) return;
+    setFeedback(null);
+
+    if (!newInsName || newInsName.trim().length < 2) {
+      setFeedback({ type: "error", msg: "Informe o nome da operadora do convênio." });
+      return;
+    }
 
     try {
       const { error } = await supabase.from("health_insurances").insert({
-        name: newInsName,
-        ans_code: newAnsCode || null,
-        cnpj: newCnpj || null
+        name: newInsName.trim(),
+        ans_code: newAnsCode.trim() || null,
+        cnpj: newCnpj.trim() || null
       });
       if (error) throw error;
 
       setNewInsName("");
       setNewAnsCode("");
       setNewCnpj("");
+      setFeedback({ type: "success", msg: "Convênio/operadora cadastrado com sucesso!" });
       loadAllData();
     } catch (err: any) {
-      alert("Erro ao cadastrar convênio: " + err.message);
+      setFeedback({ type: "error", msg: "Erro ao cadastrar convênio: " + err.message });
     }
   };
 
@@ -133,6 +158,17 @@ export const AdminPortal = () => {
           Gerencie a infraestrutura hospitalar, unidades de atendimento, especialidades médicas e cadastros de convênios.
         </p>
       </div>
+
+      {feedback && (
+        <div className={`mb-6 p-4 rounded-xl border text-sm font-semibold flex items-center gap-2 ${
+          feedback.type === "success"
+            ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+            : "bg-red-50 border-red-200 text-red-800"
+        }`}>
+          {feedback.type === "success" ? <CheckCircle2 className="w-5 h-5 text-emerald-600" /> : <AlertCircle className="w-5 h-5 text-red-600" />}
+          {feedback.msg}
+        </div>
+      )}
 
       {/* Tabs Header */}
       <div className="flex border-b border-slate-200 mb-6 space-x-8 overflow-x-auto">
@@ -229,7 +265,7 @@ export const AdminPortal = () => {
                 <div>
                   <h4 className="font-bold text-slate-900 text-base">{l.name}</h4>
                   <p className="text-xs text-slate-600 mt-1">{l.address_st} - {l.address_city}/{l.address_state}</p>
-                  <p className="text-xs text-slate-500 mt-1">Tel: {l.phone}</p>
+                  <p className="text-xs text-slate-500 mt-1">Tel: {l.phone || "Não informado"}</p>
                 </div>
                 <span className="px-2.5 py-1 bg-purple-100 text-purple-800 rounded-full text-[10px] font-bold uppercase">Unidade Ativa</span>
               </div>
@@ -240,7 +276,7 @@ export const AdminPortal = () => {
             <h4 className="font-bold text-slate-900 text-base mb-4">Cadastrar Nova Unidade</h4>
             <form onSubmit={handleAddLocation} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Nome da Unidade</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Nome da Unidade *</label>
                 <input
                   type="text"
                   placeholder="Ex: Med.na Unidade Pinheiros"
@@ -251,7 +287,7 @@ export const AdminPortal = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Endereço</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Endereço *</label>
                 <input
                   type="text"
                   placeholder="Ex: R. Teodoro Sampaio, 1200"
@@ -263,7 +299,7 @@ export const AdminPortal = () => {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Cidade</label>
+                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Cidade *</label>
                   <input
                     type="text"
                     value={newLocCity}
@@ -273,7 +309,7 @@ export const AdminPortal = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">UF</label>
+                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">UF *</label>
                   <input
                     type="text"
                     maxLength={2}
@@ -285,7 +321,7 @@ export const AdminPortal = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Telefone</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Telefone (opcional)</label>
                 <input
                   type="text"
                   placeholder="(11) 3000-4000"
@@ -329,7 +365,7 @@ export const AdminPortal = () => {
             <h4 className="font-bold text-slate-900 text-base mb-4">Cadastrar Convênio</h4>
             <form onSubmit={handleAddInsurance} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Nome da Operadora</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Nome da Operadora *</label>
                 <input
                   type="text"
                   placeholder="Ex: NotreDame Intermédica"
@@ -340,7 +376,7 @@ export const AdminPortal = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Código ANS</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Código ANS (opcional)</label>
                 <input
                   type="text"
                   placeholder="Ex: 352501"
@@ -350,7 +386,7 @@ export const AdminPortal = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">CNPJ</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">CNPJ (opcional)</label>
                 <input
                   type="text"
                   placeholder="00000000000000"

@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { Appointment, MedicalRecord, MedicationItem, Prescription } from "@/types";
+import { Appointment, MedicalRecord, MedicationItem, Prescription, User } from "@/types";
 import {
   Calendar,
   Clock,
-  User,
+  User as UserIcon,
   Stethoscope,
   Video,
   FileText,
@@ -42,18 +42,29 @@ export const DoctorPortal = () => {
     if (!currentUser) return;
 
     try {
+      // Fetch users map for joining
+      const { data: usersData } = await supabase.from("users").select("*");
+      const usersMap = new Map<string, User>();
+      (usersData || []).forEach((u) => usersMap.set(u.id, u));
+
       const { data } = await supabase
         .from("appointments")
         .select(`
           *,
-          patient_user:users!patient_id(*),
           specialty:specialties(*),
           location:locations(*)
         `)
         .eq("doctor_id", currentUser.id)
         .order("scheduled_at", { ascending: true });
 
-      if (data) setAppointments(data);
+      if (data) {
+        const enrichedApps = data.map((app) => ({
+          ...app,
+          patient_user: usersMap.get(app.patient_id),
+          doctor_user: usersMap.get(app.doctor_id),
+        }));
+        setAppointments(enrichedApps);
+      }
     } catch (err) {
       console.error("Error loading doctor appointments:", err);
     }
@@ -78,7 +89,7 @@ export const DoctorPortal = () => {
       .from("medical_records")
       .select("*")
       .eq("appointment_id", app.id)
-      .single();
+      .maybeSingle();
 
     if (rec) {
       setExistingRecord(rec);
@@ -91,7 +102,7 @@ export const DoctorPortal = () => {
         .from("prescriptions")
         .select("*")
         .eq("record_id", rec.id)
-        .single();
+        .maybeSingle();
 
       if (pres && pres.medications) {
         setMedications(pres.medications);
@@ -116,6 +127,15 @@ export const DoctorPortal = () => {
   const handleSaveMedicalRecord = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedAppointment || !currentUser) return;
+
+    if (!anamnesis.trim()) {
+      alert("Por favor, preencha a Anamnese do paciente.");
+      return;
+    }
+    if (!diagnosis.trim()) {
+      alert("Por favor, preencha o Diagnóstico / Conduta médica.");
+      return;
+    }
 
     setSaving(true);
     try {
@@ -153,7 +173,6 @@ export const DoctorPortal = () => {
       // 2. Save Prescription if medications exist
       const validMeds = medications.filter((m) => m.name.trim() !== "");
       if (recordId && validMeds.length > 0) {
-        // Delete old prescriptions and insert new
         await supabase.from("prescriptions").delete().eq("record_id", recordId);
         await supabase.from("prescriptions").insert({
           record_id: recordId,
@@ -168,7 +187,7 @@ export const DoctorPortal = () => {
         .eq("id", selectedAppointment.id);
 
       setRecordSaved(true);
-      loadDoctorAppointments();
+      await loadDoctorAppointments();
     } catch (err: any) {
       console.error("Error saving medical record:", err);
       alert("Erro ao salvar prontuário: " + err.message);
@@ -225,19 +244,19 @@ export const DoctorPortal = () => {
                   >
                     <div className="flex justify-between items-start">
                       <span className="text-sm font-bold text-slate-900">
-                        {app.patient_user?.first_name} {app.patient_user?.last_name}
+                        {app.patient_user?.first_name || "Paciente"} {app.patient_user?.last_name || ""}
                       </span>
                       <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
                         isCompleted ? "bg-emerald-100 text-emerald-800" : isCanceled ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"
                       }`}>
-                        {app.status}
+                        {app.status === "SCHEDULED" ? "Agendada" : app.status === "CONFIRMED" ? "Confirmada" : app.status === "COMPLETED" ? "Realizada" : "Cancelada"}
                       </span>
                     </div>
 
                     <div className="text-xs text-slate-500 flex flex-wrap gap-x-3 gap-y-1">
                       <span className="flex items-center gap-1 font-medium text-slate-700">
                         <Clock className="w-3.5 h-3.5 text-slate-400" />
-                        {new Date(app.scheduled_at).toLocaleDateString("pt-BR")} ás {new Date(app.scheduled_at).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(app.scheduled_at).toLocaleDateString("pt-BR")} às {new Date(app.scheduled_at).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' })}
                       </span>
                       <span className="flex items-center gap-1">
                         {app.mode === "TELEMEDICINE" ? <Video className="w-3.5 h-3.5 text-sky-600" /> : <Building className="w-3.5 h-3.5 text-slate-400" />}
@@ -265,10 +284,10 @@ export const DoctorPortal = () => {
                 <div>
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Atendimento em Andamento</span>
                   <h3 className="text-xl font-bold text-slate-900">
-                    {selectedAppointment.patient_user?.first_name} {selectedAppointment.patient_user?.last_name}
+                    {selectedAppointment.patient_user?.first_name || "Paciente"} {selectedAppointment.patient_user?.last_name || ""}
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Email: {selectedAppointment.patient_user?.email} | Tel: {selectedAppointment.patient_user?.phone || "Não informado"}
+                    Email: {selectedAppointment.patient_user?.email || "Não informado"} | Tel: {selectedAppointment.patient_user?.phone || "Não informado"}
                   </p>
                 </div>
 
@@ -295,12 +314,13 @@ export const DoctorPortal = () => {
               <form onSubmit={handleSaveMedicalRecord} className="space-y-6">
                 <div>
                   <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-3">
-                    <FileText className="w-4 h-4 text-emerald-600" /> 1. Anamnese & Queixa Principal
+                    <FileText className="w-4 h-4 text-emerald-600" /> 1. Anamnese & Queixa Principal *
                   </h4>
                   <textarea
                     rows={3}
                     value={anamnesis}
                     onChange={(e) => setAnamnesis(e.target.value)}
+                    required
                     placeholder="Sintomas relatados pelo paciente, histórico da moléstia atual..."
                     className="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                   />
@@ -308,12 +328,13 @@ export const DoctorPortal = () => {
 
                 <div>
                   <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-3">
-                    <Stethoscope className="w-4 h-4 text-emerald-600" /> 2. Diagnóstico & Conduta
+                    <Stethoscope className="w-4 h-4 text-emerald-600" /> 2. Diagnóstico & Conduta *
                   </h4>
                   <textarea
                     rows={3}
                     value={diagnosis}
                     onChange={(e) => setDiagnosis(e.target.value)}
+                    required
                     placeholder="Hipótese diagnóstica, exames solicitados, plano terapêutico..."
                     className="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                   />
@@ -321,7 +342,7 @@ export const DoctorPortal = () => {
 
                 <div>
                   <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2 mb-3">
-                    <FileText className="w-4 h-4 text-emerald-600" /> 3. Observações Médicas Adicionais
+                    <FileText className="w-4 h-4 text-emerald-600" /> 3. Observações Médicas Adicionais (opcional)
                   </h4>
                   <textarea
                     rows={2}
