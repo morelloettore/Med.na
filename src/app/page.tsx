@@ -7,6 +7,7 @@ import { PatientPortal } from "@/components/PatientPortal";
 import { DoctorPortal } from "@/components/DoctorPortal";
 import { EmployeePortal } from "@/components/EmployeePortal";
 import { AdminPortal } from "@/components/AdminPortal";
+import { LoginForm } from "@/components/LoginForm";
 
 function MainApp() {
   const { currentUser, loading } = useAuth();
@@ -20,6 +21,10 @@ function MainApp() {
         </div>
       </div>
     );
+  }
+
+  if (!currentUser) {
+    return <LoginForm />;
   }
 
   return (
