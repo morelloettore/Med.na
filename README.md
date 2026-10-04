@@ -1,48 +1,39 @@
-# Med.na - Sistema Médico & Gestão Hospitalar
+# Med.na - Sistema de Gestão de Saúde e Agendamento Médico
 
-Med.na é uma aplicação web moderna para agendamento de consultas virtuais e presenciais, gestão hospitalar, prontuário eletrônico e controle de convênios médicos.
-
----
-
-## 🚀 Tecnologias Utilizadas
-
-- **Frontend**: Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, Lucide Icons
-- **Backend / Banco de Dados**: Supabase (PostgreSQL), Criptografia AES/XOR para credenciais públicas
-- **Deploy**: GitHub Pages (`output: "export"`) & Vercel
+Med.na é uma plataforma web moderna e integrada para gestão hospitalar, agendamento de consultas médicas (presenciais e telemedicina), prontuário eletrônico e gestão de recepção e infraestrutura.
 
 ---
 
-## 🔐 Logins de Demonstração para Avaliação (Professores)
+## 🚀 Como Hospedar no Vercel
 
-A tela de login possui botões de **1 clique** para facilitar a navegação em cada papel do sistema:
-
-| Perfil / Papel | E-mail de Teste | Senha de Teste | O que é possível testar |
-|:---|:---|:---|:---|
-| **Administrador** | `admin@medna.com` | `admin123` | Cadastro de hospitais, especialidades, convênios e usuários. |
-| **Paciente** | `paciente1@medna.com` | `paciente123` | Agendamento de consultas presenciais e telemedicina, gestão de carteirinhas. |
-| **Médico** | `maria.santos@medna.com` | `medna123` | Atendimento, preenchimento de prontuário eletrônico e prescrição médica. |
-| **Recepção / Funcionário** | `funcionario@medna.com` | `func123` | Confirmação e cancelamento de consultas, fila de atendimento e busca. |
+1. Acesse [vercel.com](https://vercel.com) e conecte sua conta do GitHub.
+2. Clique em **"Add New..."** > **"Project"**.
+3. Selecione o repositório **Med.na** e clique em **"Import"**.
+4. O Vercel detectará o Next.js automaticamente.
+5. Clique em **"Deploy"**.
+6. Em cerca de 1 a 2 minutos o site estará online no Vercel.
 
 ---
 
-## 📋 Registro de Erros e Roadmap (Backlog)
+## 🌐 Como Hospedar no GitHub Pages
 
-Consulte o arquivo **[Backlog](./Backlog)** na raiz do projeto para visualizar:
-1. A lista completa de erros encontrados e corrigidos.
-2. Comprovação do nível de funcionamento de **50%+** das funcionalidades ativas.
-3. Lista detalhada com o roadmap das etapas pendentes para a aplicação ficar 100% completa.
+1. Acesse o seu repositório no GitHub e vá em **Settings** > **Pages**.
+2. Em **Build and deployment** > **Source**, selecione **GitHub Actions**.
+3. Faça o merge no branch `main` e o workflow do `.github/workflows/deploy.yml` fará o deploy automático.
 
 ---
 
-## 🛠️ Como Executar Localmente
+## 🔐 Logins de Demonstração (Para Avaliação)
 
-```bash
-# 1. Instalar dependências
-pnpm install
+Na tela de login, utilize os botões de acesso rápido em 1 clique ou as credenciais abaixo:
 
-# 2. Executar em modo desenvolvimento
-pnpm dev
+* **Administrador**: `admin@medna.com` (Senha: `admin123`)
+* **Paciente**: `paciente1@medna.com` (Senha: `paciente123`)
+* **Médico**: `maria.santos@medna.com` (Senha: `medna123`)
+* **Funcionário / Recepção**: `funcionario@medna.com` (Senha: `func123`)
 
-# 3. Gerar a build de produção (export estático)
-pnpm run build
-```
+---
+
+## 📋 Documentação Completa
+
+Para a lista detalhada de erros corrigidos, prova do percentual de funcionamento (>50%) e a trilha do que falta para 100%, consulte o arquivo [`Backlog`](./Backlog).

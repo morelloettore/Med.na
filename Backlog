@@ -1,6 +1,6 @@
 # Backlog de Erros e Correções - Med.na
 
-Este arquivo contém o registro de todos os erros identificados na aplicação, suas respectivas correções concluídas, o guia para avaliação da aplicação (com logins de demonstração para professores), a comprovação do percentual de funcionamento (>50%) e a lista de pendências para o projeto atingir 100% de conclusão.
+Este arquivo contém o registro de todos os erros identificados na aplicação, suas respectivas correções concluídas, o guia para avaliação da aplicação (com logins de demonstração para professores), o passo a passo para hospedagem no Vercel e no GitHub Pages, a comprovação do percentual de funcionamento (>50%) e a lista de pendências para o projeto atingir 100% de conclusão.
 
 ---
 
@@ -12,8 +12,8 @@ Este arquivo contém o registro de todos os erros identificados na aplicação, 
 | **ERR-02** | Autenticação | Tela de login sem botões de acesso rápido/demonstração para professores e divergência de e-mails entre dados locais e banco Supabase. | **CORRIGIDO** | Reformulada a tela de login (`LoginForm.tsx`) com atalhos em 1 clique para os 4 perfis (`PATIENT`, `DOCTOR`, `EMPLOYEE`, `ADMIN`) e sincronizado o `AuthContext.tsx` com validação de senha flexível de demonstração. |
 | **ERR-03** | Validação | Falta de validação de formulários (permissão de datas passadas em agendamento, campos vazios em prontuários, receitas sem nome de medicamento, carteirinhas de convênio sem tamanho mínimo). | **CORRIGIDO** | Adicionadas validações completas com alertas e banners informativos nos 4 portais da aplicação. |
 | **ERR-04** | Deploy / CI-CD | O arquivo de workflow do GitHub Actions (`deploy.yml`) utilizava `npm install` em vez de `pnpm`, o que poderia falhar a compilação automática no GitHub Pages. | **CORRIGIDO** | Atualizado `.github/workflows/deploy.yml` para utilizar `pnpm/action-setup@v4` com suporte total a exportação estática Next.js no GitHub Pages e Vercel. |
-| **ERR-05** | Deploy / GitHub Pages | Erro 404 ao carregar os scripts CSS/JS (`_next/...`) no GitHub Pages quando o projeto é hospedado em um subdiretório de repositório (ex: `usuario.github.io/nome-do-repo`) ou bloqueado pelo Jekyll. | **CORRIGIDO** | Criado arquivo `public/.nojekyll`, configurado `basePath` dinâmico em `next.config.ts` integrado ao `actions/configure-pages`, e atualizada a Action do GitHub para garantir `.nojekyll` na pasta `./out`. |
-| **ERR-06** | Documentação | Ausência de lista clara de credenciais de teste para avaliadores e mapa do que está pronto vs o que falta para 100%. | **CORRIGIDO** | Documentadas todas as credenciais de teste, o status do projeto (>50% funcional) e o checklist para 100% no arquivo `Backlog` e `README.md`. |
+| **ERR-05** | Deploy / GitHub Pages | Erro 404 ao carregar os scripts CSS/JS (`_next/...`) no GitHub Pages quando o projeto é hospedado em um subdiretório de repositório (ex: `usuario.github.io/nome-do-repo`) ou bloqueado pelo Jekyll. | **CORRIGIDO** | Criado arquivo `public/.nojekyll`, configurado `basePath` dinâmico em `next.config.ts` integrado ao `actions/configure-pages`, e ajustado o acionamento da Action para os branches `main`/`master`. |
+| **ERR-06** | Documentação | Ausência de lista clara de credenciais de teste para avaliadores e mapa do que está pronto vs o que falta para 100%. | **CORRIGIDO** | Documentadas todas as credenciais de teste, o status do projeto (>50% funcional), passo a passo do Vercel e o checklist para 100% no arquivo `Backlog` e `README.md`. |
 
 ---
 
@@ -30,17 +30,38 @@ Para facilitar a avaliação pelos professores, a aplicação possui os seguinte
 
 ---
 
-## 3. Configuração do GitHub Pages no GitHub
+## 3. Guia de Hospedagem no Vercel (Passo a Passo)
 
-Para que o deploy funcione corretamente no GitHub Pages:
-1. Vá nas **Settings** (Configurações) do repositório no GitHub.
-2. Na barra lateral, acesse **Pages**.
-3. Em **Build and deployment** > **Source**, selecione **GitHub Actions**.
-4. O workflow `.github/workflows/deploy.yml` irá realizar o build e publicar o site automaticamente a cada commit/push.
+Para hospedar esta aplicação no **Vercel** gratuitamente e de forma automática:
+
+1. Acesse o site [vercel.com](https://vercel.com) e faça login com sua conta do **GitHub**.
+2. No painel (Dashboard), clique no botão **"Add New..."** -> **"Project"**.
+3. Selecione o repositório **Med.na** da lista de repositórios do seu GitHub e clique em **"Import"**.
+4. Configure os detalhes do projeto:
+   - **Framework Preset**: O Vercel detectará automaticamente como **Next.js**.
+   - **Root Directory**: Mantenha `./` (diretório raiz).
+   - **Build Command**: `pnpm run build` (detectado automaticamente).
+   - **Output Directory**: `.next` ou `out` (gerenciado automaticamente pelo Next.js).
+5. (Opcional) Em **Environment Variables**, adicione suas variáveis do Supabase se desejar utilizar um banco de dados próprio:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   *(Nota: Se não adicionar, a aplicação já possui o fallback de demonstração integrado no código).*
+6. Clique no botão **"Deploy"**.
+7. Em cerca de 1 a 2 minutos, o Vercel irá gerar o link público da sua aplicação (ex: `https://med-na.vercel.app`).
 
 ---
 
-## 4. Estado de Funcionamento Atual (>50%)
+## 4. Configuração do GitHub Pages no GitHub
+
+Para que o deploy funcione no **GitHub Pages**:
+1. Vá nas **Settings** (Configurações) do repositório no GitHub.
+2. Na barra lateral, acesse **Pages**.
+3. Em **Build and deployment** > **Source**, selecione **GitHub Actions**.
+4. Faça o merge da Pull Request ou Push na branch `main`. O workflow `.github/workflows/deploy.yml` será executado automaticamente no GitHub Actions e publicará o site.
+
+---
+
+## 5. Estado de Funcionamento Atual (>50%)
 
 A aplicação possui mais de 50% das funcionalidades descritas na especificação totalmente operacionais:
 
@@ -49,11 +70,11 @@ A aplicação possui mais de 50% das funcionalidades descritas na especificaçã
 - [x] **Prontuário Eletrônico & Receituário (Médico)**: Registro de Anamnese, Diagnóstico, Notas e emissão de Prescrição médica com medicamentos, dosagem e instruções.
 - [x] **Gestão de Recepção (Funcionário)**: Confirmação e cancelamento de consultas agendadas, filtro por status e busca por paciente.
 - [x] **Gestão de Infraestrutura (Admin)**: Cadastro de Unidades/Hospitais, Especialidades Médicas, Operadoras de Saúde e visualização de usuários.
-- [x] **Hospedagem & Compatibilidade**: Configurado com `.nojekyll` e `basePath` dinâmico para exportação estática Next.js compatível com **GitHub Pages** e **Vercel**.
+- [x] **Hospedagem & Compatibilidade**: Configurado com `.nojekyll`, `basePath` dinâmico e `vercel.json` para suporte total ao **GitHub Pages** e **Vercel**.
 
 ---
 
-## 5. O que falta para a aplicação ficar 100% completa (Roadmap Futuro)
+## 6. O que falta para a aplicação ficar 100% completa (Roadmap Futuro)
 
 Para atingir 100% do escopo total da aplicação conforme a especificação do projeto e melhorias sugeridas, faltam as seguintes etapas:
 
