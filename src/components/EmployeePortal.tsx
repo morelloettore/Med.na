@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { Appointment, HealthInsurance } from "@/types";
+import { Appointment, HealthInsurance, User } from "@/types";
 import {
   UserCheck,
   CheckCircle2,
@@ -25,31 +25,41 @@ export const EmployeePortal = () => {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [searchPatient, setSearchPatient] = useState<string>("");
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
+      // Fetch users map for joining
+      const { data: usersData } = await supabase.from("users").select("*");
+      const usersMap = new Map<string, User>();
+      (usersData || []).forEach((u) => usersMap.set(u.id, u));
+
       const { data: apps } = await supabase
         .from("appointments")
         .select(`
           *,
-          patient_user:users!patient_id(*),
-          doctor_user:users!doctor_id(*),
           specialty:specialties(*),
           location:locations(*)
         `)
         .order("scheduled_at", { ascending: false });
 
-      if (apps) setAppointments(apps);
+      if (apps) {
+        const enrichedApps = apps.map((app) => ({
+          ...app,
+          patient_user: usersMap.get(app.patient_id),
+          doctor_user: usersMap.get(app.doctor_id),
+        }));
+        setAppointments(enrichedApps);
+      }
 
       const { data: ins } = await supabase.from("health_insurances").select("*");
       if (ins) setInsurances(ins);
     } catch (err) {
       console.error("Error loading employee portal data:", err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleUpdateStatus = async (appointmentId: string, status: "CONFIRMED" | "CANCELED") => {
     let cancelReason = null;
@@ -70,7 +80,7 @@ export const EmployeePortal = () => {
         .eq("id", appointmentId);
 
       if (error) throw error;
-      loadData();
+      await loadData();
     } catch (err: any) {
       console.error("Update status error:", err);
       alert("Erro ao atualizar status: " + err.message);
@@ -169,14 +179,14 @@ export const EmployeePortal = () => {
 
                     <td className="px-6 py-4">
                       <div className="font-bold text-slate-900">
-                        {app.patient_user?.first_name} {app.patient_user?.last_name}
+                        {app.patient_user?.first_name || "Paciente"} {app.patient_user?.last_name || ""}
                       </div>
-                      <div className="text-xs text-slate-500">{app.patient_user?.phone || app.patient_user?.email}</div>
+                      <div className="text-xs text-slate-500">{app.patient_user?.phone || app.patient_user?.email || "Sem contato"}</div>
                     </td>
 
                     <td className="px-6 py-4">
                       <div className="text-slate-900 font-semibold">
-                        Dr(a). {app.doctor_user?.first_name} {app.doctor_user?.last_name}
+                        Dr(a). {app.doctor_user?.first_name || "Médico"} {app.doctor_user?.last_name || ""}
                       </div>
                       <div className="text-xs text-sky-700 font-medium">{app.specialty?.name || "Geral"}</div>
                     </td>

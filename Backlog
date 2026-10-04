@@ -1,1 +1,53 @@
+# Backlog de Erros e Correções - Med.na
 
+Este arquivo contém o registro de todos os erros identificados na aplicação, suas respectivas correções concluídas, o guia para avaliação da aplicação (com logins de demonstração para professores), a comprovação do percentual de funcionamento (>50%) e a lista de pendências para o projeto atingir 100% de conclusão.
+
+---
+
+## 1. Lista de Erros Encontrados e Ações de Correção
+
+| ID | Categoria | Descrição do Erro | Status | Ação Corretiva Realizada |
+|:---|:---|:---|:---|:---|
+| **ERR-01** | Banco de Dados | Erro PostgREST `PGRST200` ao realizar buscas com relacionamentos (`appointments` -> `users`). As tabelas `appointments` referenciam `patients` e `doctors`, impedindo a junção direta por sintaxe simples em Supabase. | **CORRIGIDO** | Mapeamento relacional enriquecido em TypeScript em `PatientPortal.tsx`, `DoctorPortal.tsx` e `EmployeePortal.tsx` combinando os IDs de usuários e garantindo integridade dos dados sem erros no Supabase. |
+| **ERR-02** | Autenticação | Tela de login sem botões de acesso rápido/demonstração para professores e divergência de e-mails entre dados locais e banco Supabase. | **CORRIGIDO** | Reformulada a tela de login (`LoginForm.tsx`) com atalhos em 1 clique para os 4 perfis (`PATIENT`, `DOCTOR`, `EMPLOYEE`, `ADMIN`) e sincronizado o `AuthContext.tsx` com validação de senha flexível de demonstração. |
+| **ERR-03** | Validação | Falta de validação de formulários (permissão de datas passadas em agendamento, campos vazios em prontuários, receitas sem nome de medicamento, carteirinhas de convênio sem tamanho mínimo). | **CORRIGIDO** | Adicionadas validações completas com alertas e banners informativos nos 4 portais da aplicação. |
+| **ERR-04** | Deploy / CI-CD | O arquivo de workflow do GitHub Actions (`deploy.yml`) utilizava `npm install` em vez de `pnpm`, o que poderia falhar a compilação automática no GitHub Pages. | **CORRIGIDO** | Atualizado `.github/workflows/deploy.yml` para utilizar `pnpm/action-setup@v4` com suporte total a exportação estática Next.js no GitHub Pages e Vercel. |
+| **ERR-05** | Documentação | Ausência de lista clara de credenciais de teste para avaliadores e mapa do que está pronto vs o que falta para 100%. | **CORRIGIDO** | Documentadas todas as credenciais de teste, o status do projeto (>50% funcional) e o checklist para 100% no arquivo `Backlog` e `README.md`. |
+
+---
+
+## 2. Credenciais de Login para Demonstração e Avaliação
+
+Para facilitar a avaliação pelos professores, a aplicação possui os seguintes acessos de demonstração prontos (disponíveis também via botões de 1 clique na tela de login):
+
+| Papel / Perfil | E-mail de Teste | Senha de Teste | Descrição da Área |
+|:---|:---|:---|:---|
+| **ADMIN** | `admin@medna.com` | `admin123` | Painel de gestão de unidades hospitalares, especialidades, convênios e usuários. |
+| **PATIENT** | `paciente1@medna.com` | `paciente123` | Área do paciente para agendamento de consultas (Presencial/Telemedicina) e carteirinhas. |
+| **DOCTOR** | `maria.santos@medna.com` | `medna123` | Portal do médico para prontuário eletrônico, histórico e emissão de receitas. |
+| **EMPLOYEE** | `funcionario@medna.com` | `func123` | Recepção para gerenciamento, confirmação e cancelamento de consultas. |
+
+---
+
+## 3. Estado de Funcionamento Atual (>50%)
+
+A aplicação possui mais de 50% das funcionalidades descritas na especificação totalmente operacionais:
+
+- [x] **Autenticação Unificada e Controle de Acesso (RBAC)** para 4 perfis (`PATIENT`, `DOCTOR`, `EMPLOYEE`, `ADMIN`).
+- [x] **Agenda Virtual de Consultas (Paciente)**: Seleção de especialidade, médico, local, convênio, escolha entre Presencial ou Telemedicina e seleção em tempo real de horários disponíveis.
+- [x] **Prontuário Eletrônico & Receituário (Médico)**: Registro de Anamnese, Diagnóstico, Notas e emissão de Prescrição médica com medicamentos, dosagem e instruções.
+- [x] **Gestão de Recepção (Funcionário)**: Confirmação e cancelamento de consultas agendadas, filtro por status e busca por paciente.
+- [x] **Gestão de Infraestrutura (Admin)**: Cadastro de Unidades/Hospitais, Especialidades Médicas, Operadoras de Saúde e visualização de usuários.
+- [x] **Hospedagem & Compatibilidade**: Configurado para exportação estática Next.js compatível com **GitHub Pages** e **Vercel**.
+
+---
+
+## 4. O que falta para a aplicação ficar 100% completa (Roadmap Futuro)
+
+Para atingir 100% do escopo total expandido, as seguintes melhorias podem ser implementadas em etapas futuras:
+
+1. **Notificações por E-mail / WhatsApp**: Envio automatizado de lembretes de consultas 24h antes do horário.
+2. **Integração Real de Videochamada (WebRTC)**: Substituição dos links diretos de sala por infraestrutura nativa WebRTC/Jitsi embedded.
+3. **Módulo de Faturamento e Pagamentos**: Integração com gateway de pagamento (Pix/Cartão) para consultas particulares.
+4. **Assinatura Digital de Prontuários (ICP-Brasil)**: Certificação digital para médicos assinarem receitas e atestados.
+5. **Anexos e Exames**: Upload e armazenamento de arquivos PDF/imagens de exames laboratoriais no perfil do paciente.
