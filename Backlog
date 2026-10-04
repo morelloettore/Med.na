@@ -44,11 +44,9 @@ A aplicação possui mais de 50% das funcionalidades descritas na especificaçã
 
 ## 4. O que falta para a aplicação ficar 100% completa (Roadmap Futuro)
 
-Para atingir 100% do escopo total expandido, as seguintes melhorias podem ser implementadas em etapas futuras:
+Para atingir 100% do escopo total da aplicação conforme a especificação do projeto, faltam as seguintes etapas:
 
-1. **Gestão de Exclusão (CRUD Completo de Remoção/Exclusão)**: Adicionar botões e confirmações de exclusão/desativação para unidades hospitalares, especialidades, convênios e usuários no painel de administração e desvinculação de carteirinhas de planos no painel do paciente.
-2. **Notificações por E-mail / WhatsApp**: Envio automatizado de lembretes de consultas 24h antes do horário.
-3. **Integração Real de Videochamada (WebRTC)**: Substituição dos links diretos de sala por infraestrutura nativa WebRTC/Jitsi embedded.
-4. **Módulo de Faturamento e Pagamentos**: Integração com gateway de pagamento (Pix/Cartão) para consultas particulares.
-5. **Assinatura Digital de Prontuários (ICP-Brasil)**: Certificação digital para médicos assinarem receitas e atestados.
-6. **Anexos e Exames**: Upload e armazenamento de arquivos PDF/imagens de exames laboratoriais no perfil do paciente.
+1. **Gestão de Exclusão (CRUD Completo de Remoção/Exclusão)**: Adicionar botões e confirmações de exclusão/desativação para unidades hospitalares, especialidades, convênios e usuários no painel de administração e desvinculação de carteirinhas no painel do paciente.
+2. **Anexos e Exames**: Upload e armazenamento de arquivos PDF/imagens de exames laboratoriais diretamente no histórico do paciente.
+3. **Assinatura Digital de Prontuários (ICP-Brasil)**: Funcionalidade de validação de assinatura digital de receitas para os médicos.
+4. **Integração de Sala de Videochamada Nativa (WebRTC)**: Player de videoconferência embutido diretamente na página da consulta de telemedicina.
