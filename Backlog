@@ -44,9 +44,11 @@ A aplicação possui mais de 50% das funcionalidades descritas na especificaçã
 
 ## 4. O que falta para a aplicação ficar 100% completa (Roadmap Futuro)
 
-Para atingir 100% do escopo total da aplicação conforme a especificação do projeto, faltam as seguintes etapas:
+Para atingir 100% do escopo total da aplicação conforme a especificação do projeto e melhorias sugeridas, faltam as seguintes etapas:
 
-1. **Gestão de Exclusão (CRUD Completo de Remoção/Exclusão)**: Adicionar botões e confirmações de exclusão/desativação para unidades hospitalares, especialidades, convênios e usuários no painel de administração e desvinculação de carteirinhas no painel do paciente.
-2. **Anexos e Exames**: Upload e armazenamento de arquivos PDF/imagens de exames laboratoriais diretamente no histórico do paciente.
-3. **Assinatura Digital de Prontuários (ICP-Brasil)**: Funcionalidade de validação de assinatura digital de receitas para os médicos.
-4. **Integração de Sala de Videochamada Nativa (WebRTC)**: Player de videoconferência embutido diretamente na página da consulta de telemedicina.
+1. **Suporte a Tema Claro / Escuro (Dark Mode & Light Mode)**: Adicionar botão de alternância de tema no cabeçalho com persistência da preferência visual do usuário via Tailwind CSS.
+2. **Gestão de Exclusão (CRUD Completo de Remoção/Exclusão)**: Adicionar botões e confirmações de exclusão/desativação para unidades hospitalares, especialidades, convênios e usuários no painel de administração e desvinculação de carteirinhas no painel do paciente.
+3. **Anexos e Exames Médicos**: Upload e armazenamento de arquivos (PDF e imagens) de laudos de exames laboratoriais diretamente no histórico do paciente.
+4. **Assinatura Digital de Prontuários (ICP-Brasil)**: Funcionalidade de validação de assinatura digital e QR Code para atestados e receitas médicas.
+5. **Integração de Sala de Videochamada Nativa (WebRTC)**: Player de videoconferência embutido diretamente na página da consulta de telemedicina.
+6. **Exportação de Prontuário em PDF**: Opção para o paciente e o médico realizarem o download do histórico do prontuário e receitas formatadas para impressão em formato PDF.
