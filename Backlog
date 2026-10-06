@@ -14,6 +14,10 @@ Este arquivo contém o registro de todos os erros identificados na aplicação, 
 | **ERR-04** | Deploy / CI-CD | O arquivo de workflow do GitHub Actions (`deploy.yml`) utilizava `npm install` em vez de `pnpm`, o que poderia falhar a compilação automática no GitHub Pages. | **CORRIGIDO** | Atualizado `.github/workflows/deploy.yml` para utilizar `pnpm/action-setup@v4` com suporte total a exportação estática Next.js no GitHub Pages e Vercel. |
 | **ERR-05** | Deploy / GitHub Pages | Erro 404 ao carregar os scripts CSS/JS (`_next/...`) no GitHub Pages quando o projeto é hospedado em um subdiretório de repositório (ex: `usuario.github.io/nome-do-repo`) ou bloqueado pelo Jekyll. | **CORRIGIDO** | Criado arquivo `public/.nojekyll`, configurado `basePath` dinâmico em `next.config.ts` integrado ao `actions/configure-pages`, e atualizada a Action do GitHub para garantir `.nojekyll` na pasta `./out`. |
 | **ERR-06** | Documentação | Ausência de lista clara de credenciais de teste para avaliadores e mapa do que está pronto vs o que falta para 100%. | **CORRIGIDO** | Documentadas todas as credenciais de teste, o status do projeto (>50% funcional) e o checklist para 100% no arquivo `Backlog` e `README.md`. |
+| **ERR-07** | Telemedicina | Usuário direcionado á pagina inexistente.
+| **ERR-08** | Logins | Logins já prontos na tela de login, eles devem ser removidos, pela falta de segurança.
+| **ERR-09** | Exclusão | Adicionar opção de exclusão para os componentes do site.
+| **ERR-10** | Convênios | Os convênios não aparecem na tela de criação de consulta na área do paciente.
 
 ---
 
@@ -57,10 +61,13 @@ A aplicação possui mais de 50% das funcionalidades descritas na especificaçã
 
 Para atingir 100% do escopo total da aplicação conforme a especificação do projeto e melhorias sugeridas, faltam as seguintes etapas:
 
-1. **Painel de Configuração de Horários e Escalas Médicas**: Interface para o próprio médico ou administrador cadastrar e editar seus dias de atendimento, turnos e tempo de duração dos slots de consulta.
+1. **Painel de Configuração de Horários e Escalas Médicas**: Interface para o próprio médico ou administrador cadastrar e editar seus dias de atendimento, turnos e tempo de duração dos slots de consulta e área para simular uma agenda virtual.
 2. **Suporte a Tema Claro / Escuro (Dark Mode & Light Mode)**: Botão de alternância de tema no cabeçalho com persistência da preferência visual do usuário via Tailwind CSS.
 3. **Gestão de Exclusão (CRUD Completo de Remoção/Exclusão)**: Botões e confirmações de exclusão/desativação para unidades hospitalares, especialidades, convênios e usuários no painel de administração e desvinculação de carteirinhas no painel do paciente.
 4. **Anexos e Exames Médicos**: Upload e armazenamento de arquivos (PDF e imagens) de laudos de exames laboratoriais diretamente no histórico do paciente.
 5. **Assinatura Digital de Prontuários (ICP-Brasil)**: Validação de assinatura digital e QR Code para atestados e receitas médicas.
 6. **Integração de Sala de Videochamada Nativa (WebRTC)**: Player de videoconferência embutido diretamente na página da consulta de telemedicina.
 7. **Exportação de Prontuário em PDF**: Opção para o paciente e o médico realizarem o download do histórico do prontuário e receitas formatadas para impressão em formato PDF.
+8. **Criação de Perfils**: Área própria para a criação de perfil, para que não haja a necessidade de usar perfils prontos.
+9. **Assistente virtual**: Uma ia com o objetivo de auxiliar a sua experiência no site.
+10.**Estilização**: Adicionar uma personalidade ao site, atraves da estilizção.
