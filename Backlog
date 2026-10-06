@@ -61,13 +61,74 @@ A aplicação possui mais de 50% das funcionalidades descritas na especificaçã
 
 Para atingir 100% do escopo total da aplicação conforme a especificação do projeto e melhorias sugeridas, faltam as seguintes etapas:
 
-1. **Painel de Configuração de Horários e Escalas Médicas**: Interface para o próprio médico ou administrador cadastrar e editar seus dias de atendimento, turnos e tempo de duração dos slots de consulta e área para simular uma agenda virtual.
-2. **Suporte a Tema Claro / Escuro (Dark Mode & Light Mode)**: Botão de alternância de tema no cabeçalho com persistência da preferência visual do usuário via Tailwind CSS.
-3. **Gestão de Exclusão (CRUD Completo de Remoção/Exclusão)**: Botões e confirmações de exclusão/desativação para unidades hospitalares, especialidades, convênios e usuários no painel de administração e desvinculação de carteirinhas no painel do paciente.
-4. **Anexos e Exames Médicos**: Upload e armazenamento de arquivos (PDF e imagens) de laudos de exames laboratoriais diretamente no histórico do paciente.
-5. **Assinatura Digital de Prontuários (ICP-Brasil)**: Validação de assinatura digital e QR Code para atestados e receitas médicas.
-6. **Integração de Sala de Videochamada Nativa (WebRTC)**: Player de videoconferência embutido diretamente na página da consulta de telemedicina.
-7. **Exportação de Prontuário em PDF**: Opção para o paciente e o médico realizarem o download do histórico do prontuário e receitas formatadas para impressão em formato PDF.
-8. **Criação de Perfils**: Área própria para a criação de perfil, para que não haja a necessidade de usar perfils prontos.
-9. **Assistente virtual**: Uma ia com o objetivo de auxiliar a sua experiência no site.
-10.**Estilização**: Adicionar uma personalidade ao site, atraves da estilizção.
+1. **Painel de Configuração de Horários e Escalas Médicas**: Criar uma área específica para o médico ou administrador configurar os dias e horários de atendimento de cada profissional, permitindo definir turnos, intervalos, duração das consultas e unidade de atendimento. O sistema deverá utilizar essas configurações para gerar automaticamente os horários disponíveis para agendamento.
+
+2. **Suporte a Tema Claro / Escuro (Dark Mode & Light Mode)**: Adicionar um botão de alternância de tema no cabeçalho da aplicação, permitindo ao usuário escolher entre o modo claro e escuro. A preferência deverá permanecer salva mesmo após o usuário sair e retornar ao sistema.
+
+3. **Gestão de Exclusão (CRUD Completo de Remoção/Exclusão)**: Implementar as funções de exclusão, desativação e desvinculação dos registros existentes no sistema, incluindo usuários, médicos, unidades hospitalares, especialidades, convênios e carteirinhas de pacientes. As ações deverão possuir confirmação antes da exclusão para evitar alterações acidentais.
+
+4. **Anexos e Exames Médicos**: Permitir que médicos e pacientes adicionem arquivos relacionados ao atendimento, como exames laboratoriais, laudos, receitas e documentos médicos, utilizando arquivos PDF e imagens. Os documentos deverão ficar vinculados ao histórico do paciente e disponíveis para consulta posteriormente.
+
+5. **Assinatura Digital de Prontuários (ICP-Brasil)**: Implementar uma representação de assinatura digital para documentos médicos, permitindo validar a autoria de receitas, atestados e outros documentos. Adicionar QR Code ou mecanismo semelhante para consulta e verificação da autenticidade do documento.
+
+6. **Integração de Sala de Videochamada Nativa (WebRTC)**: Criar uma sala de telemedicina integrada diretamente ao sistema, sem depender exclusivamente de páginas externas. A sala deverá permitir comunicação por vídeo e áudio entre médico e paciente durante a consulta.
+
+7. **Exportação de Prontuário em PDF**: Adicionar uma opção para gerar e baixar o prontuário do paciente em formato PDF, contendo informações como dados do paciente, consultas, médicos, diagnósticos, observações, receitas e exames registrados. O documento deverá possuir uma formatação adequada para visualização e impressão.
+
+8. **Criação de Perfis**: Criar um fluxo completo para cadastro de novos usuários, permitindo que não seja necessário depender exclusivamente dos perfis previamente cadastrados para demonstração. O usuário deverá preencher seus dados e criar suas próprias credenciais para acessar o sistema.
+
+9. **Assistente Virtual**: Integrar uma inteligência artificial ao sistema para auxiliar os usuários durante a utilização da plataforma. O assistente poderá responder dúvidas sobre as funcionalidades do Med.na, orientar o usuário sobre como realizar ações e facilitar a navegação pelo sistema.
+
+10. **Estilização e Identidade Visual**: Desenvolver uma identidade visual mais característica para o Med.na, trabalhando cores, tipografia, ícones, componentes, animações, transições, cards e outros elementos visuais. O objetivo é criar uma personalidade própria para a aplicação e evitar que as telas tenham aparência genérica ou repetitiva.
+
+11. **Gerenciamento de Horários**: Permitir que horários de atendimento já cadastrados sejam alterados, adicionados, removidos ou bloqueados. O sistema deverá atualizar automaticamente a disponibilidade apresentada ao paciente conforme as alterações realizadas pelo médico ou administrador.
+
+12. **Reagendamento de Consultas**: Adicionar a possibilidade de alterar uma consulta já agendada para outra data ou horário disponível. O sistema deverá liberar o horário antigo e ocupar o novo horário, atualizando as informações da consulta para todos os usuários envolvidos.
+
+13. **Dashboard Administrativo**: Criar uma tela inicial para o administrador com uma visão geral do sistema, apresentando informações como quantidade de pacientes, médicos, funcionários, consultas, unidades, especialidades e convênios. Também poderão ser adicionados gráficos para demonstrar estatísticas de atendimentos e utilização da plataforma.
+
+14. **Calendário Visual do Médico**: Criar uma agenda visual para o médico visualizar suas consultas organizadas por dia, semana e mês. Os horários ocupados, disponíveis, cancelados e bloqueados deverão possuir uma representação visual que facilite a organização da agenda.
+
+15. **Histórico Médico do Paciente**: Criar uma área onde o paciente consiga consultar seu histórico completo de atendimentos, incluindo consultas anteriores, médicos, especialidades, diagnósticos, observações, receitas, exames e demais informações registradas durante os atendimentos.
+
+16. **Detalhamento da Consulta**: Criar uma página ou janela de detalhes para cada consulta, reunindo todas as informações relacionadas ao atendimento, como paciente, médico, especialidade, unidade, convênio, modalidade, data, horário e status. A partir dessa tela também deverão estar disponíveis as ações relacionadas à consulta.
+
+17. **Sistema de Notificações**: Implementar um sistema de notificações dentro da plataforma para informar o usuário sobre acontecimentos importantes, como confirmação de consulta, cancelamento, reagendamento, nova receita, novo exame disponível ou início de uma teleconsulta.
+
+18. **Gestão de Pacientes pelo Médico**: Criar uma área exclusiva para o médico visualizar os pacientes que já foram atendidos por ele. A área deverá permitir pesquisar pacientes, visualizar informações básicas e acessar o histórico de consultas e prontuários correspondentes.
+
+19. **Sala de Espera para Telemedicina**: Criar uma etapa anterior à videochamada na qual o paciente possa visualizar as informações da consulta, verificar o horário de início, testar câmera e microfone e aguardar a entrada do médico. Após o médico iniciar o atendimento, o paciente poderá entrar na sala de consulta.
+
+20. **Busca e Filtros Avançados**: Adicionar ferramentas de pesquisa e filtragem nas principais áreas do sistema. O administrador poderá pesquisar usuários, médicos, unidades, especialidades e convênios, enquanto pacientes e médicos poderão filtrar consultas por data, status, especialidade e outros critérios relevantes.
+
+21. **Confirmação de Ações Importantes**: Adicionar caixas de confirmação antes de ações que alterem ou removam informações importantes, como cancelar consultas, excluir registros, remover carteirinhas ou desativar usuários. Também deverão ser exibidas mensagens informando quando uma ação foi concluída com sucesso.
+
+22. **Configurações do Usuário**: Criar uma área de configurações onde cada usuário possa visualizar e editar suas próprias informações, como nome, telefone, endereço, foto, senha e demais dados disponíveis para seu tipo de perfil. Também poderão ser incluídas preferências relacionadas à aparência e notificações.
+
+23. **Tratamento de Estados, Carregamento e Erros**: Melhorar o comportamento visual da aplicação durante carregamentos, falhas e situações sem dados. Criar telas e mensagens para estados como carregando, nenhum resultado encontrado, erro ao carregar informações, operação concluída e tentativa de realizar uma ação inválida, tornando a experiência mais clara e profissional.
+
+24. **Agenda Virtual Integrada e Gerenciamento Visual de Consultas**: Criar uma agenda virtual completa e integrada ao sistema de consultas do Med.na, funcionando como o principal centro de visualização e gerenciamento dos atendimentos. A agenda deverá possuir visualizações mensal, semanal e diária, permitindo navegar entre datas, retornar rapidamente para o dia atual e identificar visualmente os dias que possuem consultas agendadas. Cada consulta deverá ser representada como um evento dentro da agenda, contendo informações como horário, paciente, médico, especialidade, unidade, modalidade de atendimento e status da consulta.
+
+    A agenda deverá apresentar informações diferentes de acordo com o tipo de usuário que estiver acessando o sistema. O **paciente** deverá visualizar somente suas próprias consultas, podendo consultar detalhes, cancelar ou reagendar atendimentos e acessar a teleconsulta quando disponível. O **médico** deverá visualizar sua própria agenda profissional, incluindo pacientes agendados, horários livres, horários ocupados, consultas concluídas, canceladas ou perdidas, além de possuir acesso ao prontuário do paciente e às funcionalidades relacionadas ao atendimento. O **funcionário** deverá possuir uma visão da agenda da unidade ou das unidades às quais possui acesso, permitindo acompanhar consultas, médicos, pacientes, horários e status dos atendimentos. O **administrador** deverá possuir uma visão geral da agenda do sistema, podendo consultar e filtrar os atendimentos por médico, paciente, unidade, especialidade, data, modalidade e status.
+
+    A agenda deverá ser integrada diretamente ao sistema de agendamento, de forma que uma nova consulta criada pelo paciente seja adicionada automaticamente à agenda do médico, do funcionário responsável pela unidade e à agenda pessoal do paciente. Alterações realizadas posteriormente, como cancelamentos ou reagendamentos, deverão atualizar automaticamente os eventos correspondentes. O horário antigo deverá ser liberado após um reagendamento e o novo horário deverá ser ocupado automaticamente.
+
+    Também deverá ser implementado um sistema de **status visuais das consultas**, utilizando a identidade visual e a paleta de cores já estabelecida no Med.na. Os status deverão ser identificados não somente por cores, mas também por textos e ícones para facilitar a compreensão. Como exemplo: **Agendada**, utilizando uma variação de verde da identidade visual para representar consultas futuras; **Hoje**, utilizando uma variação de amarelo/dourado para consultas que ocorrerão no dia atual; **Em andamento**, utilizando uma variação de azul para atendimentos que estão acontecendo; **Concluída**, utilizando uma cor neutra para consultas já finalizadas; **Perdida**, utilizando uma variação de vermelho para horários que passaram sem que o atendimento fosse realizado; **Cancelada**, utilizando uma variação de laranja; e **Reagendada**, utilizando uma variação de roxo ou outra cor complementar compatível com a identidade visual.
+
+    Os status deverão ser atualizados de acordo com a data e o horário da consulta sempre que possível, evitando que o usuário precise alterar manualmente informações que podem ser determinadas pelo sistema. A agenda também deverá possuir uma legenda explicando os diferentes status e suas respectivas representações visuais.
+
+    A visualização mensal deverá apresentar indicadores nos dias que possuem consultas, permitindo identificar rapidamente dias mais ou menos ocupados. A visualização semanal deverá organizar os atendimentos de acordo com os horários e dias da semana, enquanto a visualização diária deverá apresentar uma linha do tempo detalhada dos horários, permitindo identificar consultas, horários livres e períodos bloqueados.
+
+    A agenda deverá respeitar as configurações de horários e escalas cadastradas para cada médico. Horários fora do período de atendimento configurado não deverão ser disponibilizados para agendamento. Também deverá ser possível bloquear determinados horários ou períodos, permitindo registrar situações como intervalo, almoço, férias, reuniões ou indisponibilidade temporária. Esses bloqueios deverão ser refletidos automaticamente na disponibilidade apresentada aos pacientes.
+
+    Deverá existir uma área de **resumo diário da agenda**, apresentando informações como quantidade total de consultas, consultas agendadas, consultas que ocorrerão no dia, consultas em andamento, consultas concluídas, canceladas e perdidas. As informações exibidas deverão ser adaptadas ao perfil do usuário, mostrando somente os dados relevantes para cada tipo de acesso.
+
+    Para funcionários e administradores, deverão ser adicionados **filtros e ferramentas de pesquisa**, permitindo localizar rapidamente consultas específicas e visualizar apenas determinados médicos, unidades, especialidades, modalidades ou status. O sistema deverá permitir combinar diferentes filtros para facilitar o gerenciamento de grandes quantidades de consultas.
+
+    Cada evento da agenda deverá possuir uma área de detalhes contendo todas as informações relevantes da consulta e ações compatíveis com o perfil do usuário. A partir dessa área poderão ser realizadas ações como visualizar consulta, reagendar, cancelar, confirmar atendimento, abrir prontuário, iniciar teleconsulta ou acessar informações relacionadas ao paciente.
+
+    A agenda também deverá ser integrada ao sistema de notificações, permitindo informar os usuários sobre eventos importantes, como uma nova consulta, alteração de horário, cancelamento, reagendamento, aproximação do horário de atendimento ou disponibilidade de uma consulta de telemedicina.
+
+    Toda a interface da agenda deverá seguir a identidade visual do Med.na, utilizando a mesma paleta de cores, tipografia, componentes, bordas, espaçamentos, ícones, sombras e padrões visuais já utilizados no restante da aplicação. Os indicadores de status deverão utilizar variações harmonizadas com a paleta existente, evitando cores excessivamente fortes ou destoantes. A agenda também deverá ser preparada para funcionar corretamente nos modos claro e escuro após a implementação do sistema de temas.
+
+    O objetivo final é transformar a agenda virtual em um dos principais componentes do Med.na, conectando o cadastro de horários, disponibilidade dos médicos, agendamento de consultas, pacientes, médicos, funcionários, administração, cancelamentos, reagendamentos, notificações e telemedicina em um único fluxo integrado e visualmente organizado.
