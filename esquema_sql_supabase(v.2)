@@ -1,0 +1,374 @@
+-- ============================================================================
+-- SCHEMA - Med.na
+-- PostgreSQL / Supabase
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- ENUMS: ignora tipos que já existam em public
+-- ---------------------------------------------------------------------------
+DO $$ BEGIN
+    CREATE TYPE public.user_role AS ENUM ('PATIENT', 'EMPLOYEE', 'DOCTOR', 'ADMIN');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE public.appointment_status AS ENUM ('SCHEDULED', 'CONFIRMED', 'COMPLETED', 'CANCELED');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE public.appointment_mode AS ENUM ('IN_PERSON', 'TELEMEDICINE');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE public.insurance_card_status AS ENUM ('ACTIVE', 'EXPIRED', 'SUSPENDED');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- ---------------------------------------------------------------------------
+-- USUÁRIOS E PERFIS
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.users (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email         VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role          public.user_role NOT NULL,
+    first_name    VARCHAR(100) NOT NULL,
+    last_name     VARCHAR(100) NOT NULL,
+    phone         VARCHAR(20),
+    is_active     BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.patients (
+    user_id       UUID PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
+    cpf           VARCHAR(11) NOT NULL UNIQUE,
+    birth_date    DATE NOT NULL,
+    address_st    VARCHAR(255),
+    address_city  VARCHAR(100),
+    address_state CHAR(2)
+);
+
+CREATE TABLE IF NOT EXISTS public.employees (
+    user_id   UUID PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
+    cpf       VARCHAR(11) NOT NULL UNIQUE,
+    hire_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    job_title VARCHAR(100)
+);
+
+CREATE TABLE IF NOT EXISTS public.doctors (
+    user_id              UUID PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
+    crm                  VARCHAR(20) NOT NULL,
+    crm_state            CHAR(2) NOT NULL,
+    cpf                  VARCHAR(11) NOT NULL UNIQUE,
+    bio                  TEXT,
+    telemedicine_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    UNIQUE (crm, crm_state)
+);
+
+-- ---------------------------------------------------------------------------
+-- MÉDICOS E ESPECIALIDADES
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.specialties (
+    id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(120) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS public.doctor_specialties (
+    doctor_id    UUID NOT NULL REFERENCES public.doctors(user_id) ON DELETE CASCADE,
+    specialty_id UUID NOT NULL REFERENCES public.specialties(id) ON DELETE CASCADE,
+    PRIMARY KEY (doctor_id, specialty_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.locations (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name          VARCHAR(150) NOT NULL,
+    address_st    VARCHAR(255) NOT NULL,
+    address_city  VARCHAR(100) NOT NULL,
+    address_state CHAR(2) NOT NULL,
+    phone         VARCHAR(20)
+);
+
+CREATE TABLE IF NOT EXISTS public.doctor_locations (
+    doctor_id   UUID NOT NULL REFERENCES public.doctors(user_id) ON DELETE CASCADE,
+    location_id UUID NOT NULL REFERENCES public.locations(id) ON DELETE CASCADE,
+    PRIMARY KEY (doctor_id, location_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.doctor_schedules (
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    doctor_id    UUID NOT NULL REFERENCES public.doctors(user_id) ON DELETE CASCADE,
+    location_id  UUID REFERENCES public.locations(id) ON DELETE SET NULL,
+    weekday      SMALLINT NOT NULL CHECK (weekday BETWEEN 0 AND 6),
+    start_time   TIME NOT NULL,
+    end_time     TIME NOT NULL,
+    slot_minutes SMALLINT NOT NULL DEFAULT 30 CHECK (slot_minutes > 0),
+    CHECK (end_time > start_time)
+);
+
+-- ---------------------------------------------------------------------------
+-- PLANOS DE SAÚDE E CONVÊNIOS
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.health_insurances (
+    id       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name     VARCHAR(150) NOT NULL UNIQUE,
+    ans_code VARCHAR(20) UNIQUE,
+    cnpj     VARCHAR(14) UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS public.patient_insurances (
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    patient_id   UUID NOT NULL REFERENCES public.patients(user_id) ON DELETE CASCADE,
+    insurance_id UUID NOT NULL REFERENCES public.health_insurances(id),
+    card_number  VARCHAR(50) NOT NULL,
+    valid_until  DATE,
+    status       public.insurance_card_status NOT NULL DEFAULT 'ACTIVE',
+    UNIQUE (insurance_id, card_number)
+);
+
+CREATE TABLE IF NOT EXISTS public.doctor_insurances (
+    doctor_id    UUID NOT NULL REFERENCES public.doctors(user_id) ON DELETE CASCADE,
+    insurance_id UUID NOT NULL REFERENCES public.health_insurances(id) ON DELETE CASCADE,
+    PRIMARY KEY (doctor_id, insurance_id)
+);
+
+-- ---------------------------------------------------------------------------
+-- CONSULTAS E AGENDAMENTOS
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.appointments (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    patient_id      UUID NOT NULL REFERENCES public.patients(user_id),
+    doctor_id       UUID NOT NULL REFERENCES public.doctors(user_id),
+    specialty_id    UUID REFERENCES public.specialties(id),
+    location_id     UUID REFERENCES public.locations(id),
+    insurance_id    UUID REFERENCES public.patient_insurances(id),
+    scheduled_at    TIMESTAMPTZ NOT NULL,
+    duration_min    SMALLINT NOT NULL DEFAULT 30,
+    mode            public.appointment_mode NOT NULL DEFAULT 'IN_PERSON',
+    status          public.appointment_status NOT NULL DEFAULT 'SCHEDULED',
+    price           NUMERIC(10,2),
+    telemedicine_url VARCHAR(500),
+    cancel_reason   TEXT,
+    canceled_at     TIMESTAMPTZ,
+    canceled_by     UUID REFERENCES public.users(id),
+    created_by      UUID REFERENCES public.employees(user_id),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_appointments_patient
+    ON public.appointments (patient_id, scheduled_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_appointments_doctor
+    ON public.appointments (doctor_id, scheduled_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_appointments_status
+    ON public.appointments (status)
+    WHERE status IN ('SCHEDULED', 'CONFIRMED');
+
+-- ---------------------------------------------------------------------------
+-- PRONTUÁRIOS
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.medical_records (
+    id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    appointment_id UUID NOT NULL UNIQUE REFERENCES public.appointments(id) ON DELETE CASCADE,
+    patient_id     UUID NOT NULL REFERENCES public.patients(user_id),
+    doctor_id      UUID NOT NULL REFERENCES public.doctors(user_id),
+    anamnesis      TEXT,
+    diagnosis      TEXT,
+    notes          TEXT,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_records_patient
+    ON public.medical_records (patient_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS public.prescriptions (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    record_id   UUID NOT NULL REFERENCES public.medical_records(id) ON DELETE CASCADE,
+    medications JSONB NOT NULL,
+    issued_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- ---------------------------------------------------------------------------
+-- updated_at automático
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    NEW.updated_at := now();
+    RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_users_updated ON public.users;
+CREATE TRIGGER trg_users_updated
+    BEFORE UPDATE ON public.users
+    FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_appointments_updated ON public.appointments;
+CREATE TRIGGER trg_appointments_updated
+    BEFORE UPDATE ON public.appointments
+    FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_records_updated ON public.medical_records;
+CREATE TRIGGER trg_records_updated
+    BEFORE UPDATE ON public.medical_records
+    FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- DADOS INICIAIS: especialidades
+-- ---------------------------------------------------------------------------
+INSERT INTO public.specialties (name) VALUES
+    ('Cardiologia'),
+    ('Dermatologia'),
+    ('Oftalmologia'),
+    ('Pediatria'),
+    ('Psicologia'),
+    ('Ortopedia')
+ON CONFLICT (name) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- DADOS INICIAIS: locais
+-- ---------------------------------------------------------------------------
+INSERT INTO public.locations (name, address_st, address_city, address_state, phone)
+SELECT v.name, v.address_st, v.address_city, v.address_state, v.phone
+FROM (VALUES
+    ('Med.na Unidade Centro', 'Av. Paulista, 1000', 'São Paulo', 'SP', '(11) 3000-0001'),
+    ('Med.na Unidade Zona Leste', 'Rua das Flores, 500', 'São Paulo', 'SP', '(11) 3000-0002'),
+    ('Med.na Unidade Zona Oeste', 'Av. Faria Lima, 200', 'São Paulo', 'SP', '(11) 3000-0003')
+) AS v(name, address_st, address_city, address_state, phone)
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM public.locations l
+    WHERE l.name = v.name
+);
+
+-- ---------------------------------------------------------------------------
+-- DADOS INICIAIS: convênios
+-- ---------------------------------------------------------------------------
+INSERT INTO public.health_insurances (name, ans_code, cnpj) VALUES
+    ('Unimed', '331481', '28197174000172'),
+    ('Bradesco Saúde', '334298', '00000000000191'),
+    ('Particular', NULL, NULL)
+ON CONFLICT (name) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- DADOS INICIAIS: médicos
+-- ---------------------------------------------------------------------------
+INSERT INTO public.users
+    (email, password_hash, role, first_name, last_name, phone, is_active)
+VALUES
+    ('maria.santos@medna.com', '$2a$10$xyz', 'DOCTOR', 'Maria', 'Santos', '(11) 99999-0001', TRUE),
+    ('joao.silva@medna.com', '$2a$10$xyz', 'DOCTOR', 'João', 'Silva', '(11) 99999-0002', TRUE),
+    ('ana.costa@medna.com', '$2a$10$xyz', 'DOCTOR', 'Ana', 'Costa', '(11) 99999-0003', TRUE)
+ON CONFLICT (email) DO NOTHING;
+
+INSERT INTO public.doctors (user_id, crm, crm_state, cpf, bio, telemedicine_enabled)
+SELECT u.id, v.crm, 'SP', v.cpf, v.bio, TRUE
+FROM (VALUES
+    ('maria.santos@medna.com', '123456', '12345678901', 'Cardiologista experiente'),
+    ('joao.silva@medna.com',  '234567', '12345678902', 'Dermatologista especializado'),
+    ('ana.costa@medna.com',   '345678', '12345678903', 'Pediatra dedicada')
+) AS v(email, crm, cpf, bio)
+JOIN public.users u ON u.email = v.email
+ON CONFLICT (crm, crm_state) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- Associar especialidades aos médicos
+-- ---------------------------------------------------------------------------
+INSERT INTO public.doctor_specialties (doctor_id, specialty_id)
+SELECT d.user_id, s.id
+FROM (VALUES
+    ('123456', 'Cardiologia'),
+    ('234567', 'Dermatologia'),
+    ('345678', 'Pediatria')
+) AS v(crm, specialty_name)
+JOIN public.doctors d ON d.crm = v.crm
+JOIN public.specialties s ON s.name = v.specialty_name
+ON CONFLICT DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- Associar locais aos médicos
+-- ---------------------------------------------------------------------------
+INSERT INTO public.doctor_locations (doctor_id, location_id)
+SELECT d.user_id, l.id
+FROM (VALUES
+    ('123456', 'Med.na Unidade Centro'),
+    ('234567', 'Med.na Unidade Zona Leste'),
+    ('345678', 'Med.na Unidade Zona Oeste')
+) AS v(crm, location_name)
+JOIN public.doctors d ON d.crm = v.crm
+JOIN public.locations l ON l.name = v.location_name
+ON CONFLICT DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- Horários: segunda a sexta (weekday 1 a 5)
+-- ---------------------------------------------------------------------------
+WITH schedule_data AS (
+    SELECT d.user_id AS doctor_id, l.id AS location_id,
+           v.start_time, v.end_time
+    FROM (VALUES
+        ('123456', 'Med.na Unidade Centro',      '08:00'::TIME, '18:00'::TIME),
+        ('234567', 'Med.na Unidade Zona Leste',   '09:00'::TIME, '17:00'::TIME),
+        ('345678', 'Med.na Unidade Zona Oeste',   '08:00'::TIME, '16:00'::TIME)
+    ) AS v(crm, location_name, start_time, end_time)
+    JOIN public.doctors d ON d.crm = v.crm
+    JOIN public.locations l ON l.name = v.location_name
+),
+weekdays AS (
+    SELECT generate_series(1, 5)::SMALLINT AS weekday
+)
+INSERT INTO public.doctor_schedules
+    (doctor_id, location_id, weekday, start_time, end_time, slot_minutes)
+SELECT s.doctor_id, s.location_id, w.weekday, s.start_time, s.end_time, 30
+FROM schedule_data s
+CROSS JOIN weekdays w
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM public.doctor_schedules existing
+    WHERE existing.doctor_id = s.doctor_id
+      AND existing.location_id = s.location_id
+      AND existing.weekday = w.weekday
+      AND existing.start_time = s.start_time
+      AND existing.end_time = s.end_time
+);
+
+-- DADOS INICIAIS: pacientes
+INSERT INTO public.users
+    (email, password_hash, role, first_name, last_name, phone, is_active)
+VALUES
+    ('paciente1@medna.com', '$2a$10$xyz', 'PATIENT', 'Carlos', 'Oliveira', '(11) 98888-0001', TRUE),
+    ('paciente2@medna.com', '$2a$10$xyz', 'PATIENT', 'Fernanda', 'Lima', '(11) 98888-0002', TRUE)
+ON CONFLICT (email) DO NOTHING;
+
+INSERT INTO public.patients
+    (user_id, cpf, birth_date, address_st, address_city, address_state)
+SELECT u.id, v.cpf, v.birth_date, v.address_st, v.address_city, 'SP'
+FROM (VALUES
+    ('paciente1@medna.com', '98765432101', DATE '1990-05-15', 'Rua A, 100', 'São Paulo'),
+    ('paciente2@medna.com', '98765432102', DATE '1985-03-20', 'Rua B, 200', 'São Paulo')
+) AS v(email, cpf, birth_date, address_st, address_city)
+JOIN public.users u ON u.email = v.email
+ON CONFLICT (user_id) DO NOTHING;
+
+ALTER TABLE specialties DISABLE ROW LEVEL SECURITY;
+ALTER TABLE locations DISABLE ROW LEVEL SECURITY;
+ALTER TABLE health_insurances DISABLE ROW LEVEL SECURITY;
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE patients DISABLE ROW LEVEL SECURITY;
+ALTER TABLE employees DISABLE ROW LEVEL SECURITY;
+ALTER TABLE doctors DISABLE ROW LEVEL SECURITY;
+ALTER TABLE appointments DISABLE ROW LEVEL SECURITY;
+ALTER TABLE medical_records DISABLE ROW LEVEL SECURITY;
+ALTER TABLE prescriptions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE doctor_specialties DISABLE ROW LEVEL SECURITY;
+ALTER TABLE doctor_locations DISABLE ROW LEVEL SECURITY;
+ALTER TABLE doctor_schedules DISABLE ROW LEVEL SECURITY;
+ALTER TABLE patient_insurances DISABLE ROW LEVEL SECURITY;
+ALTER TABLE doctor_insurances DISABLE ROW LEVEL SECURITY;
