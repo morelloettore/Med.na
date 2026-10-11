@@ -144,11 +144,28 @@ export const AdminPortal = () => {
     }
 
     try {
-      const { error } = await supabase.from("specialties").insert({ name: newSpecName.trim() });
+      const { data: insertedSpec, error } = await supabase
+        .from("specialties")
+        .insert({ name: newSpecName.trim() })
+        .select()
+        .single();
+
       if (error) throw error;
 
+      // Automatically link all existing doctors to this new specialty
+      if (insertedSpec) {
+        const { data: docs } = await supabase.from("doctors").select("user_id");
+        if (docs && docs.length > 0) {
+          const docLinks = docs.map((d) => ({
+            doctor_id: d.user_id,
+            specialty_id: insertedSpec.id,
+          }));
+          await supabase.from("doctor_specialties").insert(docLinks);
+        }
+      }
+
       setNewSpecName("");
-      setFeedback({ type: "success", msg: "Especialidade cadastrada com sucesso!" });
+      setFeedback({ type: "success", msg: "Especialidade cadastrada e vinculada aos médicos com sucesso!" });
       loadAllData();
     } catch (err: any) {
       setFeedback({ type: "error", msg: "Erro ao adicionar especialidade: " + err.message });

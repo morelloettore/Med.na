@@ -24,6 +24,7 @@ Este arquivo contém o registro de todos os erros identificados na aplicação, 
 | **ERR-14** | Agenda Virtual | A Agenda Virtual aparecia apenas no portal do médico, não sendo visível para os pacientes. | **CORRIGIDO** | Integrado o componente `VirtualAgenda.tsx` na Área do Paciente (`PatientPortal.tsx`), permitindo visualização de horários agendados em Mês/Semana/Dia. |
 | **ERR-15** | Agendamento / Convênio | Erro de restrição de chave estrangeira (`appointments_insurance_id_fkey`) ao agendar consulta selecionando uma carteirinha de convênio. | **CORRIGIDO** | Atualizado `PatientPortal.tsx` para resolver dinamicamente o ID da operadora de saúde (`health_insurances`) a partir do cartão do paciente (`patient_insurances`). |
 | **ERR-16** | Agendamento / Especialidade | Seleção de especialidades recém-criadas na lista do agendamento resultava em lista vazia de médicos. | **CORRIGIDO** | Implementado fallback em `PatientPortal.tsx` exibindo o corpo médico disponível caso uma nova especialidade ainda não possua médicos explicitamente vinculados. |
+| **ERR-17** | Vinculação Médicos/Especialidades | Garantia de vinculação automática de pelo menos 3 especialidades para novos médicos e de corpo médico para novas especialidades. | **CORRIGIDO** | Atualizado `AuthContext.tsx` e `AdminPortal.tsx` para que cada novo médico seja vinculado a no mínimo 3 especialidades e cada nova especialidade seja vinculada aos médicos no banco de dados. |
 
 ---
 
