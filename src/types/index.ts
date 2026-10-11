@@ -1,5 +1,13 @@
 export type UserRole = 'PATIENT' | 'EMPLOYEE' | 'DOCTOR' | 'ADMIN';
-export type AppointmentStatus = 'SCHEDULED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELED';
+export type AppointmentStatus =
+  | 'SCHEDULED'
+  | 'CONFIRMED'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'CANCELED'
+  | 'MISSED'
+  | 'RESCHEDULED';
+
 export type AppointmentMode = 'IN_PERSON' | 'TELEMEDICINE';
 export type InsuranceCardStatus = 'ACTIVE' | 'EXPIRED' | 'SUSPENDED';
 
@@ -10,6 +18,9 @@ export interface User {
   first_name: string;
   last_name: string;
   phone?: string;
+  cpf?: string;
+  birth_date?: string;
+  avatar_url?: string;
   is_active: boolean;
   created_at?: string;
 }
@@ -69,6 +80,14 @@ export interface DoctorSchedule {
   location?: Location;
 }
 
+export interface ScheduleBlock {
+  id: string;
+  doctor_id: string;
+  start_datetime: string;
+  end_datetime: string;
+  reason: string;
+}
+
 export interface HealthInsurance {
   id: string;
   name: string;
@@ -124,7 +143,11 @@ export interface MedicalRecord {
   notes?: string;
   created_at?: string;
   doctor_user?: User;
+  patient_user?: User;
   appointment?: Appointment;
+  signed?: boolean;
+  signature_hash?: string;
+  signature_timestamp?: string;
 }
 
 export interface MedicationItem {
@@ -139,4 +162,28 @@ export interface Prescription {
   record_id: string;
   medications: MedicationItem[];
   issued_at: string;
+}
+
+export interface MedicalExamAttachment {
+  id: string;
+  patient_id: string;
+  doctor_id?: string;
+  appointment_id?: string;
+  title: string;
+  file_type: 'PDF' | 'IMAGE' | 'OTHER';
+  file_url: string;
+  file_size?: string;
+  uploaded_at: string;
+  notes?: string;
+}
+
+export interface AppNotification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  type: 'APPOINTMENT' | 'TELEMEDICINE' | 'PRESCRIPTION' | 'EXAM' | 'SYSTEM';
+  read: boolean;
+  created_at: string;
+  link?: string;
 }

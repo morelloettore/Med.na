@@ -1,23 +1,26 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { Navbar } from "@/components/Navbar";
 import { PatientPortal } from "@/components/PatientPortal";
 import { DoctorPortal } from "@/components/DoctorPortal";
 import { EmployeePortal } from "@/components/EmployeePortal";
 import { AdminPortal } from "@/components/AdminPortal";
 import { LoginForm } from "@/components/LoginForm";
+import { AiAssistant } from "@/components/AiAssistant";
 
 function MainApp() {
   const { currentUser, loading } = useAuth();
+  const [aiOpen, setAiOpen] = useState(false);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center transition-colors">
         <div className="text-center space-y-3">
           <div className="w-12 h-12 border-4 border-sky-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-sm font-semibold text-slate-600">Carregando Med.na System...</p>
+          <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">Carregando Med.na System...</p>
         </div>
       </div>
     );
@@ -28,8 +31,8 @@ function MainApp() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Navbar />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col text-slate-900 dark:text-slate-100 transition-colors">
+      <Navbar onToggleAiAssistant={() => setAiOpen(!aiOpen)} />
 
       <main className="flex-1">
         {currentUser?.role === "PATIENT" && <PatientPortal />}
@@ -38,7 +41,9 @@ function MainApp() {
         {currentUser?.role === "ADMIN" && <AdminPortal />}
       </main>
 
-      <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+      <AiAssistant isOpen={aiOpen} onClose={() => setAiOpen(false)} />
+
+      <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
         <p>© 2025 Med.na Clinica Médica & Gestão Hospitalar. Todos os direitos reservados.</p>
       </footer>
     </div>
@@ -47,8 +52,10 @@ function MainApp() {
 
 export default function Page() {
   return (
-    <AuthProvider>
-      <MainApp />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
