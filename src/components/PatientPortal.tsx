@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Doctor, Specialty, Location, HealthInsurance, PatientInsurance, Appointment, DoctorSchedule, User } from "@/types";
 import { TelemedicineRoom } from "@/components/TelemedicineRoom";
+import { VirtualAgenda } from "@/components/VirtualAgenda";
 import {
   Calendar,
   Clock,
@@ -30,7 +31,7 @@ const DEFAULT_TIME_SLOTS = [
 export const PatientPortal = () => {
   const { currentUser } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<"book" | "appointments" | "insurances">("book");
+  const [activeTab, setActiveTab] = useState<"book" | "agenda" | "appointments" | "insurances">("book");
 
   // Data states
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
@@ -64,16 +65,13 @@ export const PatientPortal = () => {
 
   const loadData = useCallback(async () => {
     try {
-      // Fetch users map for joining
       const { data: usersData } = await supabase.from("users").select("*");
       const usersMap = new Map<string, User>();
       (usersData || []).forEach((u) => usersMap.set(u.id, u));
 
-      // 1. Fetch Specialties
       const { data: specs } = await supabase.from("specialties").select("*").order("name");
       if (specs) setSpecialties(specs);
 
-      // 2. Fetch Doctor Specialties relation
       const { data: docSpecs } = await supabase.from("doctor_specialties").select("*");
       const dsMap: Record<string, string[]> = {};
       (docSpecs || []).forEach((ds) => {
@@ -82,7 +80,6 @@ export const PatientPortal = () => {
       });
       setDoctorSpecialtiesMap(dsMap);
 
-      // 3. Fetch Doctors
       const { data: docs } = await supabase.from("doctors").select("*");
       if (docs) {
         const enrichedDocs = docs.map((d) => ({
@@ -92,15 +89,12 @@ export const PatientPortal = () => {
         setDoctors(enrichedDocs);
       }
 
-      // 4. Fetch Locations
       const { data: locs } = await supabase.from("locations").select("*");
       if (locs) setLocations(locs);
 
-      // 5. Fetch Health Insurances
       const { data: ins } = await supabase.from("health_insurances").select("*");
       if (ins) setAllInsurances(ins);
 
-      // 6. Fetch Patient Insurances
       if (currentUser) {
         const { data: patIns } = await supabase
           .from("patient_insurances")
@@ -108,7 +102,6 @@ export const PatientPortal = () => {
           .eq("patient_id", currentUser.id);
         if (patIns) setPatientInsurances(patIns);
 
-        // 7. Fetch Patient Appointments
         const { data: apps } = await supabase
           .from("appointments")
           .select(`
@@ -138,14 +131,12 @@ export const PatientPortal = () => {
     loadData();
   }, [currentUser, loadData]);
 
-  // Filter doctors based on selected specialty
   const filteredDoctors = doctors.filter((doc) => {
     if (!selectedSpecialty) return true;
     const docSpecs = doctorSpecialtiesMap[doc.user_id] || [];
     return docSpecs.includes(selectedSpecialty);
   });
 
-  // Automatically reset selected doctor if not in filtered list
   useEffect(() => {
     if (selectedDoctor && selectedSpecialty) {
       const isStillValid = filteredDoctors.some((d) => d.user_id === selectedDoctor);
@@ -155,7 +146,6 @@ export const PatientPortal = () => {
     }
   }, [selectedSpecialty, filteredDoctors, selectedDoctor]);
 
-  // Generate Available Time Slots when Doctor and Date change
   useEffect(() => {
     if (!selectedDate) {
       setAvailableSlots(DEFAULT_TIME_SLOTS);
@@ -246,7 +236,6 @@ export const PatientPortal = () => {
       return;
     }
 
-    // Check if chosen date is in the past
     const today = new Date().toISOString().split("T")[0];
     if (selectedDate < today) {
       setBookingError("Não é possível agendar consultas em datas passadas.");
@@ -305,7 +294,6 @@ export const PatientPortal = () => {
     }
   };
 
-  // ERR-09: Delete Patient Insurance Card Option
   const handleDeleteInsuranceCard = async (insuranceCardId: string) => {
     if (!confirm("Tem certeza que deseja remover esta carteirinha de convênio?")) return;
 
@@ -371,47 +359,60 @@ export const PatientPortal = () => {
       )}
 
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-sky-700 via-sky-600 to-blue-600 dark:from-slate-800 dark:to-sky-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-8 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 dark:from-slate-900 dark:to-teal-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl mb-8 relative overflow-hidden">
         <div className="relative z-10">
           <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
             Área do Paciente
           </span>
-          <h2 className="text-2xl sm:text-3xl font-bold">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
             Olá, {currentUser?.first_name}!
           </h2>
-          <p className="text-sky-100 dark:text-slate-300 text-sm mt-1 max-w-xl">
-            Gerencie suas consultas, agende novos horários e acompanhe seus planos de saúde e prontuários médicos.
+          <p className="text-teal-100 dark:text-slate-300 text-xs sm:text-sm mt-1 max-w-xl">
+            Gerencie suas consultas, acesse sua Agenda Virtual, marque horários e acompanhe seus planos de saúde.
           </p>
         </div>
       </div>
 
       {/* Tabs Header */}
-      <div className="flex border-b border-slate-200 dark:border-slate-700 mb-6 space-x-8">
+      <div className="flex border-b border-slate-200 dark:border-slate-800 mb-6 space-x-6 sm:space-x-8 overflow-x-auto">
         <button
           onClick={() => setActiveTab("book")}
-          className={`pb-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors ${
+          className={`pb-4 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-colors shrink-0 ${
             activeTab === "book"
-              ? "border-sky-600 text-sky-600 dark:text-sky-400 dark:border-sky-400"
+              ? "border-teal-600 text-teal-600 dark:text-teal-400 dark:border-teal-400 font-extrabold"
               : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
-          <Calendar className="w-4 h-4" /> Agendar Consulta
+          <Plus className="w-4 h-4" /> Agendar Consulta
         </button>
+
+        <button
+          onClick={() => setActiveTab("agenda")}
+          className={`pb-4 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-colors shrink-0 ${
+            activeTab === "agenda"
+              ? "border-teal-600 text-teal-600 dark:text-teal-400 dark:border-teal-400 font-extrabold"
+              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+          }`}
+        >
+          <Calendar className="w-4 h-4" /> Agenda Virtual
+        </button>
+
         <button
           onClick={() => setActiveTab("appointments")}
-          className={`pb-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors ${
+          className={`pb-4 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-colors shrink-0 ${
             activeTab === "appointments"
-              ? "border-sky-600 text-sky-600 dark:text-sky-400 dark:border-sky-400"
+              ? "border-teal-600 text-teal-600 dark:text-teal-400 dark:border-teal-400 font-extrabold"
               : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
           <Clock className="w-4 h-4" /> Minhas Consultas ({appointments.length})
         </button>
+
         <button
           onClick={() => setActiveTab("insurances")}
-          className={`pb-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors ${
+          className={`pb-4 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2 border-b-2 transition-colors shrink-0 ${
             activeTab === "insurances"
-              ? "border-sky-600 text-sky-600 dark:text-sky-400 dark:border-sky-400"
+              ? "border-teal-600 text-teal-600 dark:text-teal-400 dark:border-teal-400 font-extrabold"
               : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
@@ -422,20 +423,20 @@ export const PatientPortal = () => {
       {/* TAB 1: BOOK APPOINTMENT */}
       {activeTab === "book" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+          <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <Plus className="w-5 h-5 text-sky-600" /> Nova Consulta Virtual / Presencial
+              <Plus className="w-5 h-5 text-teal-600" /> Nova Consulta Virtual / Presencial
             </h3>
 
             {bookingSuccess && (
-              <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg text-emerald-800 dark:text-emerald-300 text-sm flex items-center gap-2 font-medium">
+              <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-800 dark:text-emerald-300 text-sm flex items-center gap-2 font-medium">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                 {bookingSuccess}
               </div>
             )}
 
             {bookingError && (
-              <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300 text-sm flex items-center gap-2 font-medium">
+              <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl text-red-800 dark:text-red-300 text-sm flex items-center gap-2 font-medium">
                 <AlertCircle className="w-5 h-5 text-red-600" />
                 {bookingError}
               </div>
@@ -450,7 +451,7 @@ export const PatientPortal = () => {
                 <select
                   value={selectedSpecialty}
                   onChange={(e) => setSelectedSpecialty(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                 >
                   <option value="">Todas as especialidades</option>
                   {specialties.map((s) => (
@@ -470,7 +471,7 @@ export const PatientPortal = () => {
                   value={selectedDoctor}
                   onChange={(e) => setSelectedDoctor(e.target.value)}
                   required
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                 >
                   <option value="">Escolha um médico...</option>
                   {filteredDoctors.map((d) => (
@@ -481,7 +482,7 @@ export const PatientPortal = () => {
                 </select>
               </div>
 
-              {/* Location & Insurance Selection (ERR-10 FIX) */}
+              {/* Location & Insurance Selection */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
@@ -490,7 +491,7 @@ export const PatientPortal = () => {
                   <select
                     value={selectedLocation}
                     onChange={(e) => setSelectedLocation(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                   >
                     <option value="">Hospital Central / Unidade Principal</option>
                     {locations.map((l) => (
@@ -501,7 +502,6 @@ export const PatientPortal = () => {
                   </select>
                 </div>
 
-                {/* ERR-10 FIX: Shows patient registered insurances AND all general health insurance options */}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                     4. Plano / Convênio
@@ -509,7 +509,7 @@ export const PatientPortal = () => {
                   <select
                     value={selectedInsurance}
                     onChange={(e) => setSelectedInsurance(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                   >
                     <option value="">Atendimento Particular (R$ 150,00)</option>
                     {patientInsurances.length > 0 && (
@@ -543,9 +543,9 @@ export const PatientPortal = () => {
                   <button
                     type="button"
                     onClick={() => setSelectedMode("IN_PERSON")}
-                    className={`p-3 rounded-lg border flex items-center justify-center gap-2 text-sm font-semibold transition-all ${
+                    className={`p-3 rounded-xl border flex items-center justify-center gap-2 text-sm font-semibold transition-all ${
                       selectedMode === "IN_PERSON"
-                        ? "border-sky-600 bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 shadow-sm"
+                        ? "border-teal-600 bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 shadow-xs"
                         : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50"
                     }`}
                   >
@@ -554,9 +554,9 @@ export const PatientPortal = () => {
                   <button
                     type="button"
                     onClick={() => setSelectedMode("TELEMEDICINE")}
-                    className={`p-3 rounded-lg border flex items-center justify-center gap-2 text-sm font-semibold transition-all ${
+                    className={`p-3 rounded-xl border flex items-center justify-center gap-2 text-sm font-semibold transition-all ${
                       selectedMode === "TELEMEDICINE"
-                        ? "border-sky-600 bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 shadow-sm"
+                        ? "border-teal-600 bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 shadow-xs"
                         : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50"
                     }`}
                   >
@@ -577,7 +577,7 @@ export const PatientPortal = () => {
                     onChange={(e) => setSelectedDate(e.target.value)}
                     required
                     min={new Date().toISOString().split("T")[0]}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                   />
                 </div>
 
@@ -589,7 +589,7 @@ export const PatientPortal = () => {
                     value={selectedTime}
                     onChange={(e) => setSelectedTime(e.target.value)}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                   >
                     <option value="">Selecione o horário...</option>
                     {availableSlots.map((slot) => (
@@ -603,7 +603,7 @@ export const PatientPortal = () => {
 
               <button
                 type="submit"
-                className="w-full mt-6 py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all"
+                className="w-full mt-6 py-3.5 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all"
               >
                 Confirmar e Agendar Consulta
               </button>
@@ -612,16 +612,16 @@ export const PatientPortal = () => {
 
           {/* Side Info */}
           <div className="space-y-6">
-            <div className="bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-800 rounded-xl p-5 text-sky-900 dark:text-sky-200">
+            <div className="bg-teal-50 dark:bg-teal-950/30 border border-teal-200/80 dark:border-teal-800 rounded-2xl p-5 text-teal-900 dark:text-teal-200">
               <h4 className="font-bold text-sm flex items-center gap-2 mb-2">
-                <CheckCircle2 className="w-4 h-4 text-sky-600" /> Agenda Virtual Med.na
+                <CheckCircle2 className="w-4 h-4 text-teal-600" /> Agenda Virtual Med.na
               </h4>
-              <p className="text-xs text-sky-700 dark:text-sky-300 leading-relaxed">
-                Nossa agenda em tempo real garante que seu horário seja reservado sem filas. Para consultas por telemedicina, acesse a videochamada diretamente pelo botão na área de consultas.
+              <p className="text-xs text-teal-800 dark:text-teal-300 leading-relaxed">
+                Nossa agenda em tempo real garante que seu horário seja reservado sem filas. Acompanhe todos os seus horários marcados na aba Agenda Virtual.
               </p>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 shadow-sm">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
               <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-3">
                 Seus Convênios Ativos
               </h4>
@@ -630,7 +630,7 @@ export const PatientPortal = () => {
               ) : (
                 <ul className="space-y-2">
                   {patientInsurances.map((pi) => (
-                    <li key={pi.id} className="text-xs font-medium text-slate-700 dark:text-slate-200 flex justify-between items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800">
+                    <li key={pi.id} className="text-xs font-medium text-slate-700 dark:text-slate-200 flex justify-between items-center bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
                       <span>{pi.insurance?.name}</span>
                       <span className="font-mono text-slate-500">{pi.card_number}</span>
                     </li>
@@ -642,10 +642,17 @@ export const PatientPortal = () => {
         </div>
       )}
 
-      {/* TAB 2: MY APPOINTMENTS */}
+      {/* TAB 2: VIRTUAL AGENDA (ERR-14 FIX) */}
+      {activeTab === "agenda" && (
+        <div className="space-y-4">
+          <VirtualAgenda appointments={appointments} />
+        </div>
+      )}
+
+      {/* TAB 3: MY APPOINTMENTS */}
       {activeTab === "appointments" && (
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-800">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">Histórico de Agendamentos</h3>
           </div>
 
@@ -654,21 +661,21 @@ export const PatientPortal = () => {
               Você ainda não possui consultas agendadas.
             </div>
           ) : (
-            <div className="divide-y divide-slate-100 dark:divide-slate-700">
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
               {appointments.map((app) => {
                 const isCanceled = app.status === "CANCELED";
                 const isConfirmed = app.status === "CONFIRMED";
                 const isCompleted = app.status === "COMPLETED";
 
                 return (
-                  <div key={app.id} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors">
+                  <div key={app.id} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${
                           isCanceled
                             ? "bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300"
                             : isCompleted
-                            ? "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
+                            ? "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
                             : isConfirmed
                             ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
                             : "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
@@ -677,7 +684,7 @@ export const PatientPortal = () => {
                         </span>
 
                         <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                          {app.mode === "TELEMEDICINE" ? <Video className="w-3.5 h-3.5 text-sky-600" /> : <Building className="w-3.5 h-3.5 text-slate-600" />}
+                          {app.mode === "TELEMEDICINE" ? <Video className="w-3.5 h-3.5 text-teal-600" /> : <Building className="w-3.5 h-3.5 text-slate-600" />}
                           {app.mode === "TELEMEDICINE" ? "Telemedicina" : "Presencial"}
                         </span>
                       </div>
@@ -692,7 +699,7 @@ export const PatientPortal = () => {
                           {new Date(app.scheduled_at).toLocaleDateString("pt-BR")} às {new Date(app.scheduled_at).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' })}
                         </span>
                         {app.specialty && (
-                          <span className="flex items-center gap-1 font-medium text-sky-700 dark:text-sky-400">
+                          <span className="flex items-center gap-1 font-medium text-teal-700 dark:text-teal-400">
                             <Stethoscope className="w-3.5 h-3.5" />
                             {app.specialty.name}
                           </span>
@@ -711,11 +718,10 @@ export const PatientPortal = () => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {/* ERR-07 FIX: Integrated Native Video Telemedicine Modal Button */}
                       {app.mode === "TELEMEDICINE" && !isCanceled && (
                         <button
                           onClick={() => setActiveTeleRoomAppointment(app)}
-                          className="px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
+                          className="px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all"
                         >
                           <Video className="w-4 h-4" /> Entrar na Teleconsulta Nativa
                         </button>
@@ -724,7 +730,7 @@ export const PatientPortal = () => {
                       {!isCanceled && !isCompleted && (
                         <button
                           onClick={() => handleCancelAppointment(app.id)}
-                          className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300 rounded-lg text-xs font-bold border border-red-200 dark:border-red-800 transition-colors"
+                          className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300 rounded-xl text-xs font-bold border border-red-200 dark:border-red-800 transition-colors"
                         >
                           Cancelar
                         </button>
@@ -738,28 +744,27 @@ export const PatientPortal = () => {
         </div>
       )}
 
-      {/* TAB 3: INSURANCES */}
+      {/* TAB 4: INSURANCES */}
       {activeTab === "insurances" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">Seus Planos de Saúde</h3>
 
             {patientInsurances.length === 0 ? (
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 text-center text-slate-500 dark:text-slate-400 text-sm border border-slate-200 dark:border-slate-700">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 text-center text-slate-500 dark:text-slate-400 text-sm border border-slate-200 dark:border-slate-800">
                 Você ainda não possui carteirinhas de planos de saúde vinculadas.
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {patientInsurances.map((pi) => (
-                  <div key={pi.id} className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl p-5 shadow-md relative overflow-hidden flex flex-col justify-between">
+                  <div key={pi.id} className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 shadow-md relative overflow-hidden flex flex-col justify-between border border-slate-700">
                     <div>
                       <div className="flex justify-between items-start mb-4">
-                        <span className="font-bold text-sky-400 text-sm">{pi.insurance?.name}</span>
+                        <span className="font-bold text-teal-400 text-sm">{pi.insurance?.name}</span>
                         <div className="flex items-center gap-2">
                           <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                             {pi.status}
                           </span>
-                          {/* ERR-09 FIX: Delete Option for Insurance Cards */}
                           <button
                             onClick={() => handleDeleteInsuranceCard(pi.id)}
                             title="Excluir carteirinha"
@@ -786,7 +791,7 @@ export const PatientPortal = () => {
           </div>
 
           {/* Add New Insurance */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 h-fit">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 h-fit">
             <h4 className="font-bold text-slate-900 dark:text-white text-base mb-4">Adicionar Novo Convênio</h4>
             <form onSubmit={handleAddInsurance} className="space-y-4">
               <div>
@@ -797,7 +802,7 @@ export const PatientPortal = () => {
                   value={newInsuranceId}
                   onChange={(e) => setNewInsuranceId(e.target.value)}
                   required
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                 >
                   <option value="">Selecione o plano...</option>
                   {allInsurances.map((i) => (
@@ -818,7 +823,7 @@ export const PatientPortal = () => {
                   onChange={(e) => setNewCardNumber(e.target.value)}
                   placeholder="Ex: 889900112233"
                   required
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                 />
               </div>
 
@@ -830,13 +835,13 @@ export const PatientPortal = () => {
                   type="date"
                   value={newValidUntil}
                   onChange={(e) => setNewValidUntil(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg text-sm transition-colors"
+                className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-sm transition-colors"
               >
                 Vincular Carteirinha
               </button>
