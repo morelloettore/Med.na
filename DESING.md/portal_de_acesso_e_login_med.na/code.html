@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>Med.Na - Clínica Médica Virtual</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&amp;family=Open+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "border-subtle": "#E2E8F0", "secondary-fixed-dim": "#5cdac9", "surface-dim": "#d2d9f4", "secondary": "#006a60", "telehealth-live": "#E11D48", "outline": "#6e7977", "primary-container": "#027368", "surface-tint": "#BDEDF2", "secondary-fixed": "#7bf7e5", "on-primary-fixed": "#00201c", "primary-fixed-dim": "#7fd6c8", "on-primary-container": "#9df5e7", "primary": "#005850", "border-interactive": "#03A696", "on-tertiary-fixed": "#002020", "on-secondary-fixed-variant": "#005048", "on-surface-variant": "#3e4947", "on-secondary-fixed": "#00201c", "text-muted": "#64748B", "surface-container-low": "#f2f3ff", "surface-container": "#eaedff", "tertiary-fixed": "#6cf7f7", "tertiary-container": "#007272", "surface-container-high": "#e2e7ff", "surface-container-highest": "#dae2fd", "on-primary": "#ffffff", "error": "#ba1a1a", "on-error-container": "#93000a", "on-secondary": "#ffffff", "secondary-container": "#78f4e2", "on-tertiary": "#ffffff", "background": "#faf8ff", "on-error": "#ffffff", "outline-variant": "#bdc9c6", "text-primary": "#0F172A", "on-primary-fixed-variant": "#005048", "on-tertiary-fixed-variant": "#004f50", "surface-bright": "#faf8ff", "on-background": "#131b2e", "background-neutral": "#F8FAFB", "inverse-primary": "#7fd6c8", "error-container": "#ffdad6", "on-tertiary-container": "#6ef9f9", "surface-container-lowest": "#ffffff", "on-surface": "#131b2e", "inverse-surface": "#283044", "status-success": "#059669", "tertiary": "#005858", "primary-fixed": "#9bf2e4", "status-warning": "#D97706", "background-subtle": "#F2F2F2", "surface-card": "#FFFFFF", "on-secondary-container": "#006f64", "status-critical": "#DC2626", "inverse-on-surface": "#eef0ff", "surface": "#faf8ff", "surface-variant": "#dae2fd", "tertiary-fixed-dim": "#48dada" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter": "1.5rem", "space-xs": "0.25rem", "space-xl": "2.5rem", "margin": "1rem", "margin-lg": "3rem", "margin-sm": "1rem", "gutter-lg": "2rem", "space-lg": "1.5rem", "margin-md": "2rem", "space-md": "1rem", "space-sm": "0.5rem", "gutter-sm": "1rem" }, "fontFamily": { "label-md": ["Open Sans"], "label-sm": ["Open Sans"], "body-sm": ["Open Sans"], "title-lg": ["Open Sans"], "title-md": ["Open Sans"], "headline-xl-mobile": ["Montserrat"], "body-md": ["Open Sans"], "body-lg": ["Open Sans"], "label-lg": ["Montserrat"], "headline-md": ["Montserrat"], "headline-lg": ["Montserrat"], "headline-xl": ["Montserrat"], "headline-lg-mobile": ["Montserrat"] }, "fontSize": { "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.03em", "fontWeight": "600" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }], "title-lg": ["18px", { "lineHeight": "26px", "fontWeight": "600" }], "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "600" }], "headline-xl-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "28px", "fontWeight": "600" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }] } } } };</script></head><body class="bg-background-neutral text-on-surface font-body-md text-body-md antialiased min-h-screen flex flex-col"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-card/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(2,115,104,0.06)]"><div class="h-20 w-full px-gutter-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><img alt="Logotipo oficial da Med.Na - Clínica Médica Virtual atualizado com a tipografia Arial no subtítulo/label 'CLÍNICA MÉDICA VIRTUAL', mantendo o título em Montserrat e as cores oficiais." class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VGypiOLeuZBDCcoF-tA9mV_bYy7__Ns1hSt7KeUBkqB29HkanNSSn3EVD9tWL5F5ByeRHB6lL9q3XHRJJi57a7B3lOGDUAOKrzHmp-arlwvOG45wlqvPQtLDYUOmZl8bUKnki6w6vv3HSIux8qGq4zxqu2_wL4BK8ELIXA_tVwd8IZ95sfJBm0EFeIQwVyJyPWEXBMBCIC2cI0UTzHWI4-CEs0v3gjuvVZnryiqq-6USsNGXEDjyyAhug"/><span class="hidden sm:inline-block font-headline-md text-headline-md text-primary">Med.Na</span><div class="hidden xl:flex items-center gap-space-xs px-space-sm py-space-xs rounded-full bg-surface-tint/30 text-primary font-label-sm text-label-sm ml-space-sm"><span class="material-symbols-outlined text-[16px]">verified_user</span><span>Ambiente Seguro SSL 256-bit &amp; LGPD</span></div></div><nav class="hidden lg:flex items-center gap-space-md" data-active-classes="bg-surface-tint/40 text-primary font-label-lg rounded-lg"><a aria-current="page" class="px-space-sm py-space-xs transition-colors bg-surface-tint/40 text-primary font-label-lg rounded-lg" data-path="portal-de-acesso" href="#">Portal de Acesso</a><a class="px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors font-label-lg text-label-lg" data-path="central-de-ajuda-e-suporte" href="#">Ajuda / Suporte Clínico</a><a class="px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors font-label-lg text-label-lg" data-path="telemedicina-24h" href="#">Central 24h</a></nav><div class="flex items-center gap-space-sm"><div class="hidden md:flex items-center gap-space-xs px-space-sm py-space-xs rounded-full bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm"><span class="material-symbols-outlined text-[16px]">language</span><span>PT-BR</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-sm"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 flex-1 bg-background-neutral"><div class="flex flex-col w-full">
+<!-- Dynamic Clinical Atmospheric Background -->
+<div class="w-full relative overflow-hidden bg-background-neutral py-space-md lg:py-space-xl px-gutter sm:px-gutter-lg">
+<!-- Ambient glowing blur orbs behind the grid -->
+<div class="absolute -top-32 -left-20 w-96 h-96 bg-surface-tint/40 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute top-1/2 right-0 w-[480px] h-[480px] bg-secondary-container/20 rounded-full blur-3xl pointer-events-none"></div>
+<div class="max-w-7xl mx-auto w-full relative z-10">
+<!-- Breadcrumb & System Environment Indicator -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm mb-space-lg">
+<div class="flex items-center gap-space-xs text-text-muted font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">security</span>
+<span>Plataforma de Governança Clínica</span>
+<span>/</span>
+<span class="font-label-sm text-primary uppercase tracking-wider">Gateway de Autenticação Segura (RBAC)</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-status-success/10 text-status-success font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-status-success animate-ping"></span>
+<span>Cluster CFM/ICP Ativo</span>
+</div>
+<div class="hidden sm:inline-flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+<span>TLS 1.3 / E2EE</span>
+</div>
+</div>
+</div>
+<!-- Main Dual Panel Layout (Bento / Split View) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- ==============================================
+             LEFT COLUMN (5 Cols): Clinical Knowledge & Portals Info
+             ============================================== -->
+<div class="lg:col-span-5 flex flex-col gap-space-md order-2 lg:order-1">
+<!-- Hero Identity Mini-Panel -->
+<div class="bg-surface-card rounded-xl p-space-lg shadow-sm">
+<div class="flex items-center gap-space-md mb-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-tint/40 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">shield_with_heart</span>
+</div>
+<div class="min-w-0">
+<div class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-widest">Med.Na Virtual Hospital</div>
+<h1 class="font-headline-md text-headline-md text-text-primary tracking-tight">Ecossistema Integrado de Saúde</h1>
+</div>
+</div>
+<p class="font-body-md text-body-md text-text-muted leading-relaxed">
+              Autenticação centralizada com controle de acesso granular por papéis (<strong class="text-text-primary">RBAC</strong>). Segurança hospitalar compatível com <strong class="text-primary">Resolução CFM 2.314/22</strong> e arquitetura de dados <strong class="text-primary">LGPD</strong>.
+            </p>
+</div>
+<!-- Portals Showcase (Interactive / Informational Cards) -->
+<div class="space-y-space-sm">
+<!-- Doctor Card (Active preview) -->
+<div class="bg-gradient-to-r from-surface-tint/30 to-surface-card p-space-md rounded-xl shadow-sm transition-all duration-200">
+<div class="flex items-start gap-space-md">
+<div class="p-space-xs rounded-lg bg-primary-container text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-[20px]">stethoscope</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<h2 class="font-title-md text-title-md text-text-primary">Portal do Médico</h2>
+<span class="px-space-xs py-0.5 rounded text-[10px] font-label-sm uppercase bg-primary-fixed-dim text-on-primary-fixed">Ativo no seletor</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted mt-1">
+                    Prontuário Eletrônico do Paciente (PEP SOAP), fila de teleconsulta instantânea WebRTC e assinatura ICP-Brasil em lote.
+                  </p>
+</div>
+</div>
+</div>
+<!-- Patient Card -->
+<div class="bg-surface-card p-space-md rounded-xl shadow-sm hover:bg-surface-bright transition-colors">
+<div class="flex items-start gap-space-md">
+<div class="p-space-xs rounded-lg bg-surface-container-low text-primary">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<h2 class="font-title-md text-title-md text-text-primary">Portal do Paciente</h2>
+<span class="px-space-xs py-0.5 rounded text-[10px] font-label-sm uppercase bg-surface-container text-text-muted">Acesso Seguro</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted mt-1">
+                    Sala de atendimento virtual em 1-clique, visualização de receitas com QR Code, atestados e laudos rastreáveis.
+                  </p>
+</div>
+</div>
+</div>
+<!-- Staff Card -->
+<div class="bg-surface-card p-space-md rounded-xl shadow-sm hover:bg-surface-bright transition-colors">
+<div class="flex items-start gap-space-md">
+<div class="p-space-xs rounded-lg bg-surface-container-low text-primary">
+<span class="material-symbols-outlined text-[20px]">badge</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<h2 class="font-title-md text-title-md text-text-primary">Portal do Funcionário</h2>
+<span class="px-space-xs py-0.5 rounded text-[10px] font-label-sm uppercase bg-surface-container text-text-muted">Operacional</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted mt-1">
+                    Triagem, admissão, faturamento padrão TISS, validação imediata de carteirinhas de planos e agendamentos.
+                  </p>
+</div>
+</div>
+</div>
+<!-- Admin Card -->
+<div class="bg-surface-card p-space-md rounded-xl shadow-sm hover:bg-surface-bright transition-colors">
+<div class="flex items-start gap-space-md">
+<div class="p-space-xs rounded-lg bg-surface-container-low text-primary">
+<span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<h2 class="font-title-md text-title-md text-text-primary">Painel do Administrador</h2>
+<span class="px-space-xs py-0.5 rounded text-[10px] font-label-sm uppercase bg-surface-container text-text-muted">Gestão &amp; TI</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted mt-1">
+                    Auditoria de acessos LGPD, gerenciamento de papéis, parametrização de nós WebRTC e telemetria Redis/PostgreSQL.
+                  </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Real-Time Telemetry and Operational Status -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wide">Status de Infraestrutura Clínica</span>
+<span class="font-label-sm text-label-sm text-status-success font-semibold flex items-center gap-1">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-status-success"></span> Todos Operacionais
+              </span>
+</div>
+<div class="grid grid-cols-3 gap-space-xs">
+<div class="p-space-xs rounded bg-surface-container-low text-center">
+<div class="font-label-sm text-[10px] text-text-muted">WebRTC Video</div>
+<div class="font-label-md text-label-md text-primary font-bold">18ms • Ótimo</div>
+</div>
+<div class="p-space-xs rounded bg-surface-container-low text-center">
+<div class="font-label-sm text-[10px] text-text-muted">Validador CFM</div>
+<div class="font-label-md text-label-md text-primary font-bold">Sincronizado</div>
+</div>
+<div class="p-space-xs rounded bg-surface-container-low text-center">
+<div class="font-label-sm text-[10px] text-text-muted">Gateway TISS</div>
+<div class="font-label-md text-label-md text-primary font-bold">Conectado</div>
+</div>
+</div>
+</div>
+<!-- Medical Support & Emergency Banner -->
+<div class="p-space-md rounded-xl bg-surface-container text-on-surface flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[24px]">support_agent</span>
+<div>
+<div class="font-title-md text-title-md font-semibold text-primary">Suporte Técnico Clínico 24/7</div>
+<div class="font-body-sm text-body-sm text-text-muted">Linha direta médica: 0800 940 MEDNA</div>
+</div>
+</div>
+<a class="px-space-sm py-1.5 rounded-lg bg-surface-card hover:bg-surface-bright text-primary font-label-sm text-label-sm shadow-sm transition-colors" href="#">
+              Falar no WhatsApp
+            </a>
+</div>
+</div>
+<!-- ==============================================
+             RIGHT COLUMN (7 Cols): The Unified Auth Card
+             ============================================== -->
+<div class="lg:col-span-7 order-1 lg:order-2">
+<div class="bg-surface-card rounded-2xl shadow-xl p-space-lg sm:p-space-xl relative">
+<!-- Card Header: Title & Description -->
+<div class="mb-space-lg text-left">
+<div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-surface-tint/50 text-primary font-label-sm text-label-sm mb-space-sm">
+<span class="material-symbols-outlined text-[14px]">lock_open</span>
+<span>Acesso Seguro Unificado</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">
+                Acesse sua Conta
+              </h2>
+<p class="font-body-md text-body-md text-text-muted mt-1">
+                Selecione o seu perfil de acesso ao ecossistema Med.Na para prosseguir
+              </p>
+</div>
+<!-- RBAC Role Switcher (4 Roles) -->
+<div class="mb-space-lg">
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-space-xs p-1 bg-surface-container-low rounded-xl" id="roleTabContainer">
+<!-- Role: Paciente -->
+<button class="role-tab flex flex-col items-center justify-center py-space-sm px-space-xs rounded-lg transition-all duration-200 text-text-muted hover:text-text-primary hover:bg-surface-card/60" id="role-btn-patient" onclick="selectRole('patient')" type="button">
+<span class="material-symbols-outlined text-[22px] mb-1">person</span>
+<span class="font-label-md text-label-md font-bold">Paciente</span>
+<span class="text-[9px] uppercase tracking-wider font-semibold opacity-75 mt-0.5">Teleconsulta</span>
+</button>
+<!-- Role: Médico (Active Default) -->
+<button class="role-tab flex flex-col items-center justify-center py-space-sm px-space-xs rounded-lg transition-all duration-200 bg-surface-card text-primary shadow-sm font-bold" id="role-btn-doctor" onclick="selectRole('doctor')" type="button">
+<span class="material-symbols-outlined text-[22px] mb-1 text-primary" style="font-variation-settings: 'FILL' 1;">stethoscope</span>
+<span class="font-label-md text-label-md">Médico</span>
+<span class="text-[9px] uppercase tracking-wider font-semibold text-secondary mt-0.5">CRM &amp; PEP</span>
+</button>
+<!-- Role: Funcionário -->
+<button class="role-tab flex flex-col items-center justify-center py-space-sm px-space-xs rounded-lg transition-all duration-200 text-text-muted hover:text-text-primary hover:bg-surface-card/60" id="role-btn-employee" onclick="selectRole('employee')" type="button">
+<span class="material-symbols-outlined text-[22px] mb-1">badge</span>
+<span class="font-label-md text-label-md font-bold">Funcionário</span>
+<span class="text-[9px] uppercase tracking-wider font-semibold opacity-75 mt-0.5">Recepção/TISS</span>
+</button>
+<!-- Role: Administrador -->
+<button class="role-tab flex flex-col items-center justify-center py-space-sm px-space-xs rounded-lg transition-all duration-200 text-text-muted hover:text-text-primary hover:bg-surface-card/60" id="role-btn-admin" onclick="selectRole('admin')" type="button">
+<span class="material-symbols-outlined text-[22px] mb-1">admin_panel_settings</span>
+<span class="font-label-md text-label-md font-bold">Admin</span>
+<span class="text-[9px] uppercase tracking-wider font-semibold opacity-75 mt-0.5">Gestão Geral</span>
+</button>
+</div>
+</div>
+<!-- Context Banner per selected role -->
+<div class="mb-space-md p-space-sm rounded-xl bg-surface-tint/25 text-primary flex items-center justify-between" id="roleContextAlert">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[20px]">medical_services</span>
+<span class="font-label-md text-label-md" id="roleContextMsg">
+                  Acesso Restrito: Profissional de Medicina com registro no Conselho Regional.
+                </span>
+</div>
+<span class="font-label-sm text-[11px] font-bold uppercase bg-surface-card px-2 py-0.5 rounded text-secondary shadow-xs">
+                CRM Exigido
+              </span>
+</div>
+<!-- Login Form -->
+<form class="space-y-space-md" onsubmit="handleFormSubmit(event)">
+<!-- Dynamic Identifier Field -->
+<div class="space-y-space-xs">
+<label class="block font-label-md text-label-md text-text-primary" for="userIdentifier" id="identifierLabel">
+                  CRM com Estado ou E-mail Institucional
+                </label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-space-sm flex items-center pointer-events-none text-text-muted" id="identifierIconContainer">
+<span class="material-symbols-outlined text-[20px]">clinical_notes</span>
+</div>
+<input class="w-full h-11 pl-10 pr-space-md rounded-lg bg-surface-card text-text-primary placeholder:text-text-muted/60 text-body-md font-body-md shadow-sm focus:outline-none focus:ring-2 focus:ring-border-interactive transition-all" id="userIdentifier" name="identifier" placeholder="Ex: CRM 142890-SP ou medico@medna.com.br" required="" type="text" value="CRM 142.890 - SP"/>
+<div class="absolute inset-y-0 right-0 pr-space-sm flex items-center">
+<span class="material-symbols-outlined text-[18px] text-status-success" title="Padrão CRM Válido">check_circle</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted" id="identifierHelper">
+                  Insira o número do CRM seguido da sigla da UF correspondente.
+                </p>
+</div>
+<!-- Password Field with Visibility Toggle & Caps Lock Indicator -->
+<div class="space-y-space-xs">
+<div class="flex items-center justify-between">
+<label class="block font-label-md text-label-md text-text-primary" for="userPassword">
+                    Senha de Acesso
+                  </label>
+<a class="font-label-sm text-label-sm text-primary hover:text-border-interactive transition-colors" href="#">
+                    Esqueceu sua senha?
+                  </a>
+</div>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-space-sm flex items-center pointer-events-none text-text-muted">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+</div>
+<input class="w-full h-11 pl-10 pr-10 rounded-lg bg-surface-card text-text-primary placeholder:text-text-muted/60 text-body-md font-body-md shadow-sm focus:outline-none focus:ring-2 focus:ring-border-interactive transition-all" id="userPassword" name="password" onkeyup="checkCapsLock(event)" placeholder="••••••••••••" required="" type="password" value="MinhaSenhaForte2025#"/>
+<button aria-label="Alternar visibilidade da senha" class="absolute inset-y-0 right-0 pr-space-sm flex items-center text-text-muted hover:text-text-primary transition-colors focus:outline-none" onclick="togglePasswordVisibility()" type="button">
+<span class="material-symbols-outlined text-[20px]" id="pwdEyeIcon">visibility</span>
+</button>
+</div>
+<!-- Caps Lock Warning -->
+<div class="hidden flex items-center gap-space-xs text-status-warning font-label-sm text-label-sm mt-1" id="capsLockWarning">
+<span class="material-symbols-outlined text-[16px]">warning</span>
+<span>Atenção: A tecla Caps Lock está ativada.</span>
+</div>
+</div>
+<!-- Remember Me & Biometrics Prompt -->
+<div class="flex items-center justify-between pt-1">
+<label class="flex items-center gap-space-xs cursor-pointer select-none">
+<input checked="" class="w-4 h-4 rounded text-primary focus:ring-border-interactive cursor-pointer accent-primary" id="rememberDevice" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-text-primary">Lembrar neste dispositivo seguro</span>
+</label>
+<div class="flex items-center gap-1 text-text-muted text-[12px] font-body-sm">
+<span class="material-symbols-outlined text-[16px]">fingerprint</span>
+<span>Biometria habilitada</span>
+</div>
+</div>
+<!-- Primary Submit Button -->
+<button class="w-full h-12 rounded-lg bg-primary-container hover:bg-secondary active:scale-[0.99] text-on-primary font-headline-md text-title-md flex items-center justify-center gap-space-sm shadow-md hover:shadow-lg transition-all" id="submitBtn" type="submit">
+<span>Acessar Plataforma Med.Na</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+<!-- Doctor Fast-Track: Digital ICP-Brasil Option (Displayed dynamically) -->
+<div class="pt-space-xs" id="doctorIcpCard">
+<div class="relative flex items-center justify-center my-space-sm">
+<div class="w-full h-[1px] bg-border-subtle"></div>
+<span class="absolute bg-surface-card px-space-sm font-label-sm text-label-sm text-text-muted uppercase tracking-wider">
+                    Certificação CFM
+                  </span>
+</div>
+<button class="w-full py-2.5 px-space-md rounded-lg bg-surface-tint/30 hover:bg-surface-tint/50 text-primary font-label-md text-label-md flex items-center justify-center gap-space-sm shadow-xs transition-colors" onclick="triggerIcpAuth()" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">token</span>
+<span>Entrar com Certificado Digital (Token A3 / Nuvem CFM)</span>
+</button>
+</div>
+<!-- Alternative Global Sign-in Gateways -->
+<div class="pt-space-xs">
+<div class="relative flex items-center justify-center mb-space-md">
+<div class="w-full h-[1px] bg-border-subtle"></div>
+<span class="absolute bg-surface-card px-space-sm font-label-sm text-label-sm text-text-muted">
+                    Ou autentique-se com
+                  </span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<!-- Gov.Br Gateway -->
+<button class="flex items-center justify-center gap-space-xs py-2 px-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md shadow-xs transition-colors" onclick="triggerGovBrAuth()" type="button">
+<div class="w-5 h-5 rounded-full bg-[#1351B4] text-white flex items-center justify-center text-[10px] font-bold">
+                      gov
+                    </div>
+<span>Conta gov.br (Prata / Ouro)</span>
+</button>
+<!-- Direct ICP Brasil Gateway -->
+<button class="flex items-center justify-center gap-space-xs py-2 px-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md shadow-xs transition-colors" onclick="triggerIcpAuth()" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary">verified_user</span>
+<span>Padrão ICP-Brasil</span>
+</button>
+</div>
+</div>
+</form>
+<!-- Card Footer: Help & Registration Callout -->
+<div class="mt-space-lg pt-space-md bg-surface-container-lowest rounded-xl p-space-sm text-center">
+<p class="font-body-sm text-body-sm text-text-muted">
+                Ainda não possui credenciais ativas na clínica?
+                <a class="font-label-sm text-label-sm text-primary hover:text-border-interactive font-bold underline ml-1" href="#">
+                  Solicitar primeiro cadastro
+                </a>
+</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Compliance and Tech Stack Footnotes Grid -->
+<div class="mt-space-xl grid grid-cols-2 md:grid-cols-4 gap-space-md">
+<div class="bg-surface-card p-space-md rounded-xl shadow-xs flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[28px]">lock_clock</span>
+<div>
+<div class="font-label-md text-label-md text-text-primary">Sessão Segura JWT</div>
+<div class="font-body-sm text-body-sm text-text-muted">Expiração automática 15min</div>
+</div>
+</div>
+<div class="bg-surface-card p-space-md rounded-xl shadow-xs flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[28px]">fingerprint</span>
+<div>
+<div class="font-label-md text-label-md text-text-primary">MFA Obrigatório</div>
+<div class="font-body-sm text-body-sm text-text-muted">Duplo fator médico e admin</div>
+</div>
+</div>
+<div class="bg-surface-card p-space-md rounded-xl shadow-xs flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[28px]">verified</span>
+<div>
+<div class="font-label-md text-label-md text-text-primary">ICP-Brasil / CFM</div>
+<div class="font-body-sm text-body-sm text-text-muted">Prescrições com validade jurídica</div>
+</div>
+</div>
+<div class="bg-surface-card p-space-md rounded-xl shadow-xs flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[28px]">gavel</span>
+<div>
+<div class="font-label-md text-label-md text-text-primary">LGPD Art. 11 Saúde</div>
+<div class="font-body-sm text-body-sm text-text-muted">Criptografia em repouso AES-256</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive Logic for RBAC Switching, Password View, & Mock Authentications -->
+<script>
+    const roleConfigs = {
+      patient: {
+        label: 'CPF ou E-mail cadastrado',
+        placeholder: '000.000.000-00 ou seuemail@exemplo.com',
+        value: '382.901.442-88',
+        helper: 'Informe seu CPF sem pontuação ou o e-mail cadastrado na clínica.',
+        icon: 'person',
+        badge: 'Paciente',
+        badgeClass: 'bg-surface-tint/50 text-primary',
+        contextMsg: 'Acesso do Paciente: Agendamentos, sala de espera de telemedicina e receitas.',
+        contextTag: 'Área do Paciente',
+        showIcpBox: false
+      },
+      doctor: {
+        label: 'CRM com Estado ou E-mail Institucional',
+        placeholder: 'Ex: CRM 142890-SP ou medico@medna.com.br',
+        value: 'CRM 142.890 - SP',
+        helper: 'Insira o número do CRM seguido da sigla da UF correspondente.',
+        icon: 'clinical_notes',
+        badge: 'Médico',
+        badgeClass: 'bg-primary-fixed-dim text-on-primary-fixed',
+        contextMsg: 'Acesso Restrito: Profissional de Medicina com registro no Conselho Regional.',
+        contextTag: 'CRM Exigido',
+        showIcpBox: true
+      },
+      employee: {
+        label: 'Matrícula Funcional ou CPF',
+        placeholder: 'Matrícula (Ex: MED-8842) ou CPF',
+        value: 'MED-88420-REC',
+        helper: 'Utilize sua matrícula de operador ou CPF funcional para login administrativo.',
+        icon: 'badge',
+        badge: 'Funcionário',
+        badgeClass: 'bg-surface-container text-text-muted',
+        contextMsg: 'Acesso Operacional: Recepção, prontuários para triagem e validação TISS.',
+        contextTag: 'Recepção / TISS',
+        showIcpBox: false
+      },
+      admin: {
+        label: 'ID de Administrador ou E-mail Corporativo',
+        placeholder: 'admin@medna.com.br ou ID Operador TI',
+        value: 'root.security@medna.com.br',
+        helper: 'Exigido autenticador TOTP e autorização de IP clínico cadastrado.',
+        icon: 'admin_panel_settings',
+        badge: 'Admin',
+        badgeClass: 'bg-surface-container-high text-primary',
+        contextMsg: 'Painel Central TI & Governança: Monitoramento de auditoria e segurança LGPD.',
+        contextTag: 'Acesso Nível 4',
+        showIcpBox: false
+      }
+    };
+
+    let currentRole = 'doctor';
+
+    function selectRole(roleKey) {
+      currentRole = roleKey;
+      const config = roleConfigs[roleKey];
+      if (!config) return;
+
+      // Update Tab Visual Styles
+      const allTabs = document.querySelectorAll('.role-tab');
+      allTabs.forEach(tab => {
+        tab.className = 'role-tab flex flex-col items-center justify-center py-space-sm px-space-xs rounded-lg transition-all duration-200 text-text-muted hover:text-text-primary hover:bg-surface-card/60';
+        const iconSpan = tab.querySelector('.material-symbols-outlined');
+        if (iconSpan) iconSpan.style.fontVariationSettings = "'FILL' 0";
+      });
+
+      const activeBtn = document.getElementById('role-btn-' + roleKey);
+      if (activeBtn) {
+        activeBtn.className = 'role-tab flex flex-col items-center justify-center py-space-sm px-space-xs rounded-lg transition-all duration-200 bg-surface-card text-primary shadow-sm font-bold';
+        const activeIcon = activeBtn.querySelector('.material-symbols-outlined');
+        if (activeIcon) activeIcon.style.fontVariationSettings = "'FILL' 1";
+      }
+
+      // Update Form Fields
+      const identifierLabel = document.getElementById('identifierLabel');
+      const userIdentifier = document.getElementById('userIdentifier');
+      const identifierHelper = document.getElementById('identifierHelper');
+      const identifierIconContainer = document.getElementById('identifierIconContainer');
+      const doctorIcpCard = document.getElementById('doctorIcpCard');
+      const roleContextMsg = document.getElementById('roleContextMsg');
+
+      if (identifierLabel) identifierLabel.textContent = config.label;
+      if (userIdentifier) {
+        userIdentifier.placeholder = config.placeholder;
+        userIdentifier.value = config.value;
+      }
+      if (identifierHelper) identifierHelper.textContent = config.helper;
+      if (identifierIconContainer) {
+        identifierIconContainer.innerHTML = '<span class="material-symbols-outlined text-[20px]">' + config.icon + '</span>';
+      }
+      if (roleContextMsg) roleContextMsg.textContent = config.contextMsg;
+
+      // Toggle ICP card for doctors
+      if (doctorIcpCard) {
+        if (config.showIcpBox) {
+          doctorIcpCard.classList.remove('hidden');
+        } else {
+          doctorIcpCard.classList.add('hidden');
+        }
+      }
+    }
+
+    function togglePasswordVisibility() {
+      const pwdInput = document.getElementById('userPassword');
+      const eyeIcon = document.getElementById('pwdEyeIcon');
+      if (!pwdInput || !eyeIcon) return;
+
+      if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        eyeIcon.textContent = 'visibility_off';
+      } else {
+        pwdInput.type = 'password';
+        eyeIcon.textContent = 'visibility';
+      }
+    }
+
+    function checkCapsLock(event) {
+      const capsWarning = document.getElementById('capsLockWarning');
+      if (!capsWarning) return;
+      if (event.getModifierState && event.getModifierState('CapsLock')) {
+        capsWarning.classList.remove('hidden');
+      } else {
+        capsWarning.classList.add('hidden');
+      }
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px]">sync</span><span>Autenticando sessão segura...</span>';
+      btn.classList.add('opacity-90', 'cursor-wait');
+
+      setTimeout(() => {
+        btn.innerHTML = '<span class="material-symbols-outlined text-[20px]">check_circle</span><span>Acesso Autorizado! Redirecionando...</span>';
+        btn.classList.remove('bg-primary-container');
+        btn.classList.add('bg-status-success');
+
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+          btn.classList.remove('bg-status-success', 'opacity-90', 'cursor-wait');
+          btn.classList.add('bg-primary-container');
+          alert('Autenticação unificada concluída com sucesso para o perfil: ' + currentRole.toUpperCase() + '. Bem-vindo ao Med.Na!');
+        }, 1200);
+      }, 1000);
+    }
+
+    function triggerIcpAuth() {
+      alert('Iniciando comunicação com hardware de assinatura/token criptográfico ICP-Brasil (Padrão CFM A3/Nuvem)...');
+    }
+
+    function triggerGovBrAuth() {
+      alert('Redirecionando com segurança para a Federação de Identidade Digital gov.br...');
+    }
+  </script>
+</div></main><footer class="w-full bg-surface-card shadow-[0_-1px_6px_rgba(2,115,104,0.04)] py-space-lg"><div class="max-w-7xl mx-auto px-gutter flex flex-col md:flex-row items-center justify-between gap-space-md"><div class="flex flex-wrap items-center justify-center gap-space-md text-on-surface-variant font-label-sm text-label-sm"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-[16px]">health_and_safety</span><span>Resolução CFM nº 2.314/2022</span></div><span class="hidden md:inline text-outline-variant">•</span><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-[16px]">policy</span><span>Conformidade LGPD nº 13.709/2018</span></div><span class="hidden md:inline text-outline-variant">•</span><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-[16px]">verified</span><span>Padrão ICP-Brasil</span></div><span class="hidden md:inline text-outline-variant">•</span><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-[16px]">domain_verification</span><span>Registro ANS Telemedicina</span></div></div><div class="text-center md:text-right font-body-sm text-body-sm text-text-muted"><p>© 2025 Med.Na - Clínica Médica Virtual. Todos os direitos reservados.</p></div></div></footer></body></html>

@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&amp;family=Open+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"background":"#faf8ff","surface-container":"#eaedff","border-interactive":"#03A696","telehealth-live":"#E11D48","primary":"#005850","error-container":"#ffdad6","on-error":"#ffffff","outline-variant":"#bdc9c6","surface-variant":"#dae2fd","on-surface-variant":"#3e4947","surface-container-highest":"#dae2fd","on-secondary":"#ffffff","surface-dim":"#d2d9f4","inverse-surface":"#283044","text-muted":"#64748B","on-secondary-container":"#006f64","on-background":"#131b2e","surface-tint":"#BDEDF2","on-secondary-fixed":"#00201c","primary-fixed":"#9bf2e4","status-warning":"#D97706","border-subtle":"#E2E8F0","on-secondary-fixed-variant":"#005048","surface-container-lowest":"#ffffff","secondary":"#006a60","secondary-container":"#78f4e2","primary-fixed-dim":"#7fd6c8","status-critical":"#DC2626","surface-container-high":"#e2e7ff","text-primary":"#0F172A","on-surface":"#131b2e","surface-card":"#FFFFFF","tertiary-fixed":"#6cf7f7","background-neutral":"#F8FAFB","tertiary-fixed-dim":"#48dada","tertiary":"#005858","background-subtle":"#F2F2F2","on-primary-fixed-variant":"#005048","on-primary-fixed":"#00201c","tertiary-container":"#007272","primary-container":"#027368","surface-container-low":"#f2f3ff","secondary-fixed-dim":"#5cdac9","on-primary":"#ffffff","on-tertiary":"#ffffff","secondary-fixed":"#7bf7e5","inverse-primary":"#7fd6c8","on-error-container":"#93000a","on-tertiary-fixed":"#002020","surface-bright":"#faf8ff","on-tertiary-fixed-variant":"#004f50","status-success":"#059669","error":"#ba1a1a","outline":"#6e7977","on-tertiary-container":"#6ef9f9","inverse-on-surface":"#eef0ff","surface":"#faf8ff","on-primary-container":"#9df5e7"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-sm":"0.5rem","space-xs":"0.25rem","margin-lg":"3rem","margin":"1rem","margin-sm":"1rem","space-md":"1rem","gutter-sm":"1rem","space-xl":"2.5rem","gutter-lg":"2rem","gutter":"1.5rem","margin-md":"2rem","space-lg":"1.5rem"},"fontFamily":{"headline-lg-mobile":["Montserrat"],"title-md":["Open Sans"],"headline-md":["Montserrat"],"title-lg":["Open Sans"],"body-sm":["Open Sans"],"headline-lg":["Montserrat"],"label-md":["Open Sans"],"body-md":["Open Sans"],"label-sm":["Open Sans"],"label-lg":["Montserrat"],"headline-xl":["Montserrat"],"body-lg":["Open Sans"],"headline-xl-mobile":["Montserrat"]},"fontSize":{"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"title-md":["16px",{"lineHeight":"24px","fontWeight":"600"}],"headline-md":["22px",{"lineHeight":"28px","fontWeight":"600"}],"title-lg":["18px",{"lineHeight":"26px","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"18px","fontWeight":"400"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.015em","fontWeight":"600"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.03em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"22px","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.05em","fontWeight":"700"}],"label-lg":["14px",{"lineHeight":"20px","letterSpacing":"0.02em","fontWeight":"600"}],"headline-xl":["40px",{"lineHeight":"48px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-lg":["16px",{"lineHeight":"26px","fontWeight":"400"}],"headline-xl-mobile":["30px",{"lineHeight":"38px","letterSpacing":"-0.01em","fontWeight":"700"}]}}}};</script></head><body class="bg-surface text-on-surface font-body-md text-body-md min-h-screen"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest z-50 flex flex-col shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-space-lg flex items-center justify-between bg-surface-container-lowest"><div class="flex items-center gap-space-sm"><img alt="Logotipo oficial da Med.Na - Clínica Médica Virtual atualizado com a tipografia Arial no subtítulo/label 'CLÍNICA MÉDICA VIRTUAL', mantendo o título em Montserrat e as cores oficiais." class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VGypiOLeuZBDCcoF-tA9mV_bYy7__Ns1hSt7KeUBkqB29HkanNSSn3EVD9tWL5F5ByeRHB6lL9q3XHRJJi57a7B3lOGDUAOKrzHmp-arlwvOG45wlqvPQtLDYUOmZl8bUKnki6w6vv3HSIux8qGq4zxqu2_wL4BK8ELIXA_tVwd8IZ95sfJBm0EFeIQwVyJyPWEXBMBCIC2cI0UTzHWI4-CEs0v3gjuvVZnryiqq-6USsNGXEDjyyAhug"/><div class="flex flex-col"><span class="font-headline-md text-headline-md tracking-tight text-primary leading-none">Med.Na</span><span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary leading-tight">Clínica Virtual</span></div></div></div><div class="px-space-md py-space-sm"><div class="flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container-low text-primary"><span class="w-2 h-2 rounded-full bg-status-success"></span><span class="font-label-sm text-label-sm font-semibold text-secondary">Portal do Médico</span></div></div><nav class="flex-1 px-space-md py-space-sm flex flex-col gap-space-xs overflow-y-auto" data-active-classes="bg-primary-container text-on-primary rounded-xl font-semibold"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-body-md text-body-md">Início</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="agenda-consultas" href="#"><span class="material-symbols-outlined text-[20px]">calendar_today</span><span class="font-body-md text-body-md">Agenda &amp; Consultas</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="prontuario-eletronico" href="#"><span class="material-symbols-outlined text-[20px]">clinical_notes</span><span class="font-body-md text-body-md">Prontuário Eletrônico</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="pacientes" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span class="font-body-md text-body-md">Pacientes</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="telemedicina" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">video_camera_front</span><span class="font-body-md text-body-md">Telemedicina</span></div><span class="w-2 h-2 rounded-full bg-telehealth-live animate-pulse"></span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="convenios-planos" href="#"><span class="material-symbols-outlined text-[20px]">health_and_safety</span><span class="font-body-md text-body-md">Convênios &amp; Planos</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="configuracoes" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span class="font-body-md text-body-md">Configurações</span></a></nav><div class="p-space-md bg-surface-container-lowest"><div class="p-space-md rounded-xl bg-surface-container-low flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-text-muted">Suporte Clínico</span><span class="font-body-sm text-body-sm font-semibold text-primary">Central 24h</span></div><span class="material-symbols-outlined text-secondary text-[22px]">support_agent</span></div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md flex-1 max-w-lg"><div class="relative w-full"><span class="material-symbols-outlined absolute left-space-md top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span><input class="w-full pl-10 pr-space-md py-space-xs rounded-xl bg-surface-container-low text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest font-body-sm text-body-sm transition-all" placeholder="Buscar paciente, prontuário ou CPF..." type="text"/></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-secondary-container/30 text-secondary"><span class="w-2 h-2 rounded-full bg-status-success"></span><span class="font-label-sm text-label-sm font-semibold text-secondary">Disponível para Telemedicina</span></div><button aria-label="Notificações" class="relative p-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-status-critical"></span></button><div class="flex items-center gap-space-md pl-space-sm"><div class="flex flex-col text-right hidden sm:flex"><span class="font-title-md text-title-md text-on-surface leading-tight">Dra. Camila Torres</span><span class="font-body-sm text-body-sm text-text-muted leading-tight">Cardiologia • CRM 142.890</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover shadow-[0_1px_4px_rgba(0,0,0,0.08)]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDadIazjwdlzqznEQMQPL9aWnhaH870ISUMcxFHVPaAxPayosHnY6dbzgTYlkwaTUDBV6LlzX6gZZZOjikjmQV5UyAIA3FM5w0-RxwQyAPeR51mDYTJ-k27XRusgg-T2Mfz8MSyu1mgebZbjMxfBS4O0BT1NeXVUbtqaywVaZWfiP3jgx8UcnossdlyPcTpd0uUEs_KMPn0ilyvuAQR66k4dpEvJfVQhR0lIfy6GQqiKNhjBGd4W1ik"/></div></div></header><main class="flex-1 pt-16 bg-surface w-full px-space-lg"><div class="flex flex-col w-full pb-margin-lg">
+<!-- Header do Módulo -->
+<section class="flex flex-col gap-space-sm pt-space-md mb-space-lg">
+<div class="flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs max-w-3xl">
+<div class="flex items-center gap-space-xs">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm tracking-widest uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-border-interactive"></span>
+            Portal do Médico • Financeiro &amp; Faturamento
+          </span>
+<span class="px-space-sm py-0.5 rounded-full bg-secondary-container/30 text-secondary font-label-sm text-label-sm font-semibold">
+            Competência Outubro/2025
+          </span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">
+          Repasses Clínicos &amp; Honorários Médicos
+        </h1>
+<p class="font-body-md text-body-md text-text-muted leading-relaxed">
+          Gestão consolidada de honorários por teleconsultas, consultas presenciais e exames SADT, conciliação de faturas TISS, extrato bancário de liquidação e gestão de glosas operacionais da Dra. Camila Torres.
+        </p>
+</div>
+<!-- Ações Primárias -->
+<div class="flex items-center gap-space-sm flex-wrap">
+<button class="group flex items-center gap-space-xs px-space-md py-2.5 rounded-xl bg-surface-card text-primary font-label-lg text-label-lg shadow-sm hover:shadow hover:bg-surface-container-low transition-all" type="button">
+<span class="material-symbols-outlined text-[19px] text-border-interactive">sim_card_download</span>
+<span>Exportar Relatório Fiscal</span>
+<span class="text-text-muted font-body-sm text-body-sm">(PDF/OFX/XLS)</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-lg py-2.5 rounded-xl bg-primary-container text-on-primary font-label-lg text-label-lg shadow-md hover:bg-border-interactive hover:shadow-lg transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+<span>Solicitar Antecipação / Fechamento</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Filtros e Controles de Competência -->
+<section class="bg-surface-card rounded-xl p-space-md shadow-sm mb-space-lg">
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md flex-1">
+<!-- Seletor de Competência -->
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Competência / Mês</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary text-[19px]">event_repeat</span>
+<select class="w-full pl-9 pr-8 py-2 rounded-lg bg-surface text-on-surface font-body-md text-body-md shadow-inner focus:outline-none focus:bg-surface-card appearance-none cursor-pointer">
+<option selected="">Outubro / 2025 (Competência Atual)</option>
+<option>Setembro / 2025 (Liquidado 100%)</option>
+<option>Agosto / 2025 (Liquidado 100%)</option>
+<option>Julho / 2025 (Histórico Arquivado)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Seletor de Convênio / Canal -->
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Convênio / Operadora</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary text-[19px]">shield_with_heart</span>
+<select class="w-full pl-9 pr-8 py-2 rounded-lg bg-surface text-on-surface font-body-md text-body-md shadow-inner focus:outline-none focus:bg-surface-card appearance-none cursor-pointer">
+<option selected="">Todas as Operadoras &amp; Particulares</option>
+<option>Bradesco Saúde (Top Nacional)</option>
+<option>SulAmérica Saúde</option>
+<option>Unimed Nacional / Cooperativa</option>
+<option>Particular / Med.Na Pay Direct</option>
+<option>NotreDame Intermédica</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Filtro de Modalidade & Status -->
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Modalidade &amp; Status</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary text-[19px]">tune</span>
+<select class="w-full pl-9 pr-8 py-2 rounded-lg bg-surface text-on-surface font-body-md text-body-md shadow-inner focus:outline-none focus:bg-surface-card appearance-none cursor-pointer">
+<option selected="">Todos os Repasses • Ativos</option>
+<option>Apenas Liquidados / Pagos</option>
+<option>A Receber (Ciclo TISS 15-30d)</option>
+<option>Glosas TISS / Recursos em Aberto</option>
+<option>Apenas Telemedicina (Virtual)</option>
+<option>Apenas Consultas Presenciais</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-sm pt-2 lg:pt-5 border-t lg:border-t-0 border-surface-container">
+<button class="px-space-md py-2 rounded-lg bg-surface-container-high text-primary hover:bg-surface-variant font-label-md text-label-md flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">filter_alt_off</span>
+<span>Limpar</span>
+</button>
+<div class="px-space-md py-2 rounded-lg bg-surface-container text-secondary font-label-md text-label-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-border-interactive">verified</span>
+<span>Fechamento Fiscal: 05/11</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Painel de Métricas / KPI Cards (Grid de 4 colunas) -->
+<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md mb-space-lg">
+<!-- KPI 1: Total Bruto -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-all">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Total de Honorários Brutos</span>
+<h2 class="font-headline-md text-headline-md text-on-surface mt-1 tracking-tight">R$ 48.720,00</h2>
+</div>
+<div class="w-10 h-10 rounded-xl bg-surface-container-high text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center justify-between">
+<div class="flex items-center gap-1 text-status-success font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+14,2%</span>
+<span class="text-text-muted font-normal">vs mês ant.</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+          142 atendimentos
+        </span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-border-interactive to-secondary-container"></div>
+</div>
+<!-- KPI 2: Liquidados -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-all">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Repasses Liquidados / Pagos</span>
+<h2 class="font-headline-md text-headline-md text-status-success mt-1 tracking-tight">R$ 36.150,00</h2>
+</div>
+<div class="w-10 h-10 rounded-xl bg-secondary-container/40 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">check_circle</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-text-muted">Crédito em conta PJ</span>
+<span class="text-on-surface font-semibold">Itaú Unibanco Ag. 1204</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-status-success h-full rounded-full" style="width: 74.2%"></div>
+</div>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-status-success"></div>
+</div>
+<!-- KPI 3: A Receber TISS -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-all">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">A Receber / Ciclo TISS</span>
+<h2 class="font-headline-md text-headline-md text-primary mt-1 tracking-tight">R$ 11.890,00</h2>
+</div>
+<div class="w-10 h-10 rounded-xl bg-surface-container-high text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">pending_actions</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-text-muted">Previsto p/ liquidação:</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold bg-surface-container-low px-2 py-0.5 rounded-full">
+          Até 10/11/2025
+        </span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-border-interactive"></div>
+</div>
+<!-- KPI 4: Glosas & Recursos -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-all">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Taxa de Glosas &amp; Recursos</span>
+<h2 class="font-headline-md text-headline-md text-status-warning mt-1 tracking-tight">R$ 680,00</h2>
+</div>
+<div class="w-10 h-10 rounded-xl bg-error-container/40 text-status-warning flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">gavel</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center justify-between">
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-text-muted">
+<span class="font-bold text-on-surface">1,39%</span>
+<span>do faturamento</span>
+</div>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-status-warning/10 text-status-warning font-label-sm text-label-sm font-semibold">
+          3 recursos ativos
+        </span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-status-warning"></div>
+</div>
+</section>
+<!-- Grid Analítico & Visualizações Gráficas -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-space-md mb-space-lg">
+<!-- Distribuição por Canal & Operadora (7 colunas) -->
+<div class="lg:col-span-7 bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Distribuição de Repasses</span>
+<h3 class="font-title-lg text-title-lg text-primary">Receita por Operadora de Saúde</h3>
+</div>
+<span class="px-space-sm py-1 rounded-full bg-surface-container-low text-secondary font-label-sm text-label-sm">
+            Auditoria TISS / ANS 2025
+          </span>
+</div>
+<!-- Barra Proporcional de Volume -->
+<div class="w-full h-3 rounded-full bg-surface-container overflow-hidden flex mb-space-md shadow-inner">
+<div class="bg-primary h-full" style="width: 38%" title="Bradesco Saúde: 38%"></div>
+<div class="bg-border-interactive h-full" style="width: 26%" title="SulAmérica: 26%"></div>
+<div class="bg-tertiary-container h-full" style="width: 20%" title="Unimed: 20%"></div>
+<div class="bg-secondary-container h-full" style="width: 16%" title="Particular: 16%"></div>
+</div>
+<!-- Detalhamento de Operadoras em Grid 2x2 -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<div class="p-space-sm rounded-xl bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-md bg-primary"></span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">Bradesco Saúde</span>
+<span class="font-body-sm text-body-sm text-text-muted">54 guias TISS faturadas</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-title-md text-title-md text-primary">R$ 18.513,60</span>
+<span class="block font-label-sm text-label-sm text-text-muted">38% total</span>
+</div>
+</div>
+<div class="p-space-sm rounded-xl bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-md bg-border-interactive"></span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">SulAmérica Saúde</span>
+<span class="font-body-sm text-body-sm text-text-muted">37 guias faturadas</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-title-md text-title-md text-primary">R$ 12.667,20</span>
+<span class="block font-label-sm text-label-sm text-text-muted">26% total</span>
+</div>
+</div>
+<div class="p-space-sm rounded-xl bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-md bg-tertiary-container"></span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">Unimed Nacional</span>
+<span class="font-body-sm text-body-sm text-text-muted">29 guias auditadas</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-title-md text-title-md text-primary">R$ 9.744,00</span>
+<span class="block font-label-sm text-label-sm text-text-muted">20% total</span>
+</div>
+</div>
+<div class="p-space-sm rounded-xl bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-md bg-secondary-container"></span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">Particular Med.Na</span>
+<span class="font-body-sm text-body-sm text-text-muted">22 pagamentos PIX/Cartão</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-title-md text-title-md text-primary">R$ 7.795,20</span>
+<span class="block font-label-sm text-label-sm text-text-muted">16% total</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Rodapé do Card com Métricas de Preço Médio -->
+<div class="mt-space-md pt-space-sm flex flex-wrap items-center justify-between gap-space-sm bg-surface rounded-lg p-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[20px]">price_change</span>
+<span class="font-body-sm text-body-sm text-on-surface">
+            Ticket Médio por Consulta: <strong class="font-title-md text-title-md text-primary">R$ 343,10</strong>
+</span>
+</div>
+<div class="font-label-sm text-label-sm text-text-muted">
+          Padrão CBHPM 2024 • Faixa R$ 220,00 a R$ 420,00
+        </div>
+</div>
+</div>
+<!-- Comparativo Modalidade & Repasse Líquido (5 colunas) -->
+<div class="lg:col-span-5 bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Divisão Operacional</span>
+<h3 class="font-title-lg text-title-lg text-primary">Telemedicina vs Presencial</h3>
+</div>
+<span class="w-8 h-8 rounded-full bg-secondary-container/40 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">pie_chart</span>
+</span>
+</div>
+<!-- SVG Donut Chart Inline -->
+<div class="flex items-center gap-space-md my-space-sm">
+<div class="relative w-36 h-36 flex-shrink-0 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<!-- Círculo Base Fundo -->
+<path class="text-surface-container" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="4.5"></path>
+<!-- Telemedicina 72% -->
+<path class="text-primary transition-all duration-1000" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="72, 100" stroke-linecap="round" stroke-width="4.5"></path>
+<!-- Presencial 28% (offset 72) -->
+<path class="text-secondary-container" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="28, 100" stroke-dashoffset="-72" stroke-width="4.5"></path>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="font-headline-md text-headline-md text-primary leading-none font-bold">72%</span>
+<span class="font-label-sm text-label-sm text-text-muted mt-0.5">Telemed.</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-sm flex-1">
+<div class="p-space-xs rounded-lg bg-surface-container-low">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary font-bold flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                  Telemedicina (102 consultas)
+                </span>
+<span class="font-title-md text-title-md text-on-surface">R$ 35.078,40</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted mt-0.5">Média de duração: 28 min • Alta resolutividade clínica</p>
+</div>
+<div class="p-space-xs rounded-lg bg-surface-container-low">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary font-bold flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span>
+                  Presencial &amp; SADT (40 consultas)
+                </span>
+<span class="font-title-md text-title-md text-on-surface">R$ 13.641,60</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted mt-0.5">Consultório parceiro SP Jardins + Laudos ECG/Holter</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Detalhe da Taxa Med.Na -->
+<div class="p-space-sm rounded-lg bg-surface-container flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[17px] text-border-interactive">verified_user</span>
+          Taxa Fixa Plataforma Med.Na:
+        </span>
+<strong class="font-label-lg text-label-lg text-primary">8,0% sobre Bruto Faturado</strong>
+</div>
+</div>
+</section>
+<!-- Tabela Detalhada de Honorários & Lotes por Paciente / Procedimento -->
+<section class="bg-surface-card rounded-xl shadow-sm overflow-hidden mb-space-lg">
+<!-- Header da Tabela com Barra de Ferramentas -->
+<div class="p-space-md sm:p-space-lg flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-md">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<h3 class="font-title-lg text-title-lg text-primary">Extrato Individual de Procedimentos &amp; Repasses</h3>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+            6 de 142 registros
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">
+          Detalhamento contábil por guia TISS, paciente atendido, dedução operacional da plataforma e status bancário.
+        </p>
+</div>
+<div class="flex items-center gap-space-sm flex-wrap">
+<!-- Input de Busca Rápida -->
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">search</span>
+<input class="w-full pl-9 pr-space-md py-1.5 rounded-lg bg-surface text-on-surface font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-low shadow-inner" placeholder="Paciente, Guia TISS ou CPF..." type="text"/>
+</div>
+<!-- Botão Filtro Avançado -->
+<button class="p-2 rounded-lg bg-surface-container-high text-primary hover:bg-surface-variant transition-colors" title="Filtrar colunas" type="button">
+<span class="material-symbols-outlined text-[19px]">view_column</span>
+</button>
+<button class="p-2 rounded-lg bg-surface-container-high text-primary hover:bg-surface-variant transition-colors" title="Atualizar lote" type="button">
+<span class="material-symbols-outlined text-[19px]">refresh</span>
+</button>
+</div>
+</div>
+<!-- Container com Scroll Horizontal Suave -->
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-md text-body-md border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-3 px-space-md font-semibold">Data / Hora</th>
+<th class="py-3 px-space-md font-semibold">Paciente &amp; Prontuário</th>
+<th class="py-3 px-space-md font-semibold">Operadora &amp; Guia TISS</th>
+<th class="py-3 px-space-md font-semibold">Procedimento (TUSS)</th>
+<th class="py-3 px-space-md font-semibold">Modalidade</th>
+<th class="py-3 px-space-md font-semibold text-right">Valor Bruto</th>
+<th class="py-3 px-space-md font-semibold text-right">Med.Na (8%)</th>
+<th class="py-3 px-space-md font-semibold text-right">Líquido Médico</th>
+<th class="py-3 px-space-md font-semibold text-center">Status</th>
+<th class="py-3 px-space-md font-semibold text-center">Ação</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Linha 1: Mariana Siqueira (Bradesco - Liquidado) -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-body-md text-body-md font-semibold text-on-surface block">20/10/2025</span>
+<span class="font-body-sm text-body-sm text-text-muted">14:30</span>
+</td>
+<td class="py-3.5 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-bold text-[12px]">
+                  MS
+                </div>
+<div>
+<span class="font-title-md text-title-md text-on-surface block leading-tight">Mariana Siqueira da Silva</span>
+<span class="font-body-sm text-body-sm text-text-muted">Pront. #94821</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-body-md text-body-md font-medium text-primary block">Bradesco Saúde</span>
+<span class="font-body-sm text-body-sm text-text-muted">TISS #992144</span>
+</td>
+<td class="py-3.5 px-space-md">
+<span class="font-body-md text-body-md text-on-surface block">10101012 • Consulta Geral</span>
+<span class="font-body-sm text-body-sm text-text-muted">Cardiologia Ambulatorial</span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container/30 text-secondary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">videocam</span>
+                Telemedicina
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-right font-medium text-on-surface whitespace-nowrap">
+              R$ 280,00
+            </td>
+<td class="py-3.5 px-space-md text-right text-text-muted whitespace-nowrap">
+              - R$ 22,40
+            </td>
+<td class="py-3.5 px-space-md text-right whitespace-nowrap">
+<span class="font-title-md text-title-md text-primary font-bold">R$ 257,60</span>
+</td>
+<td class="py-3.5 px-space-md text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-status-success/10 text-status-success font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>
+                Liquidado (20/10)
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-center whitespace-nowrap">
+<button class="p-1.5 rounded-lg text-primary hover:bg-surface-container transition-colors" title="Ver Comprovante TISS" type="button">
+<span class="material-symbols-outlined text-[19px]">receipt_long</span>
+</button>
+</td>
+</tr>
+<!-- Linha 2: Lucas Mendes (Bradesco - Em Processamento) -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-body-md text-body-md font-semibold text-on-surface block">22/10/2025</span>
+<span class="font-body-sm text-body-sm text-text-muted">16:15</span>
+</td>
+<td class="py-3.5 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-bold text-[12px]">
+                  LM
+                </div>
+<div>
+<span class="font-title-md text-title-md text-on-surface block leading-tight">Lucas Mendes</span>
+<span class="font-body-sm text-body-sm text-text-muted">Pront. #99420</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-body-md text-body-md font-medium text-primary block">Bradesco Saúde</span>
+<span class="font-body-sm text-body-sm text-text-muted">TISS #992160</span>
+</td>
+<td class="py-3.5 px-space-md">
+<span class="font-body-md text-body-md text-on-surface block">10101012 • Consulta Geral</span>
+<span class="font-body-sm text-body-sm text-text-muted">Retorno Digital Hipertensão</span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container/30 text-secondary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">videocam</span>
+                Telemedicina
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-right font-medium text-on-surface whitespace-nowrap">
+              R$ 280,00
+            </td>
+<td class="py-3.5 px-space-md text-right text-text-muted whitespace-nowrap">
+              - R$ 22,40
+            </td>
+<td class="py-3.5 px-space-md text-right whitespace-nowrap">
+<span class="font-title-md text-title-md text-primary font-bold">R$ 257,60</span>
+</td>
+<td class="py-3.5 px-space-md text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-border-interactive/10 text-border-interactive font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-border-interactive animate-pulse"></span>
+                Em Análise TISS
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-center whitespace-nowrap">
+<button class="p-1.5 rounded-lg text-primary hover:bg-surface-container transition-colors" title="Rastrear Guia TISS" type="button">
+<span class="material-symbols-outlined text-[19px]">query_stats</span>
+</button>
+</td>
+</tr>
+<!-- Linha 3: Jorge Fernando Alencar (Unimed - Presencial + ECG) -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-body-md text-body-md font-semibold text-on-surface block">23/10/2025</span>
+<span class="font-body-sm text-body-sm text-text-muted">10:00</span>
+</td>
+<td class="py-3.5 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-bold text-[12px]">
+                  JA
+                </div>
+<div>
+<span class="font-title-md text-title-md text-on-surface block leading-tight">Jorge Fernando Alencar</span>
+<span class="font-body-sm text-body-sm text-text-muted">Pront. #88210</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-body-md text-body-md font-medium text-tertiary block">Unimed Nacional</span>
+<span class="font-body-sm text-body-sm text-text-muted">TISS #984210</span>
+</td>
+<td class="py-3.5 px-space-md">
+<span class="font-body-md text-body-md text-on-surface block">10101012 + 40101010</span>
+<span class="font-body-sm text-body-sm text-text-muted">Presencial + Eletrocardiograma</span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">local_hospital</span>
+                Presencial
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-right font-medium text-on-surface whitespace-nowrap">
+              R$ 340,00
+            </td>
+<td class="py-3.5 px-space-md text-right text-text-muted whitespace-nowrap">
+              - R$ 27,20
+            </td>
+<td class="py-3.5 px-space-md text-right whitespace-nowrap">
+<span class="font-title-md text-title-md text-primary font-bold">R$ 312,80</span>
+</td>
+<td class="py-3.5 px-space-md text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-status-success/10 text-status-success font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>
+                Liquidado (24/10)
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-center whitespace-nowrap">
+<button class="p-1.5 rounded-lg text-primary hover:bg-surface-container transition-colors" title="Ver Laudo e Comprovante" type="button">
+<span class="material-symbols-outlined text-[19px]">receipt_long</span>
+</button>
+</td>
+</tr>
+<!-- Linha 4: Luciana Moreira Castro (SulAmérica - Holter 24h Telelaudo) -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-body-md text-body-md font-semibold text-on-surface block">25/10/2025</span>
+<span class="font-body-sm text-body-sm text-text-muted">11:45</span>
+</td>
+<td class="py-3.5 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-bold text-[12px]">
+                  LM
+                </div>
+<div>
+<span class="font-title-md text-title-md text-on-surface block leading-tight">Luciana Moreira Castro</span>
+<span class="font-body-sm text-body-sm text-text-muted">Pront. #91032</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-body-md text-body-md font-medium text-border-interactive block">SulAmérica Saúde</span>
+<span class="font-body-sm text-body-sm text-text-muted">TISS #973215</span>
+</td>
+<td class="py-3.5 px-space-md">
+<span class="font-body-md text-body-md text-on-surface block">40101010 • Holter Digital</span>
+<span class="font-body-sm text-body-sm text-text-muted">Telelaudo de 24 horas</span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container/30 text-secondary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">ecg_heart</span>
+                Telelaudo SADT
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-right font-medium text-on-surface whitespace-nowrap">
+              R$ 420,00
+            </td>
+<td class="py-3.5 px-space-md text-right text-text-muted whitespace-nowrap">
+              - R$ 33,60
+            </td>
+<td class="py-3.5 px-space-md text-right whitespace-nowrap">
+<span class="font-title-md text-title-md text-primary font-bold">R$ 386,40</span>
+</td>
+<td class="py-3.5 px-space-md text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                A Receber (10/11)
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-center whitespace-nowrap">
+<button class="p-1.5 rounded-lg text-primary hover:bg-surface-container transition-colors" title="Detalhes do Lote" type="button">
+<span class="material-symbols-outlined text-[19px]">description</span>
+</button>
+</td>
+</tr>
+<!-- Linha 5: Renato Azevedo Costa (Particular PIX Instantâneo) -->
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-body-md text-body-md font-semibold text-on-surface block">27/10/2025</span>
+<span class="font-body-sm text-body-sm text-text-muted">09:10</span>
+</td>
+<td class="py-3.5 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-bold text-[12px]">
+                  RC
+                </div>
+<div>
+<span class="font-title-md text-title-md text-on-surface block leading-tight">Renato Azevedo Costa</span>
+<span class="font-body-sm text-body-sm text-text-muted">Pront. #76419</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-body-md text-body-md font-medium text-secondary block">Particular (Med.Na Pay)</span>
+<span class="font-body-sm text-body-sm text-text-muted">ID #PAR-4421</span>
+</td>
+<td class="py-3.5 px-space-md">
+<span class="font-body-md text-body-md text-on-surface block">Consulta Avulsa Especializada</span>
+<span class="font-body-sm text-body-sm text-text-muted">Segunda Opinião Clínica</span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container/30 text-secondary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">videocam</span>
+                Telemedicina
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-right font-medium text-on-surface whitespace-nowrap">
+              R$ 350,00
+            </td>
+<td class="py-3.5 px-space-md text-right text-text-muted whitespace-nowrap">
+              - R$ 28,00
+            </td>
+<td class="py-3.5 px-space-md text-right whitespace-nowrap">
+<span class="font-title-md text-title-md text-status-success font-bold">R$ 322,00</span>
+</td>
+<td class="py-3.5 px-space-md text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-status-success/15 text-status-success font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[13px]">bolt</span>
+                Liquidado Instantâneo
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-center whitespace-nowrap">
+<button class="p-1.5 rounded-lg text-primary hover:bg-surface-container transition-colors" title="Recibo Fiscal Emitido" type="button">
+<span class="material-symbols-outlined text-[19px]">receipt</span>
+</button>
+</td>
+</tr>
+<!-- Linha 6: Vinícius Toledo Prado (NotreDame - Glosa Técnica em Recurso) -->
+<tr class="hover:bg-error-container/20 transition-colors bg-error-container/10">
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-body-md text-body-md font-semibold text-on-surface block">18/10/2025</span>
+<span class="font-body-sm text-body-sm text-text-muted">15:00</span>
+</td>
+<td class="py-3.5 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-error-container text-error flex items-center justify-center font-bold text-[12px]">
+                  VP
+                </div>
+<div>
+<span class="font-title-md text-title-md text-on-surface block leading-tight">Vinícius Toledo Prado</span>
+<span class="font-body-sm text-body-sm text-text-muted">Pront. #82340</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="font-body-md text-body-md font-medium text-on-surface block">NotreDame Intermédica</span>
+<span class="font-body-sm text-body-sm text-text-muted">TISS #961204</span>
+</td>
+<td class="py-3.5 px-space-md">
+<span class="font-body-md text-body-md text-on-surface block">10101012 • Consulta Ambulatorial</span>
+<span class="font-body-sm text-body-sm text-status-warning font-semibold">Motivo: Falta assinatura digital guia</span>
+</td>
+<td class="py-3.5 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">local_hospital</span>
+                Presencial
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-right font-medium text-on-surface whitespace-nowrap">
+              R$ 240,00
+            </td>
+<td class="py-3.5 px-space-md text-right text-text-muted whitespace-nowrap">
+              - R$ 19,20
+            </td>
+<td class="py-3.5 px-space-md text-right whitespace-nowrap">
+<span class="font-title-md text-title-md text-status-warning font-bold">R$ 220,80</span>
+</td>
+<td class="py-3.5 px-space-md text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-error-container text-error font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+                Glosa Técnica (Em Recurso)
+              </span>
+</td>
+<td class="py-3.5 px-space-md text-center whitespace-nowrap">
+<button class="px-2.5 py-1 rounded-lg bg-status-warning/20 text-status-warning font-label-sm text-label-sm font-bold hover:bg-status-warning hover:text-on-primary transition-all" type="button">
+                Anexar Assinatura
+              </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Paginação e Métricas do Extrato -->
+<div class="p-space-md bg-surface flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm font-body-sm text-body-sm text-text-muted">
+<span>Mostrando <strong>1 - 6</strong> de <strong>142</strong> atendimentos auditados</span>
+<span class="text-surface-container-high">•</span>
+<span>Soma parcial página: <strong class="text-on-surface">R$ 1.910,00</strong></span>
+</div>
+<div class="flex items-center gap-1">
+<button class="px-3 py-1.5 rounded-lg bg-surface-card text-text-muted hover:bg-surface-container font-label-md text-label-md transition-colors" disabled="" type="button">
+          Anterior
+        </button>
+<button class="w-8 h-8 rounded-lg bg-primary text-on-primary font-label-md text-label-md" type="button">1</button>
+<button class="w-8 h-8 rounded-lg bg-surface-card text-on-surface hover:bg-surface-container font-label-md text-label-md" type="button">2</button>
+<button class="w-8 h-8 rounded-lg bg-surface-card text-on-surface hover:bg-surface-container font-label-md text-label-md" type="button">3</button>
+<span class="px-1 text-text-muted">…</span>
+<button class="w-8 h-8 rounded-lg bg-surface-card text-on-surface hover:bg-surface-container font-label-md text-label-md" type="button">24</button>
+<button class="px-3 py-1.5 rounded-lg bg-surface-card text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" type="button">
+          Próxima
+        </button>
+</div>
+</div>
+</section>
+<!-- Painel de Conciliação Bancária, Recursos de Glosas e Conformidade Fiscal -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-space-md mb-space-lg">
+<!-- Card 1: Dados Bancários PJ Dra. Camila -->
+<div class="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<div class="w-9 h-9 rounded-xl bg-surface-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">account_balance</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Domicílio Bancário PJ</span>
+<h4 class="font-title-md text-title-md text-primary">Conta de Liquidação Médica</h4>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-status-success/15 text-status-success font-label-sm text-label-sm font-semibold">
+            Ativa • Verificada
+          </span>
+</div>
+<div class="space-y-space-xs bg-surface-container-low p-space-sm rounded-xl mt-space-sm">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-text-muted">Instituição:</span>
+<span class="text-on-surface font-semibold">Banco Itaú Unibanco S.A. (341)</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-text-muted">Agência / Conta:</span>
+<span class="text-on-surface font-semibold">Ag. 1204 • C/C 98214-0 PJ</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-text-muted">Razão Social:</span>
+<span class="text-on-surface font-semibold text-right">Camila Nogueira Torres Serv. Médicos ME</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-text-muted">CNPJ da Clínica:</span>
+<span class="text-on-surface font-semibold">38.412.980/0001-44</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-text-muted">Chave PIX Repasse:</span>
+<span class="text-primary font-semibold">financeiro@dracamilatorres.med.br</span>
+</div>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-border-interactive">lock</span>
+          Criptografia ponta a ponta
+        </span>
+<button class="text-primary hover:text-border-interactive font-label-md text-label-md font-semibold transition-colors" type="button">
+          Alterar Conta PJ
+        </button>
+</div>
+</div>
+<!-- Card 2: Balcão de Recursos de Glosas TISS -->
+<div class="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<div class="w-9 h-9 rounded-xl bg-status-warning/10 text-status-warning flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">assignment_late</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Gestão Regulatória</span>
+<h4 class="font-title-md text-title-md text-primary">Recursos de Glosas TISS</h4>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-status-warning/15 text-status-warning font-label-sm text-label-sm font-bold">
+            3 Pendências
+          </span>
+</div>
+<div class="space-y-space-xs mt-space-sm">
+<!-- Item Glosa 1 -->
+<div class="p-space-xs rounded-lg bg-surface flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">NotreDame • Guia #961204</span>
+<span class="font-body-sm text-body-sm text-text-muted">Falta assinatura digital do encaminhamento</span>
+</div>
+<div class="text-right">
+<span class="font-label-md text-label-md text-status-warning font-bold">R$ 220,80</span>
+<span class="block font-label-sm text-label-sm text-error">Prazo: 48h</span>
+</div>
+</div>
+<!-- Item Glosa 2 -->
+<div class="p-space-xs rounded-lg bg-surface flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">Unimed • Guia #978431</span>
+<span class="font-body-sm text-body-sm text-text-muted">Divergência código TUSS Laudo ECG</span>
+</div>
+<div class="text-right">
+<span class="font-label-md text-label-md text-status-warning font-bold">R$ 180,00</span>
+<span class="block font-label-sm text-label-sm text-text-muted">Em Análise ANS</span>
+</div>
+</div>
+<!-- Item Glosa 3 -->
+<div class="p-space-xs rounded-lg bg-surface flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">Bradesco • Guia #990112</span>
+<span class="font-body-sm text-body-sm text-text-muted">Validação de Elegibilidade retroativa</span>
+</div>
+<div class="text-right">
+<span class="font-label-md text-label-md text-status-warning font-bold">R$ 279,20</span>
+<span class="block font-label-sm text-label-sm text-status-success">Defesa Anexada</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-text-muted">Total retido: <strong>R$ 680,00</strong></span>
+<button class="px-space-md py-1.5 rounded-lg bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold hover:bg-border-interactive transition-colors" type="button">
+          Acompanhar Protocolos ANS
+        </button>
+</div>
+</div>
+<!-- Card 3: Conformidade Fiscal & Emissão NFS-e -->
+<div class="bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<div class="w-9 h-9 rounded-xl bg-secondary-container/40 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">receipt</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Integração Fiscal</span>
+<h4 class="font-title-md text-title-md text-primary">NFS-e Automática • São Paulo</h4>
+</div>
+</div>
+<span class="w-2 h-2 rounded-full bg-status-success animate-ping"></span>
+</div>
+<div class="p-space-sm rounded-xl bg-surface-container-low space-y-space-xs mt-space-sm">
+<div class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-status-success text-[18px] mt-0.5">task_alt</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Emissão Sincronizada</span>
+<p class="font-body-sm text-body-sm text-text-muted">
+                As notas fiscais de serviços são transmitidas diretamente para a Secretaria Municipal da Fazenda de SP após o aceite de cada lote TISS.
+              </p>
+</div>
+</div>
+<div class="pt-space-xs flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-text-muted">Último Lote Fiscal Emitido:</span>
+<span class="text-primary font-bold">NFS-e #2025-88421</span>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-text-muted">Regime Tributário:</span>
+<span class="text-on-surface font-semibold">Simples Nacional (Anexo III)</span>
+</div>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs">
+<div class="p-space-xs rounded-lg bg-surface flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-text-muted">Certificado Digital A1:</span>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-status-success font-semibold">
+<span class="material-symbols-outlined text-[15px]">verified</span>
+            Válido até 04/2026
+          </span>
+</div>
+</div>
+</div>
+</section>
+<!-- Banner de Auditoria Médica e Garantia Regulatória CFM -->
+<section class="bg-gradient-to-r from-surface-card via-surface to-surface-card rounded-xl p-space-md shadow-sm flex flex-col md:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[28px]">gavel</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-primary font-bold">Conformidade Regulatória CFM &amp; ANS</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/30 text-secondary font-label-sm text-label-sm font-semibold">
+            Auditado Med.Na v4.8
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">
+          Todos os valores de honorários médicos são calculados estritamente de acordo com a Tabela CBHPM e Resolução CFM nº 2.314/2022 de Telemedicina, assegurando autonomia e segurança jurídico-financeira para a profissional.
+        </p>
+</div>
+</div>
+<div class="flex items-center gap-space-sm flex-shrink-0">
+<button class="px-space-md py-2 rounded-xl bg-surface-container-high text-primary hover:bg-surface-variant font-label-md text-label-md font-semibold transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Manual TISS 2025</span>
+</button>
+<button class="px-space-md py-2 rounded-xl bg-primary-container text-on-primary hover:bg-border-interactive font-label-md text-label-md font-semibold transition-colors flex items-center gap-1 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">support_agent</span>
+<span>Suporte Faturamento</span>
+</button>
+</div>
+</section>
+</div>
+<script>
+  // Microinterações da tela de repasses
+  document.addEventListener('DOMContentLoaded', () => {
+    // Interação simples de feedback visual nos botões
+    const actionButtons = document.querySelectorAll('button');
+    actionButtons.forEach(btn => {
+      btn.addEventListener('mousedown', () => {
+        btn.classList.add('scale-[0.98]');
+      });
+      btn.addEventListener('mouseup', () => {
+        btn.classList.remove('scale-[0.98]');
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.classList.remove('scale-[0.98]');
+      });
+    });
+  });
+</script></main></div></body></html>

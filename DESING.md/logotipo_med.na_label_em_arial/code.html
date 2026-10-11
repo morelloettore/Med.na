@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" width="800" height="240">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#17BFBF"/>
+      <stop offset="100%" stop-color="#027368"/>
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#BDEDF2" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#BDEDF2" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#027368"/>
+      <stop offset="60%" stop-color="#03A696"/>
+      <stop offset="100%" stop-color="#17BFBF"/>
+    </linearGradient>
+    <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="125%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#027368" flood-opacity="0.18" />
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="800" height="240" rx="16" fill="#FFFFFF"/>
+
+  <!-- Logo Mark / Icon -->
+  <g transform="translate(60, 28)" filter="url(#subtleShadow)">
+    <!-- Aura / Outer Glow Shield -->
+    <path d="M90 6 C138 6 174 24 174 24 C174 100 134 148 90 178 C46 148 6 100 6 24 C6 24 42 6 90 6 Z"
+          fill="url(#glowGrad)"/>
+
+    <!-- Outer Shield Outline -->
+    <path d="M90 12 C132 12 164 28 164 28 C164 96 128 138 90 166 C52 138 16 96 16 28 C16 28 48 12 90 12 Z"
+          fill="none" stroke="#BDEDF2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Main Solid Shield -->
+    <path d="M90 24 C124 24 150 38 150 38 C150 92 120 128 90 152 C60 128 30 92 30 38 C30 38 56 24 90 24 Z"
+          fill="url(#shieldGrad)"/>
+
+    <!-- Inner Medical Cross & Pulse Motif -->
+    <path d="M80 54 C80 50 84 46 88 46 L92 46 C96 46 100 50 100 54 L100 76 L122 76 C126 76 130 80 130 84 L130 92 C130 96 126 100 122 100 L100 100 L100 122 C100 126 96 130 92 130 L88 130 C84 130 80 126 80 122 L80 100 L58 100 C54 100 50 96 50 92 L50 84 C50 80 54 76 58 76 L80 76 Z"
+          fill="#FFFFFF" />
+
+    <!-- Virtual Telemed Sparkle / Node -->
+    <circle cx="90" cy="88" r="4.5" fill="#BDEDF2" />
+  </g>
+
+  <!-- Typography Section -->
+  <g transform="translate(265, 42)">
+    <!-- Brand Wordmark: Med.Na (Title font: Montserrat) -->
+    <text x="0" y="80"
+          font-family="'Montserrat', sans-serif"
+          font-size="82"
+          font-weight="800"
+          letter-spacing="-1.5"
+          fill="#027368">
+      Med<tspan fill="#17BFBF">.</tspan><tspan fill="#03A696">Na</tspan>
+    </text>
+
+    <!-- Sleek Horizontal Divider -->
+    <rect x="2" y="104" width="460" height="3.5" rx="1.75" fill="url(#textGrad)" />
+
+    <!-- Subtitle / Label: CLÍNICA MÉDICA VIRTUAL (Updated to font: Arial) -->
+    <text x="4" y="134"
+          font-family="'Arial', sans-serif"
+          font-size="19"
+          font-weight="700"
+          letter-spacing="5.5"
+          fill="#027368">
+      CLÍNICA MÉDICA VIRTUAL
+    </text>
+
+    <!-- Tagline / Digital Badge (Font: Arial) -->
+    <g transform="translate(4, 150)">
+      <circle cx="5" cy="5" r="4" fill="#17BFBF" />
+      <text x="16" y="9"
+            font-family="'Arial', sans-serif"
+            font-size="12"
+            font-weight="500"
+            letter-spacing="0.5"
+            fill="#03A696">
+        Telemedicina e Gestão Clínica Integrada
+      </text>
+    </g>
+  </g>
+</svg>

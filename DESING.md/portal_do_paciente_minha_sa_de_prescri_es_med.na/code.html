@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;family=Open+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-container-high":"#e2e7ff","tertiary-container":"#007272","tertiary":"#005858","surface-variant":"#dae2fd","on-secondary-fixed-variant":"#005048","on-tertiary-fixed-variant":"#004f50","error":"#ba1a1a","secondary-fixed-dim":"#5cdac9","on-error":"#ffffff","surface-container-highest":"#dae2fd","secondary-container":"#78f4e2","on-surface-variant":"#3e4947","inverse-primary":"#7fd6c8","surface-container":"#eaedff","surface":"#faf8ff","surface-bright":"#faf8ff","background-neutral":"#F8FAFB","inverse-surface":"#283044","tertiary-fixed-dim":"#48dada","on-secondary-fixed":"#00201c","primary":"#005850","error-container":"#ffdad6","primary-fixed":"#9bf2e4","primary-fixed-dim":"#7fd6c8","outline-variant":"#bdc9c6","on-error-container":"#93000a","status-warning":"#D97706","on-tertiary-fixed":"#002020","background":"#faf8ff","text-muted":"#64748B","on-secondary":"#ffffff","surface-card":"#FFFFFF","secondary-fixed":"#7bf7e5","on-primary-fixed":"#00201c","background-subtle":"#F2F2F2","tertiary-fixed":"#6cf7f7","on-primary-fixed-variant":"#005048","on-surface":"#131b2e","border-interactive":"#03A696","surface-tint":"#BDEDF2","surface-container-lowest":"#ffffff","border-subtle":"#E2E8F0","on-tertiary-container":"#6ef9f9","on-background":"#131b2e","on-primary-container":"#9df5e7","status-success":"#059669","text-primary":"#0F172A","on-tertiary":"#ffffff","surface-container-low":"#f2f3ff","inverse-on-surface":"#eef0ff","outline":"#6e7977","secondary":"#006a60","surface-dim":"#d2d9f4","telehealth-live":"#E11D48","status-critical":"#DC2626","primary-container":"#027368","on-secondary-container":"#006f64","on-primary":"#ffffff"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"gutter-sm":"1rem","gutter-lg":"2rem","gutter":"1.5rem","margin-md":"2rem","space-xs":"0.25rem","margin":"1rem","margin-sm":"1rem","margin-lg":"3rem","space-lg":"1.5rem","space-xl":"2.5rem","space-sm":"0.5rem","space-md":"1rem"},fontFamily:{"headline-lg-mobile":["Montserrat"],"body-md":["Open Sans"],"title-lg":["Open Sans"],"body-sm":["Open Sans"],"title-md":["Open Sans"],"label-lg":["Montserrat"],"headline-lg":["Montserrat"],"label-md":["Open Sans"],"body-lg":["Open Sans"],"headline-md":["Montserrat"],"headline-xl-mobile":["Montserrat"],"label-sm":["Open Sans"],"headline-xl":["Montserrat"]},fontSize:{"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"22px","fontWeight":"400"}],"title-lg":["18px",{"lineHeight":"26px","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"18px","fontWeight":"400"}],"title-md":["16px",{"lineHeight":"24px","fontWeight":"600"}],"label-lg":["14px",{"lineHeight":"20px","letterSpacing":"0.02em","fontWeight":"600"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.015em","fontWeight":"600"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.03em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"26px","fontWeight":"400"}],"headline-md":["22px",{"lineHeight":"28px","fontWeight":"600"}],"headline-xl-mobile":["30px",{"lineHeight":"38px","letterSpacing":"-0.01em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.05em","fontWeight":"700"}],"headline-xl":["40px",{"lineHeight":"48px","letterSpacing":"-0.02em","fontWeight":"700"}]}}}};</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50"><div class="h-16 w-full px-gutter flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md shrink-0"><img alt="Logotipo oficial da Med.Na - Clínica Médica Virtual atualizado com a tipografia Arial no subtítulo/label 'CLÍNICA MÉDICA VIRTUAL', mantendo o título em Montserrat e as cores oficiais." class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V3s6rpJaNm5_naNTvtUfjLE9Fsi-FdLqtgeQppaZyIuxes56C742FPT45eQpZxwNGkuL5BzftMn39FW8kmU8gYdnL_ijaeUsxpn0YcKBfv2VaactjMycf6ImKtgrIlY9IIoCMfeaiqGG7bWdoXkYzKamHeUwgaXZYVK90AamAwfYv_uDlMOEuaP6iXe3Ta5fToi5Xehpom_PTO7bQaSijgu17RcWhFVdPMy7qHCW7mgmESLZtkG-zN_b8"/><div class="hidden sm:flex flex-col"><span class="font-headline-md text-headline-md text-primary font-bold tracking-tight leading-none">Med.Na</span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Clínica Virtual</span></div><div class="hidden md:flex items-center gap-space-xs ml-space-sm pl-space-sm bg-surface-tint/30 text-primary px-space-sm py-space-xs rounded-full font-label-md text-label-md"><span class="material-symbols-outlined text-sm">swap_horiz</span><span>Portal Médico</span><span class="material-symbols-outlined text-xs">expand_more</span></div></div><div class="flex-1 max-w-md hidden lg:block"><div class="relative flex items-center"><span class="material-symbols-outlined absolute left-3 text-outline text-lg pointer-events-none">search</span><input class="w-full h-10 pl-10 pr-space-md bg-surface-card rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-border-interactive shadow-[0_1px_4px_rgba(0,0,0,0.03)]" placeholder="Buscar prontuário, paciente, CRM ou guia TISS..." type="text"/></div></div><div class="flex items-center gap-space-md shrink-0"><div class="hidden xl:flex items-center gap-space-sm px-space-sm py-1 bg-surface-container rounded-full"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-status-success animate-pulse"></span><span class="font-label-sm text-label-sm text-on-surface">WebRTC Ativo</span></div><span class="text-outline-variant font-label-sm text-label-sm">•</span><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-status-success"></span><span class="font-label-sm text-label-sm text-on-surface">TISS Online</span></div></div><button aria-label="Notificações do Sistema" class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 bg-telehealth-live rounded-full"></span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="hidden md:flex flex-col text-right"><span class="font-label-md text-label-md text-on-surface leading-tight font-semibold">Dra. Helena Ribeiro</span><span class="font-body-sm text-body-sm text-on-surface-variant leading-tight">CRM/SP 148.920 • Telemedicina</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida/AEtjO1WUfyQbyZrGjkvYQYnRgBF8UUJS9azQ1Yh4wrkYZS2XTISWc4iQi4vQbQSltpNwjhlSG0KtcZ_xssIFSnwx8-Fq_a3rv3IWtw9blsDk71qH2Q0ucQ0v4SkIXJ5BiolHtxXcpuv-JO4SISMQWJdR_pB9FlTZIabsjDLTaFtMOcLS9JeV8gLGAZPToP9xL_K21Pz9ZZ436SLb6hChvrqOD-VE_oO8kyTceVPi8oEDHjh5rt07EcvOS55rigs"/></div></div></div></header><aside class="fixed left-0 top-16 bottom-0 w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex flex-col justify-between py-space-md overflow-y-auto"><div class="px-space-sm"><div class="px-space-md mb-space-sm font-label-sm text-label-sm uppercase tracking-wider text-outline">Navegação Clínica</div><nav class="flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary font-label-lg rounded-xl shadow-[0_2px_8px_rgba(2,115,104,0.12)]"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="inicio" href="#"><span class="material-symbols-outlined text-lg">grid_view</span><span>Início</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="triagem-&amp;-recepcao" href="#"><span class="material-symbols-outlined text-lg">how_to_reg</span><span>Triagem &amp; Recepção</span></a><a class="flex items-center justify-between px-space-md py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="telemedicina" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-lg">video_camera_front</span><span>Telemedicina</span></div><span class="w-2 h-2 rounded-full bg-telehealth-live animate-ping"></span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="pacientes" href="#"><span class="material-symbols-outlined text-lg">clinical_notes</span><span>Pacientes</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-2.5 transition-all bg-primary-container text-on-primary font-label-lg rounded-xl shadow-[0_2px_8px_rgba(2,115,104,0.12)]" data-path="minhas-receitas" href="#"><span class="material-symbols-outlined text-lg">prescriptions</span><span>Minhas Receitas</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="convenios-&amp;-tiss" href="#"><span class="material-symbols-outlined text-lg">fact_check</span><span>Convênios &amp; TISS</span></a><div class="my-space-sm mx-space-sm border-t border-surface-container-high/60"></div><div class="px-space-md mb-space-xs font-label-sm text-label-sm uppercase tracking-wider text-outline">Segurança &amp; Gestão</div><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="gestao-de-acessos" href="#"><span class="material-symbols-outlined text-lg">admin_panel_settings</span><span>Gestão de Acessos</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="auditoria-lgpd" href="#"><span class="material-symbols-outlined text-lg">shield</span><span>Auditoria LGPD</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="configuracoes" href="#"><span class="material-symbols-outlined text-lg">tune</span><span>Configurações</span></a></nav></div><div class="px-space-md pt-space-sm"><div class="bg-surface-container-low p-space-sm rounded-xl"><div class="flex items-center gap-space-xs text-primary mb-1"><span class="material-symbols-outlined text-sm">verified_user</span><span class="font-label-sm text-label-sm font-bold">CFM nº 2.314/2022</span></div><p class="font-body-sm text-body-sm text-on-surface-variant leading-tight">Ambiente criptografado e em conformidade estrita com a LGPD Saúde.</p></div></div></aside><div class="pl-64"><main class="relative pt-16 bg-surface min-h-screen w-full px-gutter py-space-lg"><div class="flex flex-col w-full gap-space-lg">
+<!-- Welcome & Patient Status Summary -->
+<section class="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary-container via-secondary to-tertiary text-on-primary p-space-lg shadow-lg">
+<div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-surface-tint/15 blur-2xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="space-y-space-xs max-w-2xl">
+<div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-surface-container-lowest/15 backdrop-blur-md text-on-primary">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed animate-ping"></span>
+<span class="font-label-sm text-label-sm tracking-widest uppercase">Portal Seguro do Paciente</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg font-bold tracking-tight">Olá, Lucas Mendes!</h1>
+<p class="font-body-lg text-body-lg text-primary-fixed opacity-95">Seu espaço de saúde integrado, acolhedor e digital. Seus registros, prescrições e teleconsultas em um só lugar.</p>
+</div>
+<div class="flex items-center gap-space-sm bg-surface-container-lowest/10 backdrop-blur-md p-space-sm rounded-xl">
+<div class="w-12 h-12 rounded-full bg-surface-tint/20 flex items-center justify-center text-secondary-fixed">
+<span class="material-symbols-outlined text-2xl">shield_with_heart</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-surface-tint uppercase">Plano Ativo</span>
+<span class="font-title-md text-title-md font-semibold text-on-primary">Bradesco Saúde Top Nacional</span>
+<span class="font-body-sm text-body-sm text-primary-fixed">Carteira: 849.201.442-01</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Urgent Action: Next Telemedicine Appointment -->
+<section class="relative rounded-xl bg-surface-container-lowest shadow-md overflow-hidden">
+<div class="h-2 w-full bg-gradient-to-r from-border-interactive via-secondary-container to-telehealth-live"></div>
+<div class="p-space-lg flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-lg">
+<!-- Doctor and Call Meta -->
+<div class="flex items-start sm:items-center gap-space-md flex-1">
+<div class="relative shrink-0">
+<img class="w-20 h-20 rounded-full object-cover shadow-sm" data-alt="Close-up portrait of Dra Camila Torres, an empathetic Brazilian female cardiologist wearing glasses, a teal stethoscope, and a white medical coat, smiling warmly in a bright modern telehealth clinic room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYGe2kGv3d-QMA13wEqbF1eY3oxO97gZnUJcQKFYcZ4dRckvoUkL8VD4xyrs4PuwLfEvGt6vxJ_zZjZ871iLYl5AVuD0HGuU_HEVFYiBactWShF7Nst28SSfYUC2AqQMyP-D3Bo7eb_OW867DZIORHJ0Vhx1PujwBi37afMfPHL-KNsh_R3LTdvI3AMPAc-6t1cSXx2TAIrbAgim4WJdmoyfhP1zQBJLWR7C9H0HM49hQAE_nfFxDM"/>
+<span class="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-status-success flex items-center justify-center text-on-primary text-xs shadow-sm">
+<span class="material-symbols-outlined text-xs">check</span>
+</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="px-space-sm py-0.5 rounded-full bg-surface-tint/40 text-primary font-label-sm text-label-sm font-semibold">
+              Telemedicina Hoje
+            </span>
+<span class="px-space-sm py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-telehealth-live animate-ping"></span>
+              Em 15 minutos (10:00)
+            </span>
+<span class="px-space-sm py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+              Criptografia WebRTC E2E
+            </span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Dra. Camila Torres</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Cardiologia • CRM/SP 192.483 • RQE 84.102 • Consulta de Retorno e Avaliação de Exames</p>
+</div>
+</div>
+<!-- Device Quick Check & Direct Call CTA -->
+<div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-stretch sm:items-center gap-space-md shrink-0">
+<!-- Hardware Diagnostics Trigger -->
+<button class="flex items-center justify-center gap-space-xs px-space-md py-3 rounded-lg bg-surface-container-high text-primary hover:bg-surface-tint/30 transition-all font-label-lg text-label-lg" id="openCheckModalBtn" type="button">
+<span class="material-symbols-outlined text-lg">videocam</span>
+<span>Verificar Dispositivos</span>
+</button>
+<!-- Pulsing High-Priority CTA -->
+<a class="relative group flex items-center justify-center gap-space-sm px-space-lg py-3.5 rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg shadow-lg hover:bg-border-interactive transition-all" href="#sala-virtual">
+<span class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-fixed opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-secondary-fixed"></span>
+</span>
+<span class="tracking-wide">Entrar na Sala de Espera</span>
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+</section>
+<!-- Main Bento Grid: Prescriptions & Reports & Quick Appointments -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Left Column (8 cols): Digital Prescriptions & Diagnostic Reports -->
+<div class="lg:col-span-8 flex flex-col gap-space-lg">
+<!-- Digital Prescriptions with QR Code Module -->
+<section class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm space-y-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div>
+<div class="flex items-center gap-space-xs text-primary">
+<span class="material-symbols-outlined text-xl">prescriptions</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Minhas Receitas Digitais</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Válidas em todo o território nacional • Assinatura ICP-Brasil • Padrão CFM/CFF</p>
+</div>
+<span class="px-space-sm py-1 rounded-full bg-surface-tint/20 text-secondary font-label-sm text-label-sm font-semibold w-fit">
+            2 Receitas Ativas
+          </span>
+</div>
+<!-- Prescription Card 1 -->
+<div class="rounded-xl bg-surface-container-low p-space-md flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md shadow-sm hover:shadow transition-shadow">
+<div class="flex items-start gap-space-md">
+<!-- Simulated Valid QR Code with Medical Teal Hue -->
+<div class="shrink-0 p-2 bg-surface-card rounded-lg shadow-sm flex flex-col items-center">
+<svg class="w-16 h-16 text-primary" fill="currentColor" viewbox="0 0 100 100">
+<!-- QR Code Representation -->
+<path d="M10,10 h30 v30 h-30 z M18,18 v14 h14 v-14 z M60,10 h30 v30 h-30 z M68,18 v14 h14 v-14 z M10,60 h30 v30 h-30 z M18,68 v14 h14 v-14 z M50,10 h6 v10 h-6 z M50,30 h6 v10 h-6 z M10,50 h10 v6 h-10 z M30,50 h10 v6 h-10 z M60,50 h10 v10 h-10 z M80,50 h10 v10 h-10 z M50,60 h10 v6 h-10 z M70,60 h10 v10 h-10 z M50,80 h10 v10 h-10 z M70,80 h20 v10 h-20 z M80,70 h10 v10 h-10 z"></path>
+</svg>
+<span class="font-label-sm text-label-sm text-outline mt-1 font-semibold">QR Válido</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-title-md text-title-md font-semibold text-on-surface">Losartana Potássica 50mg</span>
+<span class="px-2 py-0.5 rounded-full bg-status-success/15 text-status-success font-label-sm text-label-sm">Uso Contínuo</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Tomar 1 comprimido pela manhã em jejum. Tratamento de Hipertensão Arterial Sistêmica.</p>
+<div class="flex flex-wrap items-center gap-space-sm pt-1 text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-sm">verified</span>
+                  ICP-Brasil Válida
+                </span>
+<span>•</span>
+<span>Emissão: 12/04/2025</span>
+<span>•</span>
+<span class="text-status-warning font-semibold">Vence em 45 dias</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-xs w-full md:w-auto justify-end">
+<button class="px-space-sm py-2 rounded-lg bg-surface-card text-primary font-label-md text-label-md shadow-sm hover:bg-surface-tint/20 transition-all flex items-center gap-1" onclick="openQrModal('Losartana Potássica 50mg', 'DR-94810-SP')" type="button">
+<span class="material-symbols-outlined text-sm">qr_code_scanner</span>
+<span>Farmácia</span>
+</button>
+<button class="px-space-sm py-2 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md shadow-sm hover:bg-secondary transition-all flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-sm">download</span>
+<span>PDF Assinado</span>
+</button>
+</div>
+</div>
+<!-- Prescription Card 2 -->
+<div class="rounded-xl bg-surface-container-low p-space-md flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md shadow-sm hover:shadow transition-shadow">
+<div class="flex items-start gap-space-md">
+<div class="shrink-0 p-2 bg-surface-card rounded-lg shadow-sm flex flex-col items-center">
+<svg class="w-16 h-16 text-primary" fill="currentColor" viewbox="0 0 100 100">
+<path d="M10,10 h30 v30 h-30 z M18,18 v14 h14 v-14 z M60,10 h30 v30 h-30 z M68,18 v14 h14 v-14 z M10,60 h30 v30 h-30 z M18,68 v14 h14 v-14 z M50,15 h6 v6 h-6 z M45,30 h10 v8 h-10 z M10,48 h8 v8 h-8 z M25,50 h12 v6 h-12 z M60,50 h8 v8 h-8 z M80,45 h10 v12 h-10 z M48,65 h12 v8 h-12 z M70,65 h12 v8 h-12 z M50,80 h8 v10 h-8 z M75,80 h15 v10 h-15 z"></path>
+</svg>
+<span class="font-label-sm text-label-sm text-outline mt-1 font-semibold">QR Válido</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-title-md text-title-md font-semibold text-on-surface">Passiflora Incarnata 300mg</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-tint/40 text-primary font-label-sm text-label-sm">Fitoterápico</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Ingerir 1 cápsula 1 hora antes de deitar por 30 noites para melhora da arquitetura do sono.</p>
+<div class="flex flex-wrap items-center gap-space-sm pt-1 text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-sm">verified</span>
+                  ICP-Brasil Válida
+                </span>
+<span>•</span>
+<span>Emissão: 10/05/2025</span>
+<span>•</span>
+<span class="text-status-warning font-semibold">Vence em 20 dias</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-xs w-full md:w-auto justify-end">
+<button class="px-space-sm py-2 rounded-lg bg-surface-card text-primary font-label-md text-label-md shadow-sm hover:bg-surface-tint/20 transition-all flex items-center gap-1" onclick="openQrModal('Passiflora Incarnata 300mg', 'DR-88129-SP')" type="button">
+<span class="material-symbols-outlined text-sm">qr_code_scanner</span>
+<span>Farmácia</span>
+</button>
+<button class="px-space-sm py-2 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md shadow-sm hover:bg-secondary transition-all flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-sm">download</span>
+<span>PDF Assinado</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Diagnostic Exam Reports Available for Download -->
+<section class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="material-symbols-outlined text-xl">folder_managed</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Laudos &amp; Exames Recentes</h3>
+</div>
+<a class="font-label-md text-label-md text-primary hover:underline flex items-center gap-0.5" href="#todos-exames">
+<span>Ver arquivo completo</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</a>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<!-- Exam 1 -->
+<div class="p-space-md rounded-xl bg-surface-container flex flex-col justify-between gap-space-sm shadow-sm hover:shadow transition-shadow">
+<div class="flex items-start justify-between">
+<div class="p-2 rounded-lg bg-surface-card text-primary shadow-sm">
+<span class="material-symbols-outlined text-2xl">ecg_heart</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-status-success/15 text-status-success font-label-sm text-label-sm font-semibold">Liberado</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md font-semibold text-on-surface">Ecocardiograma Transtorácico com Doppler</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Realizado no Centro Fleury em 05/05/2025</p>
+<p class="font-body-sm text-body-sm text-primary font-semibold mt-1">Fração de Ejeção preservada (64%)</p>
+</div>
+<div class="pt-2 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline">PDF (3.4 MB)</span>
+<button class="px-space-sm py-1.5 rounded-lg bg-surface-card text-primary hover:bg-surface-tint/30 transition-all font-label-md text-label-md flex items-center gap-1 shadow-sm" type="button">
+<span class="material-symbols-outlined text-sm">download</span>
+                Baixar Laudo
+              </button>
+</div>
+</div>
+<!-- Exam 2 -->
+<div class="p-space-md rounded-xl bg-surface-container flex flex-col justify-between gap-space-sm shadow-sm hover:shadow transition-shadow">
+<div class="flex items-start justify-between">
+<div class="p-2 rounded-lg bg-surface-card text-primary shadow-sm">
+<span class="material-symbols-outlined text-2xl">monitoring</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-status-success/15 text-status-success font-label-sm text-label-sm font-semibold">Liberado</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md font-semibold text-on-surface">Holter Digital de 24 Horas</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Realizado no Centro Fleury em 02/05/2025</p>
+<p class="font-body-sm text-body-sm text-primary font-semibold mt-1">Ritmo sinusal sem pausas patológicas</p>
+</div>
+<div class="pt-2 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline">PDF (5.1 MB)</span>
+<button class="px-space-sm py-1.5 rounded-lg bg-surface-card text-primary hover:bg-surface-tint/30 transition-all font-label-md text-label-md flex items-center gap-1 shadow-sm" type="button">
+<span class="material-symbols-outlined text-sm">download</span>
+                Baixar Laudo
+              </button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column (4 cols): Fast Re-scheduling, History & 24h Telecare Support -->
+<div class="lg:col-span-4 flex flex-col gap-space-lg">
+<!-- Quick Appointment Request with Pre-selected Insurance -->
+<section class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm space-y-space-md">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="material-symbols-outlined text-xl">calendar_month</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Agendamento Rápido</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Marque consultas virtuais ou presenciais com cobertura direta pelo seu convênio.</p>
+<form class="space-y-space-sm" onsubmit="event.preventDefault(); alert('Solicitação de agendamento enviada! Nossa equipe confirmará por WhatsApp em instantes.');">
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface font-semibold">Convênio Ativo</label>
+<div class="p-2.5 rounded-lg bg-surface-container flex items-center justify-between text-on-surface">
+<span class="font-body-sm text-body-sm font-semibold">Bradesco Saúde (Top Nacional)</span>
+<span class="material-symbols-outlined text-status-success text-sm">verified</span>
+</div>
+</div>
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface font-semibold" for="specialtySelect">Especialidade Desejada</label>
+<select class="w-full h-11 px-3 rounded-lg bg-surface-card text-on-surface font-body-sm text-body-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-border-interactive" id="specialtySelect">
+<option>Cardiologia (Retorno Dra. Camila)</option>
+<option>Clínica Geral • Telemedicina 24h</option>
+<option>Dermatologia Virtual</option>
+<option>Endocrinologia &amp; Metabologia</option>
+<option>Nutrição Clínica</option>
+<option>Psiquiatria &amp; Saúde Mental</option>
+</select>
+</div>
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface font-semibold" for="preferredPeriod">Preferência de Horário</label>
+<select class="w-full h-11 px-3 rounded-lg bg-surface-card text-on-surface font-body-sm text-body-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-border-interactive" id="preferredPeriod">
+<option>Primeiro horário disponível</option>
+<option>Manhã (08:00 às 12:00)</option>
+<option>Tarde (13:00 às 18:00)</option>
+<option>Noite (18:00 às 21:00)</option>
+</select>
+</div>
+<button class="w-full h-11 rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-secondary transition-all flex items-center justify-center gap-1.5" type="submit">
+<span class="material-symbols-outlined text-lg">event_available</span>
+<span>Solicitar Agendamento</span>
+</button>
+</form>
+</section>
+<!-- Patient History Timeline (Recent Touchpoints) -->
+<section class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<h3 class="font-title-lg text-title-lg font-semibold text-on-surface">Histórico Clínico</h3>
+<span class="font-label-sm text-label-sm text-outline">Últimos 6 meses</span>
+</div>
+<div class="space-y-space-md relative pl-4">
+<div class="absolute left-1.5 top-2 bottom-2 w-0.5 bg-surface-container-high"></div>
+<!-- History Item 1 -->
+<div class="relative flex items-start gap-space-sm">
+<div class="w-3 h-3 rounded-full bg-primary ring-4 ring-surface-tint/50 shrink-0 mt-1"></div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline">12 de Abril, 2025</span>
+<span class="font-label-lg text-label-lg text-on-surface">Consulta de Acompanhamento</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Dra. Camila Torres • Ajuste de Losartana para 50mg</span>
+</div>
+</div>
+<!-- History Item 2 -->
+<div class="relative flex items-start gap-space-sm">
+<div class="w-3 h-3 rounded-full bg-secondary shrink-0 mt-1"></div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline">28 de Fevereiro, 2025</span>
+<span class="font-label-lg text-label-lg text-on-surface">Pronto-Atendimento Virtual</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Dr. Rafael Nogueira • Quadro gripal e prescrição sintomática</span>
+</div>
+</div>
+<!-- History Item 3 -->
+<div class="relative flex items-start gap-space-sm">
+<div class="w-3 h-3 rounded-full bg-outline-variant shrink-0 mt-1"></div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline">14 de Janeiro, 2025</span>
+<span class="font-label-lg text-label-lg text-on-surface">Check-up Preventivo Anual</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Solicitação de Ecocardiograma e Holter 24h</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 24/7 Patient Support & Nursing Concierge Card -->
+<section class="rounded-xl bg-gradient-to-br from-surface-tint/30 to-surface-container-high p-space-md flex items-center justify-between gap-space-sm shadow-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-2xl">support_agent</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-semibold text-primary">Enfermagem &amp; Concierge 24h</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Dúvidas sobre receitas, sintomas ou preparos</span>
+</div>
+</div>
+<button class="px-space-md py-2 rounded-lg bg-surface-card text-primary font-label-md text-label-md shadow-sm hover:bg-surface-tint/50 transition-all shrink-0" onclick="alert('Iniciando chat seguro com a equipe de enfermagem da Med.Na...');" type="button">
+          Chamar Agora
+        </button>
+</section>
+</div>
+</div>
+<!-- Educational & Wellness Widget -->
+<section class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
+<div class="flex flex-col md:flex-row items-center justify-between gap-space-lg">
+<div class="flex items-center gap-space-md max-w-xl">
+<div class="w-16 h-16 rounded-xl bg-secondary-container/40 flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-3xl">health_and_safety</span>
+</div>
+<div>
+<h4 class="font-title-lg text-title-lg font-bold text-on-surface">Como apresentar sua receita digital na farmácia?</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Basta mostrar o QR Code gerado diretamente na tela do seu celular para o farmacêutico escanear. O código autentica a assinatura do CFM instantaneamente.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<a class="px-space-md py-2.5 rounded-lg bg-surface-container-high text-primary hover:bg-surface-tint/30 font-label-md text-label-md transition-all" href="#guia-farmacia">
+          Guia do Paciente
+        </a>
+</div>
+</div>
+</section>
+<!-- MODAL: Device Check Modal (Simulated WebRTC diagnostics) -->
+<div class="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm hidden flex items-center justify-center p-space-md" id="deviceModal">
+<div class="bg-surface-card rounded-xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+<div class="p-space-lg bg-gradient-to-r from-primary-container to-secondary text-on-primary flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-2xl">sensors</span>
+<h3 class="font-headline-md text-headline-md">Diagnóstico de Dispositivos</h3>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-card/20 flex items-center justify-center text-on-primary hover:bg-surface-card/30" id="closeCheckModalBtn" type="button">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+<div class="p-space-lg space-y-space-md">
+<p class="font-body-md text-body-md text-on-surface-variant">Testamos seus componentes de áudio e vídeo para garantir que sua consulta com a <strong>Dra. Camila Torres</strong> ocorra com total clareza.</p>
+<!-- Simulated Video Preview Box -->
+<div class="relative w-full h-44 rounded-lg bg-surface-container-high overflow-hidden flex items-center justify-center">
+<img class="w-full h-full object-cover" data-alt="POV webcam framing test of a relaxed Brazilian male patient sitting in an organized living room ready for a remote medical telemedicine session" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCobiXn83RW6I2ysMtZZGuZswWawjDjkNNkBhC8VZY4uknVU4RoHlMxLYc2CTuwIQ2Jf2O-xQuSA-Pdqvbe0fVqfpdlAL1xUOvmU-Myk8OGJzV2uyIoJZYtIlseODMOzPiM1LEXK5K1IfmBWErh75xs311ITyxuKQI_UH-WGHaqJZG4Nj354RuCV1-LmE49TssubXo1_Ku5lKD26HlHo9PJqxqKxalVIN_k3_aTU1DABnpeW03JEx6K"/>
+<div class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-inverse-surface/80 text-on-primary font-label-sm text-label-sm flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-status-success animate-pulse"></span>
+            Câmera HD Ativa (Logitech C920)
+          </div>
+</div>
+<!-- Checklist of Devices -->
+<div class="space-y-space-xs">
+<div class="flex items-center justify-between p-space-xs rounded bg-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-status-success text-base">mic</span>
+<span class="font-label-md text-label-md text-on-surface">Microfone Padrão</span>
+</div>
+<span class="font-label-sm text-label-sm text-status-success font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>
+              Captação 100%
+            </span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-status-success text-base">volume_up</span>
+<span class="font-label-md text-label-md text-on-surface">Alto-falantes / Fones</span>
+</div>
+<button class="font-label-sm text-label-sm text-primary hover:underline font-semibold" onclick="playTestBeep()" type="button">Testar Som</button>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface-container">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-status-success text-base">wifi</span>
+<span class="font-label-md text-label-md text-on-surface">Conexão de Internet</span>
+</div>
+<span class="font-label-sm text-label-sm text-status-success font-semibold">Banda Larga Excelente (120 Mbps)</span>
+</div>
+</div>
+</div>
+<div class="p-space-md bg-surface-container-low flex justify-end gap-space-sm">
+<button class="px-space-lg py-2.5 rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-secondary transition-all" id="confirmDevicesBtn" type="button">
+          Tudo Pronto para a Consulta
+        </button>
+</div>
+</div>
+</div>
+<!-- MODAL: Full Pharmacist QR Code Inspection -->
+<div class="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm hidden flex items-center justify-center p-space-md" id="qrModal">
+<div class="bg-surface-card rounded-xl shadow-2xl max-w-sm w-full overflow-hidden text-center animate-in fade-in zoom-in-95 duration-200">
+<div class="p-space-md bg-surface-container flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-primary font-bold">Validador de Farmácia</span>
+<button class="w-7 h-7 rounded-full bg-surface-card flex items-center justify-center text-on-surface-variant hover:text-on-surface" onclick="closeQrModal()" type="button">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<div class="p-space-lg space-y-space-md">
+<h4 class="font-headline-md text-headline-md text-on-surface" id="qrModalMedication">Medicamento</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Apresente esta tela ao farmacêutico responsável para dispensação imediata com certificação digital.</p>
+<div class="p-4 bg-surface-container-lowest rounded-xl shadow-md inline-block">
+<svg class="w-48 h-48 text-primary mx-auto" fill="currentColor" viewbox="0 0 100 100">
+<path d="M10,10 h30 v30 h-30 z M18,18 v14 h14 v-14 z M60,10 h30 v30 h-30 z M68,18 v14 h14 v-14 z M10,60 h30 v30 h-30 z M18,68 v14 h14 v-14 z M50,10 h6 v10 h-6 z M50,30 h6 v10 h-6 z M10,50 h10 v6 h-10 z M30,50 h10 v6 h-10 z M60,50 h10 v10 h-10 z M80,50 h10 v10 h-10 z M50,60 h10 v6 h-10 z M70,60 h10 v10 h-10 z M50,80 h10 v10 h-10 z M70,80 h20 v10 h-20 z M80,70 h10 v10 h-10 z"></path>
+</svg>
+</div>
+<div class="text-left bg-surface-container-low p-3 rounded-lg text-xs space-y-1 text-on-surface-variant">
+<div class="flex justify-between"><span class="text-outline">Código Verificador:</span> <span class="font-semibold text-primary" id="qrModalCode">DR-94810-SP</span></div>
+<div class="flex justify-between"><span class="text-outline">Médica Emissora:</span> <span class="font-semibold text-on-surface">Dra. Camila Torres (CRM 192.483)</span></div>
+<div class="flex justify-between"><span class="text-outline">Padrão:</span> <span class="font-semibold text-status-success">ICP-Brasil / CFM</span></div>
+</div>
+</div>
+<div class="p-space-md bg-surface-container-low">
+<button class="w-full py-2 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md" onclick="closeQrModal()" type="button">
+          Concluir Exibição
+        </button>
+</div>
+</div>
+</div>
+<script>
+    // Modal toggle interactions
+    const deviceModal = document.getElementById('deviceModal');
+    const openCheckModalBtn = document.getElementById('openCheckModalBtn');
+    const closeCheckModalBtn = document.getElementById('closeCheckModalBtn');
+    const confirmDevicesBtn = document.getElementById('confirmDevicesBtn');
+
+    if (openCheckModalBtn && deviceModal) {
+      openCheckModalBtn.addEventListener('click', () => {
+        deviceModal.classList.remove('hidden');
+      });
+    }
+
+    if (closeCheckModalBtn && deviceModal) {
+      closeCheckModalBtn.addEventListener('click', () => {
+        deviceModal.classList.add('hidden');
+      });
+    }
+
+    if (confirmDevicesBtn && deviceModal) {
+      confirmDevicesBtn.addEventListener('click', () => {
+        deviceModal.classList.add('hidden');
+        alert('Dispositivos verificados com sucesso! Sua sala de espera virtual está liberada.');
+      });
+    }
+
+    // QR Code inspection modal logic
+    const qrModal = document.getElementById('qrModal');
+    const qrModalMedication = document.getElementById('qrModalMedication');
+    const qrModalCode = document.getElementById('qrModalCode');
+
+    function openQrModal(medicationName, code) {
+      if (qrModalMedication) qrModalMedication.textContent = medicationName;
+      if (qrModalCode) qrModalCode.textContent = code;
+      if (qrModal) qrModal.classList.remove('hidden');
+    }
+
+    function closeQrModal() {
+      if (qrModal) qrModal.classList.add('hidden');
+    }
+
+    // Simple audio verification feedback
+    function playTestBeep() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(520, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.25);
+      } catch (e) {
+        alert('Áudio funcionando perfeitamente!');
+      }
+    }
+  </script>
+</div></main></div></body></html>
