@@ -22,6 +22,7 @@ Este arquivo contém o registro de todos os erros identificados na aplicação, 
 | **ERR-12** | IA / Assistente | O Assistente Virtual de IA possuía respostas pré-definidas limitadas sem variação dinâmica suficiente. | **CORRIGIDO** | Expandido `AiAssistant.tsx` com mecanismo dinâmico de respostas contextuais, alertas de emergência, novos chips de dúvidas e cobertura completa dos 4 portais. |
 | **ERR-13** | Autenticação / Banco | Novos usuários cadastrados na tela de login não conseguiam autenticar no login subsequente. | **CORRIGIDO** | Atualizado `AuthContext.tsx` para persistir credenciais e perfis customizados em `localStorage` com sincronia dinâmica no Supabase e em memória. |
 | **ERR-14** | Agenda Virtual | A Agenda Virtual aparecia apenas no portal do médico, não sendo visível para os pacientes. | **CORRIGIDO** | Integrado o componente `VirtualAgenda.tsx` na Área do Paciente (`PatientPortal.tsx`), permitindo visualização de horários agendados em Mês/Semana/Dia. |
+| **ERR-15** | Agendamento / Convênio | Erro de restrição de chave estrangeira (`appointments_insurance_id_fkey`) ao agendar consulta selecionando uma carteirinha de convênio. | **CORRIGIDO** | Atualizado `PatientPortal.tsx` para resolver dinamicamente o ID da operadora de saúde (`health_insurances`) a partir do cartão do paciente (`patient_insurances`). |
 
 ---
 

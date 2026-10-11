@@ -244,18 +244,34 @@ export const PatientPortal = () => {
 
     const scheduledAt = `${selectedDate}T${selectedTime}:00`;
 
+    // Resolve actual health_insurances ID
+    let resolvedInsuranceId: string | null = null;
+    if (selectedInsurance) {
+      // Check if selectedInsurance matches a patient_insurances card
+      const matchedCard = patientInsurances.find((pi) => pi.id === selectedInsurance);
+      if (matchedCard) {
+        resolvedInsuranceId = matchedCard.insurance_id;
+      } else {
+        // Otherwise, it's a direct health_insurances ID
+        const matchedHealthIns = allInsurances.find((hi) => hi.id === selectedInsurance);
+        if (matchedHealthIns) {
+          resolvedInsuranceId = matchedHealthIns.id;
+        }
+      }
+    }
+
     try {
       const { error } = await supabase.from("appointments").insert({
         patient_id: currentUser.id,
         doctor_id: selectedDoctor,
         specialty_id: selectedSpecialty || null,
         location_id: selectedLocation || null,
-        insurance_id: selectedInsurance || null,
+        insurance_id: resolvedInsuranceId,
         scheduled_at: scheduledAt,
         duration_min: 30,
         mode: selectedMode,
         status: "SCHEDULED",
-        price: selectedInsurance ? 0 : 150.0,
+        price: resolvedInsuranceId ? 0 : 150.0,
         telemedicine_url: selectedMode === "TELEMEDICINE" ? `https://meet.medna.com.br/consulta-${Date.now()}` : null
       });
 
