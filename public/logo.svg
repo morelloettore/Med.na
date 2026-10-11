@@ -1,0 +1,35 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="shieldGrad" x1="140" y1="30" x2="260" y2="210" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2DD4BF"/>
+      <stop offset="50%" stop-color="#0D9488"/>
+      <stop offset="100%" stop-color="#0F766E"/>
+    </linearGradient>
+    <filter id="logoShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0F766E" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Shield Badge -->
+  <g filter="url(#logoShadow)">
+    <path d="M200 30 C245 30, 275 50, 275 90 C275 145, 235 185, 200 200 C165 185, 125 145, 125 90 C125 50, 155 30, 200 30 Z" fill="url(#shieldGrad)"/>
+    <path d="M200 40 C238 40, 263 57, 263 90 C263 136, 229 170, 200 183 C171 170, 137 136, 137 90 C137 57, 162 40, 200 40 Z" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="3"/>
+    <!-- Medical Cross -->
+    <path d="M188 72 C188 68 191 65 195 65 H205 C209 65 212 68 212 72 V93 H233 C237 93 240 96 240 100 V110 C240 114 237 117 233 117 H212 V138 C212 142 209 145 205 145 H195 C191 145 188 142 188 138 V117 H167 C163 117 160 114 160 110 V100 C160 96 163 93 167 93 H188 V72 Z" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Text: Med.Na -->
+  <text x="200" y="275" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="64" text-anchor="middle" letter-spacing="-1">
+    <tspan fill="#0F766E">Med</tspan>
+    <tspan fill="#2DD4BF">.</tspan>
+    <tspan fill="#0D9488">Na</tspan>
+  </text>
+
+  <!-- Divider Line -->
+  <line x1="100" y1="295" x2="300" y2="295" stroke="#0D9488" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Subtitle: CLÍNICA MÉDICA VIRTUAL -->
+  <text x="200" y="325" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="18" fill="#115E59" text-anchor="middle" letter-spacing="3.5">
+    CLÍNICA MÉDICA VIRTUAL
+  </text>
+</svg>

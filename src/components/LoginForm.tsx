@@ -3,21 +3,16 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Activity,
   Lock,
   Mail,
   ArrowRight,
   AlertCircle,
-  User as UserIcon,
-  Phone,
-  ShieldAlert,
-  Stethoscope,
-  UserCheck,
   UserPlus,
   LogIn
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types";
+import { Logo } from "@/components/Logo";
 
 export function LoginForm() {
   const router = useRouter();
@@ -86,37 +81,29 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex items-center justify-center px-4 py-8 transition-colors">
-      <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-        {/* Banner Header */}
-        <div className="bg-gradient-to-r from-sky-700 via-sky-600 to-blue-600 p-6 text-white">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center backdrop-blur-md">
-              <Activity className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                Med<span className="text-sky-200">.na</span>
-              </h1>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-sky-100 font-medium">
-                Sistema Clínico & Hospitalar
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 flex items-center justify-center px-4 py-12 transition-colors relative overflow-hidden">
+      {/* Decorative Glow Elements */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-64 h-64 bg-teal-600/10 rounded-full blur-2xl pointer-events-none" />
+
+      <div className="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-teal-500/20 dark:border-teal-500/30 overflow-hidden relative z-10">
+        {/* Banner Header with Logo */}
+        <div className="bg-gradient-to-b from-teal-950 to-slate-900 p-8 text-white flex flex-col items-center justify-center border-b border-teal-800/40">
+          <Logo variant="full" size="xl" showSubtitle={true} />
         </div>
 
         {/* Tab Switcher: Login / Cadastro */}
-        <div className="flex border-b border-slate-200 dark:border-slate-700">
+        <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
           <button
             type="button"
             onClick={() => {
               setIsRegister(false);
               setError("");
             }}
-            className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${
+            className={`flex-1 py-3.5 text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
               !isRegister
-                ? "bg-white dark:bg-slate-800 text-sky-600 border-b-2 border-sky-600"
-                : "bg-slate-50 dark:bg-slate-800/50 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                ? "bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 border-b-2 border-teal-600 dark:border-teal-400 font-extrabold shadow-xs"
+                : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
             }`}
           >
             <LogIn className="w-4 h-4" /> Entrar
@@ -127,10 +114,10 @@ export function LoginForm() {
               setIsRegister(true);
               setError("");
             }}
-            className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${
+            className={`flex-1 py-3.5 text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
               isRegister
-                ? "bg-white dark:bg-slate-800 text-sky-600 border-b-2 border-sky-600"
-                : "bg-slate-50 dark:bg-slate-800/50 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                ? "bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 border-b-2 border-teal-600 dark:border-teal-400 font-extrabold shadow-xs"
+                : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
             }`}
           >
             <UserPlus className="w-4 h-4" /> Criar Conta
@@ -171,7 +158,7 @@ export function LoginForm() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2.5 pl-10 pr-3 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500"
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/80 py-2.5 pl-10 pr-3 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all"
                     placeholder="seu.email@medna.com"
                     required
                   />
@@ -188,7 +175,7 @@ export function LoginForm() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2.5 pl-10 pr-3 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500"
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/80 py-2.5 pl-10 pr-3 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all"
                     placeholder="Digite sua senha"
                     required
                   />
@@ -199,7 +186,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={loading || submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 hover:bg-sky-700 py-3 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60 shadow-md"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 py-3 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60 shadow-lg shadow-teal-600/20 active:scale-[0.99]"
             >
               {submitting ? "Autenticando..." : "Entrar no Sistema"}
               <ArrowRight className="h-4 w-4" />
@@ -237,7 +224,7 @@ export function LoginForm() {
                   onChange={(e) => setRegFirstName(e.target.value)}
                   placeholder="Nome"
                   required
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500"
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-teal-500"
                 />
               </div>
               <div>
@@ -248,7 +235,7 @@ export function LoginForm() {
                   onChange={(e) => setRegLastName(e.target.value)}
                   placeholder="Sobrenome"
                   required
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500"
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-teal-500"
                 />
               </div>
             </div>
@@ -261,7 +248,7 @@ export function LoginForm() {
                 onChange={(e) => setRegEmail(e.target.value)}
                 placeholder="seu.email@exemplo.com"
                 required
-                className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500"
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-teal-500"
               />
             </div>
 
@@ -273,7 +260,7 @@ export function LoginForm() {
                   value={regPhone}
                   onChange={(e) => setRegPhone(e.target.value)}
                   placeholder="(11) 99999-9999"
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500"
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-teal-500"
                 />
               </div>
               <div>
@@ -283,7 +270,7 @@ export function LoginForm() {
                   value={regCpf}
                   onChange={(e) => setRegCpf(e.target.value)}
                   placeholder="000.000.000-00"
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500"
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-teal-500"
                 />
               </div>
             </div>
@@ -293,7 +280,7 @@ export function LoginForm() {
               <select
                 value={regRole}
                 onChange={(e) => setRegRole(e.target.value as UserRole)}
-                className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 font-semibold outline-none focus:border-sky-500"
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 font-semibold outline-none focus:border-teal-500"
               >
                 <option value="PATIENT">Paciente</option>
                 <option value="DOCTOR">Médico</option>
@@ -310,14 +297,14 @@ export function LoginForm() {
                 onChange={(e) => setRegPassword(e.target.value)}
                 placeholder="Crie uma senha forte"
                 required
-                className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500"
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-teal-500"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading || submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 hover:bg-sky-700 py-2.5 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60 shadow-md mt-2 text-xs"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 py-2.5 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60 shadow-md mt-2 text-xs"
             >
               {submitting ? "Cadastrando..." : "Concluir Cadastro"}
               <ArrowRight className="h-4 w-4" />
