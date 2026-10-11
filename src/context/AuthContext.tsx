@@ -101,6 +101,49 @@ const normalizeEmail = (value: string) => {
   return EMAIL_ALIASES[clean] || clean;
 };
 
+// LocalStorage Persistence Helpers for Custom Registered Users & Passwords
+const getCustomUsers = (): User[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const data = localStorage.getItem("medna_custom_users");
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveCustomUser = (user: User) => {
+  if (typeof window === "undefined") return;
+  try {
+    const current = getCustomUsers();
+    const updated = [...current.filter((u) => u.email !== user.email), user];
+    localStorage.setItem("medna_custom_users", JSON.stringify(updated));
+  } catch (err) {
+    console.error("Failed to save custom user to localStorage:", err);
+  }
+};
+
+const getCustomCredentials = (): Record<string, string> => {
+  if (typeof window === "undefined") return {};
+  try {
+    const data = localStorage.getItem("medna_custom_credentials");
+    return data ? JSON.parse(data) : {};
+  } catch {
+    return {};
+  }
+};
+
+const saveCustomCredential = (email: string, pass: string) => {
+  if (typeof window === "undefined") return;
+  try {
+    const current = getCustomCredentials();
+    current[normalizeEmail(email)] = pass;
+    localStorage.setItem("medna_custom_credentials", JSON.stringify(current));
+  } catch (err) {
+    console.error("Failed to save credential to localStorage:", err);
+  }
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUserState] = useState<User | null>(null);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
@@ -117,26 +160,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const loadUsers = async () => {
     try {
+      const customUsers = getCustomUsers();
       const { data, error } = await supabase.from("users").select("*").order("first_name");
 
+      let allUsers: User[] = [];
       if (!error && data && data.length > 0) {
-        setAvailableUsers(data);
-
-        const savedUserId = localStorage.getItem("medna_active_user_id");
-        const found = data.find((u) => u.id === savedUserId);
-        if (found) {
-          setCurrentUserState(found);
-        }
-        return;
+        // Merge Supabase users with locally created users (without duplicates)
+        const supabaseEmails = new Set(data.map((u) => normalizeEmail(u.email)));
+        const uniqueCustom = customUsers.filter((u) => !supabaseEmails.has(normalizeEmail(u.email)));
+        allUsers = [...data, ...uniqueCustom];
+      } else {
+        const demoEmails = new Set(DEMO_USERS.map((u) => normalizeEmail(u.email)));
+        const uniqueCustom = customUsers.filter((u) => !demoEmails.has(normalizeEmail(u.email)));
+        allUsers = [...DEMO_USERS, ...uniqueCustom];
       }
 
-      throw error || new Error("No users found in database");
-    } catch (err) {
-      console.warn("Failed to load users from Supabase, using demo users:", err);
-      setAvailableUsers(DEMO_USERS);
+      setAvailableUsers(allUsers);
 
       const savedUserId = localStorage.getItem("medna_active_user_id");
-      const found = DEMO_USERS.find((u) => u.id === savedUserId);
+      const found = allUsers.find((u) => u.id === savedUserId);
+      if (found) {
+        setCurrentUserState(found);
+      }
+    } catch (err) {
+      console.warn("Failed to load users, using demo & custom users:", err);
+      const customUsers = getCustomUsers();
+      const allUsers = [...DEMO_USERS, ...customUsers];
+      setAvailableUsers(allUsers);
+
+      const savedUserId = localStorage.getItem("medna_active_user_id");
+      const found = allUsers.find((u) => u.id === savedUserId);
       if (found) {
         setCurrentUserState(found);
       }
@@ -167,23 +220,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return { ok: false, error: "Por favor, informe sua senha." };
     }
 
+    const customCreds = getCustomCredentials();
     const users = availableUsers.length > 0 ? availableUsers : DEMO_USERS;
     const user = users.find((u) => normalizeEmail(u.email) === normalizedEmail);
 
-    const expectedPass = DEMO_CREDENTIALS[normalizedEmail] || "123456";
-    const isDemoPasswordValid =
+    if (!user) {
+      return { ok: false, error: "E-mail não cadastrado na base." };
+    }
+
+    const customPassword = customCreds[normalizedEmail];
+    const expectedPass = customPassword || DEMO_CREDENTIALS[normalizedEmail] || "123456";
+
+    const isPasswordCorrect =
       password === expectedPass ||
+      password === customPassword ||
       password === "123456" ||
       password === "medna123" ||
       password === "admin123" ||
       password === "func123" ||
       password === "paciente123";
 
-    if (!user) {
-      return { ok: false, error: "E-mail não cadastrado na base." };
-    }
-
-    if (!isDemoPasswordValid) {
+    if (!isPasswordCorrect) {
       return { ok: false, error: "Senha incorreta para o e-mail informado." };
     }
 
@@ -215,8 +272,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return { ok: false, error: "Este e-mail já está cadastrado no sistema." };
     }
 
+    let newUserObject: User | null = null;
+
     try {
-      const { data: newUser, error } = await supabase
+      const { data: insertedUser, error } = await supabase
         .from("users")
         .insert({
           email: normalizedEmail,
@@ -231,34 +290,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .single();
 
       if (error) throw error;
+      newUserObject = insertedUser;
 
-      // Also create role specific entry if needed
       if (userData.role === "PATIENT" && userData.cpf) {
         await supabase.from("patients").insert({
-          user_id: newUser.id,
+          user_id: insertedUser.id,
           cpf: userData.cpf.replace(/\D/g, ""),
           birth_date: "1990-01-01",
         });
       } else if (userData.role === "DOCTOR" && userData.cpf) {
         await supabase.from("doctors").insert({
-          user_id: newUser.id,
+          user_id: insertedUser.id,
           crm: "123456",
           crm_state: "SP",
           cpf: userData.cpf.replace(/\D/g, ""),
           telemedicine_enabled: true,
         });
       }
-
-      // Add to DEMO_CREDENTIALS dynamically
-      DEMO_CREDENTIALS[normalizedEmail] = userData.password;
-
-      await loadUsers();
-      setCurrentUser(newUser);
-      return { ok: true };
     } catch (err: any) {
-      console.error("SignUp error:", err);
-      // Fallback local registration if Supabase insert is blocked
-      const fallbackUser: User = {
+      console.warn("Supabase insert failed/fallback used:", err);
+      newUserObject = {
         id: `user-${Date.now()}`,
         email: normalizedEmail,
         role: userData.role,
@@ -267,12 +318,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         phone: userData.phone,
         is_active: true,
       };
+    }
 
-      DEMO_CREDENTIALS[normalizedEmail] = userData.password;
-      setAvailableUsers((prev) => [...prev, fallbackUser]);
-      setCurrentUser(fallbackUser);
+    if (newUserObject) {
+      saveCustomCredential(normalizedEmail, userData.password);
+      saveCustomUser(newUserObject);
+      setAvailableUsers((prev) => [...prev.filter((u) => u.email !== normalizedEmail), newUserObject!]);
+      setCurrentUser(newUserObject);
       return { ok: true };
     }
+
+    return { ok: false, error: "Erro ao criar usuário." };
   };
 
   const logout = () => {

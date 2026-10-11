@@ -18,6 +18,10 @@ Este arquivo contém o registro de todos os erros identificados na aplicação, 
 | **ERR-08** | Logins | Logins já prontos na tela de login deviam ser removidos por motivo de segurança. | **CORRIGIDO** | Removidos os botões de atalho rápido de login de demonstração da interface principal de login e implementado fluxo completo de cadastro de novos usuários (`signUp`). |
 | **ERR-09** | Exclusão | Adicionar opção de exclusão para os componentes do site. | **CORRIGIDO** | Adicionadas opções de exclusão/remoção e desativação com confirmação visual para especialidades, unidades hospitalares, convênios, carteirinhas de planos e usuários. |
 | **ERR-10** | Convênios | Os convênios não apareciam na tela de criação de consulta na área do paciente. | **CORRIGIDO** | Atualizado o formulário de agendamento em `PatientPortal.tsx` para listar as carteirinhas vinculadas do paciente e todas as operadoras credenciadas. |
+| **ERR-11** | Interface / Recepção | A área do funcionário/recepção estava muito básica e o modo escuro não funcionava nela. | **CORRIGIDO** | Reformulado `EmployeePortal.tsx` com design moderno, métricas em tempo real, check-in, busca por paciente, aba de convênios e suporte total ao Modo Escuro. |
+| **ERR-12** | IA / Assistente | O Assistente Virtual de IA possuía respostas pré-definidas limitadas sem variação dinâmica suficiente. | **CORRIGIDO** | Expandido `AiAssistant.tsx` com mecanismo dinâmico de respostas contextuais, alertas de emergência, novos chips de dúvidas e cobertura completa dos 4 portais. |
+| **ERR-13** | Autenticação / Banco | Novos usuários cadastrados na tela de login não conseguiam autenticar no login subsequente. | **CORRIGIDO** | Atualizado `AuthContext.tsx` para persistir credenciais e perfis customizados em `localStorage` com sincronia dinâmica no Supabase e em memória. |
+| **ERR-14** | Agenda Virtual | A Agenda Virtual aparecia apenas no portal do médico, não sendo visível para os pacientes. | **CORRIGIDO** | Integrado o componente `VirtualAgenda.tsx` na Área do Paciente (`PatientPortal.tsx`), permitindo visualização de horários agendados em Mês/Semana/Dia. |
 
 ---
 
@@ -28,9 +32,9 @@ Para realizar testes e avaliações no sistema Med.na, utilize os e-mails e senh
 | Papel / Perfil | E-mail de Teste | Senha de Teste | Descrição da Área |
 |:---|:---|:---|:---|
 | **ADMIN** | `admin@medna.com` | `admin123` | Painel de gestão de unidades hospitalares, especialidades, convênios, usuários e Dashboard. |
-| **PATIENT** | `paciente1@medna.com` | `paciente123` | Área do paciente para agendamento de consultas, telemedicina e carteirinhas. |
+| **PATIENT** | `paciente1@medna.com` | `paciente123` | Área do paciente para agendamento de consultas, telemedicina, agenda virtual e carteirinhas. |
 | **DOCTOR** | `maria.santos@medna.com` | `medna123` | Portal do médico para prontuário eletrônico com assinatura ICP-Brasil, prescrições e escalas. |
-| **EMPLOYEE** | `funcionario@medna.com` | `func123` | Recepção para gerenciamento, confirmação e cancelamento de consultas. |
+| **EMPLOYEE** | `funcionario@medna.com` | `func123` | Recepção para gerenciamento, confirmação, check-in e cancelamento de consultas. |
 
 ---
 
@@ -61,4 +65,4 @@ A aplicação atingiu **100% de conclusão do roadmap do projeto**:
 21. [x] **Confirmação de Ações Importantes**: Caixas de diálogo de confirmação antes de remover ou cancelar registros.
 22. [x] **Configurações do Usuário**: Modal `UserProfileModal` para edição de perfil.
 23. [x] **Tratamento de Estados, Carregamento e Erros**: Spinners de carregamento e banners informativos.
-24. [x] **Agenda Virtual Integrada e Gerenciamento Visual de Consultas**: Visão Mês/Semana/Dia com badges de status ("Atendimento Hoje", "Confirmada", "Concluída", "Cancelada") e legenda visual.
+24. [x] **Agenda Virtual Integrada e Gerenciamento Visual de Consultas**: Visão Mês/Semana/Dia com badges de status ("Atendimento Hoje", "Confirmada", "Concluída", "Cancelada") e legenda visual na Área do Paciente e do Médico.
