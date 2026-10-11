@@ -248,6 +248,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return { ok: true };
     }
 
+    if (user.is_active === false) {
+      return { ok: false, error: "Esta conta de usuário foi desativada pelo administrador." };
+    }
+
     const storedPass = customCreds[cleanEmail] || DEMO_CREDENTIALS[cleanEmail] || DEMO_CREDENTIALS[user.email];
 
     // Verify password flexibility: if stored password exists, check it; otherwise allow any password >= 4 chars
