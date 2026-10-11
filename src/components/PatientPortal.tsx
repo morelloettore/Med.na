@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Doctor, Specialty, Location, HealthInsurance, PatientInsurance, Appointment, DoctorSchedule, User } from "@/types";
+import { TelemedicineRoom } from "@/components/TelemedicineRoom";
 import {
   Calendar,
   Clock,
@@ -17,6 +18,7 @@ import {
   XCircle,
   Plus,
   AlertCircle,
+  Trash2,
   FileText
 } from "lucide-react";
 
@@ -51,6 +53,9 @@ export const PatientPortal = () => {
 
   const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
   const [bookingError, setBookingError] = useState<string | null>(null);
+
+  // Active Telemedicine Room Modal
+  const [activeTeleRoomAppointment, setActiveTeleRoomAppointment] = useState<Appointment | null>(null);
 
   // New Insurance Form State
   const [newInsuranceId, setNewInsuranceId] = useState<string>("");
@@ -158,7 +163,6 @@ export const PatientPortal = () => {
     }
 
     async function generateSlots() {
-      // Calculate weekday (0 = Sunday, 1 = Monday, ...)
       const dateObj = new Date(selectedDate + "T12:00:00");
       const weekday = dateObj.getDay();
 
@@ -279,8 +283,8 @@ export const PatientPortal = () => {
   };
 
   const handleCancelAppointment = async (appointmentId: string) => {
-    const reason = prompt("Informe o motivo do cancelamento:");
-    if (!reason) return;
+    if (!confirm("Tem certeza de que deseja cancelar esta consulta?")) return;
+    const reason = prompt("Informe o motivo do cancelamento:") || "Cancelado pelo paciente";
 
     try {
       const { error } = await supabase
@@ -298,6 +302,25 @@ export const PatientPortal = () => {
     } catch (err) {
       console.error("Cancel error:", err);
       alert("Erro ao cancelar consulta.");
+    }
+  };
+
+  // ERR-09: Delete Patient Insurance Card Option
+  const handleDeleteInsuranceCard = async (insuranceCardId: string) => {
+    if (!confirm("Tem certeza que deseja remover esta carteirinha de convênio?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("patient_insurances")
+        .delete()
+        .eq("id", insuranceCardId);
+
+      if (error) throw error;
+      await loadData();
+      alert("Carteirinha removida com sucesso.");
+    } catch (err: any) {
+      console.error("Delete insurance card error:", err);
+      alert("Erro ao remover carteirinha: " + err.message);
     }
   };
 
@@ -338,8 +361,17 @@ export const PatientPortal = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Telemedicine Native Room Modal */}
+      {activeTeleRoomAppointment && (
+        <TelemedicineRoom
+          appointment={activeTeleRoomAppointment}
+          currentUserRole="PATIENT"
+          onClose={() => setActiveTeleRoomAppointment(null)}
+        />
+      )}
+
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-sky-700 via-sky-600 to-blue-600 rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-8 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-sky-700 via-sky-600 to-blue-600 dark:from-slate-800 dark:to-sky-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-8 relative overflow-hidden">
         <div className="relative z-10">
           <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
             Área do Paciente
@@ -347,20 +379,20 @@ export const PatientPortal = () => {
           <h2 className="text-2xl sm:text-3xl font-bold">
             Olá, {currentUser?.first_name}!
           </h2>
-          <p className="text-sky-100 text-sm mt-1 max-w-xl">
+          <p className="text-sky-100 dark:text-slate-300 text-sm mt-1 max-w-xl">
             Gerencie suas consultas, agende novos horários e acompanhe seus planos de saúde e prontuários médicos.
           </p>
         </div>
       </div>
 
       {/* Tabs Header */}
-      <div className="flex border-b border-slate-200 mb-6 space-x-8">
+      <div className="flex border-b border-slate-200 dark:border-slate-700 mb-6 space-x-8">
         <button
           onClick={() => setActiveTab("book")}
           className={`pb-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors ${
             activeTab === "book"
-              ? "border-sky-600 text-sky-600"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-sky-600 text-sky-600 dark:text-sky-400 dark:border-sky-400"
+              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
           <Calendar className="w-4 h-4" /> Agendar Consulta
@@ -369,8 +401,8 @@ export const PatientPortal = () => {
           onClick={() => setActiveTab("appointments")}
           className={`pb-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors ${
             activeTab === "appointments"
-              ? "border-sky-600 text-sky-600"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-sky-600 text-sky-600 dark:text-sky-400 dark:border-sky-400"
+              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
           <Clock className="w-4 h-4" /> Minhas Consultas ({appointments.length})
@@ -379,8 +411,8 @@ export const PatientPortal = () => {
           onClick={() => setActiveTab("insurances")}
           className={`pb-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors ${
             activeTab === "insurances"
-              ? "border-sky-600 text-sky-600"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-sky-600 text-sky-600 dark:text-sky-400 dark:border-sky-400"
+              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
           <ShieldCheck className="w-4 h-4" /> Planos & Convênios ({patientInsurances.length})
@@ -390,20 +422,20 @@ export const PatientPortal = () => {
       {/* TAB 1: BOOK APPOINTMENT */}
       {activeTab === "book" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
               <Plus className="w-5 h-5 text-sky-600" /> Nova Consulta Virtual / Presencial
             </h3>
 
             {bookingSuccess && (
-              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-sm flex items-center gap-2 font-medium">
+              <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg text-emerald-800 dark:text-emerald-300 text-sm flex items-center gap-2 font-medium">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                 {bookingSuccess}
               </div>
             )}
 
             {bookingError && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm flex items-center gap-2 font-medium">
+              <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300 text-sm flex items-center gap-2 font-medium">
                 <AlertCircle className="w-5 h-5 text-red-600" />
                 {bookingError}
               </div>
@@ -412,13 +444,13 @@ export const PatientPortal = () => {
             <form onSubmit={handleBookAppointment} className="space-y-5">
               {/* Specialty */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                   1. Selecione a Especialidade
                 </label>
                 <select
                   value={selectedSpecialty}
                   onChange={(e) => setSelectedSpecialty(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 >
                   <option value="">Todas as especialidades</option>
                   {specialties.map((s) => (
@@ -431,14 +463,14 @@ export const PatientPortal = () => {
 
               {/* Doctor Selection */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                   2. Selecione o Médico
                 </label>
                 <select
                   value={selectedDoctor}
                   onChange={(e) => setSelectedDoctor(e.target.value)}
                   required
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 >
                   <option value="">Escolha um médico...</option>
                   {filteredDoctors.map((d) => (
@@ -449,16 +481,16 @@ export const PatientPortal = () => {
                 </select>
               </div>
 
-              {/* Location & Insurance */}
+              {/* Location & Insurance Selection (ERR-10 FIX) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                     3. Local de Atendimento
                   </label>
                   <select
                     value={selectedLocation}
                     onChange={(e) => setSelectedLocation(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
                   >
                     <option value="">Hospital Central / Unidade Principal</option>
                     {locations.map((l) => (
@@ -469,28 +501,42 @@ export const PatientPortal = () => {
                   </select>
                 </div>
 
+                {/* ERR-10 FIX: Shows patient registered insurances AND all general health insurance options */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                     4. Plano / Convênio
                   </label>
                   <select
                     value={selectedInsurance}
                     onChange={(e) => setSelectedInsurance(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
                   >
-                    <option value="">Particular (R$ 150,00)</option>
-                    {patientInsurances.map((pi) => (
-                      <option key={pi.id} value={pi.id}>
-                        {pi.insurance?.name} ({pi.card_number})
-                      </option>
-                    ))}
+                    <option value="">Atendimento Particular (R$ 150,00)</option>
+                    {patientInsurances.length > 0 && (
+                      <optgroup label="Minhas Carteirinhas">
+                        {patientInsurances.map((pi) => (
+                          <option key={pi.id} value={pi.id}>
+                            {pi.insurance?.name || "Convênio"} (Carteirinha: {pi.card_number})
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                    {allInsurances.length > 0 && (
+                      <optgroup label="Todos os Convênios Aceitos">
+                        {allInsurances.map((ins) => (
+                          <option key={ins.id} value={ins.id}>
+                            {ins.name} (Convênio Credenciado)
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
                   </select>
                 </div>
               </div>
 
               {/* Attendance Mode */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
                   5. Modalidade de Consulta
                 </label>
                 <div className="grid grid-cols-2 gap-4">
@@ -499,8 +545,8 @@ export const PatientPortal = () => {
                     onClick={() => setSelectedMode("IN_PERSON")}
                     className={`p-3 rounded-lg border flex items-center justify-center gap-2 text-sm font-semibold transition-all ${
                       selectedMode === "IN_PERSON"
-                        ? "border-sky-600 bg-sky-50 text-sky-700 shadow-sm"
-                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                        ? "border-sky-600 bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 shadow-sm"
+                        : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50"
                     }`}
                   >
                     <Building className="w-4 h-4" /> Presencial
@@ -510,8 +556,8 @@ export const PatientPortal = () => {
                     onClick={() => setSelectedMode("TELEMEDICINE")}
                     className={`p-3 rounded-lg border flex items-center justify-center gap-2 text-sm font-semibold transition-all ${
                       selectedMode === "TELEMEDICINE"
-                        ? "border-sky-600 bg-sky-50 text-sky-700 shadow-sm"
-                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                        ? "border-sky-600 bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 shadow-sm"
+                        : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50"
                     }`}
                   >
                     <Video className="w-4 h-4" /> Telemedicina
@@ -522,7 +568,7 @@ export const PatientPortal = () => {
               {/* Date & Time Selection */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                     6. Data da Consulta
                   </label>
                   <input
@@ -531,19 +577,19 @@ export const PatientPortal = () => {
                     onChange={(e) => setSelectedDate(e.target.value)}
                     required
                     min={new Date().toISOString().split("T")[0]}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                     7. Horário Disponível
                   </label>
                   <select
                     value={selectedTime}
                     onChange={(e) => setSelectedTime(e.target.value)}
                     required
-                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
                   >
                     <option value="">Selecione o horário...</option>
                     {availableSlots.map((slot) => (
@@ -566,25 +612,25 @@ export const PatientPortal = () => {
 
           {/* Side Info */}
           <div className="space-y-6">
-            <div className="bg-sky-50 border border-sky-100 rounded-xl p-5 text-sky-900">
+            <div className="bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-800 rounded-xl p-5 text-sky-900 dark:text-sky-200">
               <h4 className="font-bold text-sm flex items-center gap-2 mb-2">
                 <CheckCircle2 className="w-4 h-4 text-sky-600" /> Agenda Virtual Med.na
               </h4>
-              <p className="text-xs text-sky-700 leading-relaxed">
-                Nossa agenda em tempo real garante que seu horário seja reservado sem filas. Para consultas por telemedicina, você receberá o link direto na sua área de consultas.
+              <p className="text-xs text-sky-700 dark:text-sky-300 leading-relaxed">
+                Nossa agenda em tempo real garante que seu horário seja reservado sem filas. Para consultas por telemedicina, acesse a videochamada diretamente pelo botão na área de consultas.
               </p>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-              <h4 className="font-bold text-slate-900 text-sm mb-3">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 shadow-sm">
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-3">
                 Seus Convênios Ativos
               </h4>
               {patientInsurances.length === 0 ? (
-                <p className="text-xs text-slate-500">Nenhum plano cadastrado ainda.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Nenhum plano cadastrado ainda.</p>
               ) : (
                 <ul className="space-y-2">
                   {patientInsurances.map((pi) => (
-                    <li key={pi.id} className="text-xs font-medium text-slate-700 flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <li key={pi.id} className="text-xs font-medium text-slate-700 dark:text-slate-200 flex justify-between items-center bg-slate-50 dark:bg-slate-900 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800">
                       <span>{pi.insurance?.name}</span>
                       <span className="font-mono text-slate-500">{pi.card_number}</span>
                     </li>
@@ -598,55 +644,55 @@ export const PatientPortal = () => {
 
       {/* TAB 2: MY APPOINTMENTS */}
       {activeTab === "appointments" && (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="p-6 border-b border-slate-200">
-            <h3 className="text-lg font-bold text-slate-900">Histórico de Agendamentos</h3>
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Histórico de Agendamentos</h3>
           </div>
 
           {appointments.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-sm">
+            <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">
               Você ainda não possui consultas agendadas.
             </div>
           ) : (
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 dark:divide-slate-700">
               {appointments.map((app) => {
                 const isCanceled = app.status === "CANCELED";
                 const isConfirmed = app.status === "CONFIRMED";
                 const isCompleted = app.status === "COMPLETED";
 
                 return (
-                  <div key={app.id} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 transition-colors">
+                  <div key={app.id} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${
                           isCanceled
-                            ? "bg-red-100 text-red-700"
+                            ? "bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300"
                             : isCompleted
-                            ? "bg-slate-100 text-slate-700"
+                            ? "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
                             : isConfirmed
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-amber-100 text-amber-700"
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
+                            : "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
                         }`}>
                           {app.status === "SCHEDULED" ? "Aguardando Confirmação" : app.status === "CONFIRMED" ? "Confirmada" : app.status === "COMPLETED" ? "Realizada" : "Cancelada"}
                         </span>
 
-                        <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
                           {app.mode === "TELEMEDICINE" ? <Video className="w-3.5 h-3.5 text-sky-600" /> : <Building className="w-3.5 h-3.5 text-slate-600" />}
                           {app.mode === "TELEMEDICINE" ? "Telemedicina" : "Presencial"}
                         </span>
                       </div>
 
-                      <h4 className="text-base font-bold text-slate-900">
+                      <h4 className="text-base font-bold text-slate-900 dark:text-white">
                         Dr(a). {app.doctor_user?.first_name || "Médico"} {app.doctor_user?.last_name || ""}
                       </h4>
 
-                      <div className="text-xs text-slate-600 flex flex-wrap gap-x-4 gap-y-1">
+                      <div className="text-xs text-slate-600 dark:text-slate-300 flex flex-wrap gap-x-4 gap-y-1">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
                           {new Date(app.scheduled_at).toLocaleDateString("pt-BR")} às {new Date(app.scheduled_at).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' })}
                         </span>
                         {app.specialty && (
-                          <span className="flex items-center gap-1 font-medium text-sky-700">
+                          <span className="flex items-center gap-1 font-medium text-sky-700 dark:text-sky-400">
                             <Stethoscope className="w-3.5 h-3.5" />
                             {app.specialty.name}
                           </span>
@@ -660,26 +706,25 @@ export const PatientPortal = () => {
                       </div>
 
                       {isCanceled && app.cancel_reason && (
-                        <p className="text-xs text-red-600 mt-1">Motivo do cancelamento: {app.cancel_reason}</p>
+                        <p className="text-xs text-red-600 dark:text-red-400 mt-1">Motivo do cancelamento: {app.cancel_reason}</p>
                       )}
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {app.mode === "TELEMEDICINE" && app.telemedicine_url && !isCanceled && (
-                        <a
-                          href={app.telemedicine_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-3 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm"
+                      {/* ERR-07 FIX: Integrated Native Video Telemedicine Modal Button */}
+                      {app.mode === "TELEMEDICINE" && !isCanceled && (
+                        <button
+                          onClick={() => setActiveTeleRoomAppointment(app)}
+                          className="px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
                         >
-                          <Video className="w-4 h-4" /> Entrar na Sala
-                        </a>
+                          <Video className="w-4 h-4" /> Entrar na Teleconsulta Nativa
+                        </button>
                       )}
 
                       {!isCanceled && !isCompleted && (
                         <button
                           onClick={() => handleCancelAppointment(app.id)}
-                          className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs font-bold border border-red-200 transition-colors"
+                          className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300 rounded-lg text-xs font-bold border border-red-200 dark:border-red-800 transition-colors"
                         >
                           Cancelar
                         </button>
@@ -697,28 +742,40 @@ export const PatientPortal = () => {
       {activeTab === "insurances" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Seus Planos de Saúde</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Seus Planos de Saúde</h3>
 
             {patientInsurances.length === 0 ? (
-              <div className="bg-white rounded-xl p-6 text-center text-slate-500 text-sm border border-slate-200">
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 text-center text-slate-500 dark:text-slate-400 text-sm border border-slate-200 dark:border-slate-700">
                 Você ainda não possui carteirinhas de planos de saúde vinculadas.
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {patientInsurances.map((pi) => (
-                  <div key={pi.id} className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl p-5 shadow-md relative overflow-hidden">
-                    <div className="flex justify-between items-start mb-6">
-                      <span className="font-bold text-sky-400 text-sm">{pi.insurance?.name}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        {pi.status}
-                      </span>
+                  <div key={pi.id} className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl p-5 shadow-md relative overflow-hidden flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-start mb-4">
+                        <span className="font-bold text-sky-400 text-sm">{pi.insurance?.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            {pi.status}
+                          </span>
+                          {/* ERR-09 FIX: Delete Option for Insurance Cards */}
+                          <button
+                            onClick={() => handleDeleteInsuranceCard(pi.id)}
+                            title="Excluir carteirinha"
+                            className="p-1 text-slate-400 hover:text-red-400 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="font-mono text-lg tracking-wider font-semibold mb-4">
+                        {pi.card_number}
+                      </div>
                     </div>
 
-                    <div className="font-mono text-lg tracking-wider font-semibold mb-4">
-                      {pi.card_number}
-                    </div>
-
-                    <div className="text-[10px] text-slate-400 flex justify-between uppercase font-semibold">
+                    <div className="text-[10px] text-slate-400 flex justify-between uppercase font-semibold border-t border-slate-800 pt-3">
                       <span>Validade</span>
                       <span>{pi.valid_until ? new Date(pi.valid_until).toLocaleDateString("pt-BR") : "Indefinida"}</span>
                     </div>
@@ -729,18 +786,18 @@ export const PatientPortal = () => {
           </div>
 
           {/* Add New Insurance */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 h-fit">
-            <h4 className="font-bold text-slate-900 text-base mb-4">Adicionar Novo Convênio</h4>
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 h-fit">
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-4">Adicionar Novo Convênio</h4>
             <form onSubmit={handleAddInsurance} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                   Operadora
                 </label>
                 <select
                   value={newInsuranceId}
                   onChange={(e) => setNewInsuranceId(e.target.value)}
                   required
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 >
                   <option value="">Selecione o plano...</option>
                   {allInsurances.map((i) => (
@@ -752,7 +809,7 @@ export const PatientPortal = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                   Número da Carteirinha
                 </label>
                 <input
@@ -761,19 +818,19 @@ export const PatientPortal = () => {
                   onChange={(e) => setNewCardNumber(e.target.value)}
                   placeholder="Ex: 889900112233"
                   required
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                   Validade (opcional)
                 </label>
                 <input
                   type="date"
                   value={newValidUntil}
                   onChange={(e) => setNewValidUntil(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 />
               </div>
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { Specialty, Location, HealthInsurance, User } from "@/types";
+import { Specialty, Location, HealthInsurance, User, Appointment } from "@/types";
 import {
   ShieldAlert,
   Building,
@@ -14,18 +14,23 @@ import {
   CheckCircle2,
   Activity,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  TrendingUp,
+  FileText,
+  Clock,
+  Video
 } from "lucide-react";
 
 export const AdminPortal = () => {
   const { currentUser } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<"specialties" | "locations" | "insurances" | "users">("specialties");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "specialties" | "locations" | "insurances" | "users">("dashboard");
 
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [insurances, setInsurances] = useState<HealthInsurance[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
   // Forms State
   const [newSpecName, setNewSpecName] = useState("");
@@ -58,8 +63,75 @@ export const AdminPortal = () => {
 
       const { data: usr } = await supabase.from("users").select("*").order("first_name");
       if (usr) setUsers(usr);
+
+      const { data: apps } = await supabase.from("appointments").select("*");
+      if (apps) setAppointments(apps);
     } catch (err) {
       console.error("Error loading admin data:", err);
+    }
+  };
+
+  // Metrics for Dashboard
+  const patientCount = users.filter((u) => u.role === "PATIENT").length;
+  const doctorCount = users.filter((u) => u.role === "DOCTOR").length;
+  const employeeCount = users.filter((u) => u.role === "EMPLOYEE").length;
+  const teleCount = appointments.filter((a) => a.mode === "TELEMEDICINE").length;
+  const inPersonCount = appointments.filter((a) => a.mode === "IN_PERSON").length;
+
+  const handleDeleteSpecialty = async (id: string, name: string) => {
+    if (!confirm(`Tem certeza de que deseja excluir a especialidade "${name}"?`)) return;
+
+    try {
+      const { error } = await supabase.from("specialties").delete().eq("id", id);
+      if (error) throw error;
+      setFeedback({ type: "success", msg: `Especialidade "${name}" excluída com sucesso.` });
+      loadAllData();
+    } catch (err: any) {
+      setFeedback({ type: "error", msg: "Erro ao excluir especialidade: " + err.message });
+    }
+  };
+
+  const handleDeleteLocation = async (id: string, name: string) => {
+    if (!confirm(`Tem certeza de que deseja excluir a unidade "${name}"?`)) return;
+
+    try {
+      const { error } = await supabase.from("locations").delete().eq("id", id);
+      if (error) throw error;
+      setFeedback({ type: "success", msg: `Unidade "${name}" excluída com sucesso.` });
+      loadAllData();
+    } catch (err: any) {
+      setFeedback({ type: "error", msg: "Erro ao excluir unidade: " + err.message });
+    }
+  };
+
+  const handleDeleteInsurance = async (id: string, name: string) => {
+    if (!confirm(`Tem certeza de que deseja excluir o convênio "${name}"?`)) return;
+
+    try {
+      const { error } = await supabase.from("health_insurances").delete().eq("id", id);
+      if (error) throw error;
+      setFeedback({ type: "success", msg: `Convênio "${name}" excluído com sucesso.` });
+      loadAllData();
+    } catch (err: any) {
+      setFeedback({ type: "error", msg: "Erro ao excluir convênio: " + err.message });
+    }
+  };
+
+  const handleToggleUserActive = async (userId: string, currentStatus: boolean, userName: string) => {
+    const actionName = currentStatus ? "desativar" : "reativar";
+    if (!confirm(`Tem certeza de que deseja ${actionName} o usuário "${userName}"?`)) return;
+
+    try {
+      const { error } = await supabase
+        .from("users")
+        .update({ is_active: !currentStatus })
+        .eq("id", userId);
+
+      if (error) throw error;
+      setFeedback({ type: "success", msg: `Usuário "${userName}" ${currentStatus ? "desativado" : "reativado"} com sucesso.` });
+      loadAllData();
+    } catch (err: any) {
+      setFeedback({ type: "error", msg: "Erro ao alterar status do usuário: " + err.message });
     }
   };
 
@@ -147,23 +219,23 @@ export const AdminPortal = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Banner */}
-      <div className="bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-8">
+      <div className="bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 dark:from-slate-900 dark:to-purple-950 rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-8">
         <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
           Painel do Administrador Geral
         </span>
         <h2 className="text-2xl sm:text-3xl font-bold">
           Administração Med.na
         </h2>
-        <p className="text-purple-200 text-sm mt-1 max-w-xl">
-          Gerencie a infraestrutura hospitalar, unidades de atendimento, especialidades médicas e cadastros de convênios.
+        <p className="text-purple-200 dark:text-slate-300 text-sm mt-1 max-w-xl">
+          Visão geral executiva, gerenciamento de infraestrutura, operadoras e usuários.
         </p>
       </div>
 
       {feedback && (
         <div className={`mb-6 p-4 rounded-xl border text-sm font-semibold flex items-center gap-2 ${
           feedback.type === "success"
-            ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-            : "bg-red-50 border-red-200 text-red-800"
+            ? "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
+            : "bg-red-50 border-red-200 text-red-800 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800"
         }`}>
           {feedback.type === "success" ? <CheckCircle2 className="w-5 h-5 text-emerald-600" /> : <AlertCircle className="w-5 h-5 text-red-600" />}
           {feedback.msg}
@@ -171,13 +243,23 @@ export const AdminPortal = () => {
       )}
 
       {/* Tabs Header */}
-      <div className="flex border-b border-slate-200 mb-6 space-x-8 overflow-x-auto">
+      <div className="flex border-b border-slate-200 dark:border-slate-700 mb-6 space-x-8 overflow-x-auto">
+        <button
+          onClick={() => setActiveTab("dashboard")}
+          className={`pb-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === "dashboard"
+              ? "border-purple-600 text-purple-600 dark:text-purple-400 dark:border-purple-400"
+              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+          }`}
+        >
+          <TrendingUp className="w-4 h-4" /> Dashboard Executivo
+        </button>
         <button
           onClick={() => setActiveTab("specialties")}
           className={`pb-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
             activeTab === "specialties"
-              ? "border-purple-600 text-purple-600"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-purple-600 text-purple-600 dark:text-purple-400 dark:border-purple-400"
+              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
           <Stethoscope className="w-4 h-4" /> Especialidades ({specialties.length})
@@ -186,8 +268,8 @@ export const AdminPortal = () => {
           onClick={() => setActiveTab("locations")}
           className={`pb-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
             activeTab === "locations"
-              ? "border-purple-600 text-purple-600"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-purple-600 text-purple-600 dark:text-purple-400 dark:border-purple-400"
+              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
           <Building className="w-4 h-4" /> Unidades & Hospitais ({locations.length})
@@ -196,8 +278,8 @@ export const AdminPortal = () => {
           onClick={() => setActiveTab("insurances")}
           className={`pb-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
             activeTab === "insurances"
-              ? "border-purple-600 text-purple-600"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-purple-600 text-purple-600 dark:text-purple-400 dark:border-purple-400"
+              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
           <Activity className="w-4 h-4" /> Convênios & Operadoras ({insurances.length})
@@ -206,43 +288,130 @@ export const AdminPortal = () => {
           onClick={() => setActiveTab("users")}
           className={`pb-4 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
             activeTab === "users"
-              ? "border-purple-600 text-purple-600"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-purple-600 text-purple-600 dark:text-purple-400 dark:border-purple-400"
+              : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
           <Users className="w-4 h-4" /> Usuários ({users.length})
         </button>
       </div>
 
+      {/* TAB 0: DASHBOARD EXEC (Roadmap #13) */}
+      {activeTab === "dashboard" && (
+        <div className="space-y-8">
+          {/* Metrics Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm">
+              <span className="text-xs font-bold uppercase text-slate-400">Total Pacientes</span>
+              <div className="text-3xl font-black text-slate-900 dark:text-white mt-2">{patientCount}</div>
+              <p className="text-[11px] text-emerald-600 font-semibold mt-1">● Ativos na base</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm">
+              <span className="text-xs font-bold uppercase text-slate-400">Corpo Médico</span>
+              <div className="text-3xl font-black text-slate-900 dark:text-white mt-2">{doctorCount}</div>
+              <p className="text-[11px] text-sky-600 font-semibold mt-1">● Com CRM cadastrado</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm">
+              <span className="text-xs font-bold uppercase text-slate-400">Consultas no Sistema</span>
+              <div className="text-3xl font-black text-slate-900 dark:text-white mt-2">{appointments.length}</div>
+              <p className="text-[11px] text-purple-600 font-semibold mt-1">● Agendadas e Concluídas</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm">
+              <span className="text-xs font-bold uppercase text-slate-400">Atendimentos Telemedicina</span>
+              <div className="text-3xl font-black text-slate-900 dark:text-white mt-2">{teleCount}</div>
+              <p className="text-[11px] text-teal-600 font-semibold mt-1">● Sessões virtuais WebRTC</p>
+            </div>
+          </div>
+
+          {/* Graphical Summary Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">Proporção Modalidade de Atendimento</h4>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-xs font-bold mb-1">
+                    <span className="text-slate-600 dark:text-slate-300">Telemedicina Virtual ({teleCount})</span>
+                    <span className="text-sky-600">{appointments.length > 0 ? Math.round((teleCount / appointments.length) * 100) : 0}%</span>
+                  </div>
+                  <div className="w-full h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-sky-600 rounded-full" style={{ width: `${appointments.length > 0 ? (teleCount / appointments.length) * 100 : 0}%` }}></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-xs font-bold mb-1">
+                    <span className="text-slate-600 dark:text-slate-300">Presencial ({inPersonCount})</span>
+                    <span className="text-purple-600">{appointments.length > 0 ? Math.round((inPersonCount / appointments.length) * 100) : 0}%</span>
+                  </div>
+                  <div className="w-full h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-purple-600 rounded-full" style={{ width: `${appointments.length > 0 ? (inPersonCount / appointments.length) * 100 : 0}%` }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">Resumo da Infraestrutura</h4>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <span className="block font-black text-xl text-purple-600">{specialties.length}</span>
+                  <span className="text-[10px] font-bold uppercase text-slate-400">Especialidades</span>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <span className="block font-black text-xl text-purple-600">{locations.length}</span>
+                  <span className="text-[10px] font-bold uppercase text-slate-400">Unidades</span>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <span className="block font-black text-xl text-purple-600">{insurances.length}</span>
+                  <span className="text-[10px] font-bold uppercase text-slate-400">Convênios</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* TAB 1: SPECIALTIES */}
       {activeTab === "specialties" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-5 border-b border-slate-200 bg-slate-50">
-              <h3 className="font-bold text-slate-900 text-base">Especialidades Médicas Cadastradas</h3>
+          <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">Especialidades Médicas Cadastradas</h3>
             </div>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 dark:divide-slate-700">
               {specialties.map((s) => (
-                <div key={s.id} className="p-4 flex items-center justify-between hover:bg-slate-50">
-                  <span className="font-bold text-slate-800 text-sm">{s.name}</span>
-                  <span className="text-xs text-slate-400 font-mono">ID: {s.id.substring(0, 8)}...</span>
+                <div key={s.id} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                  <div>
+                    <span className="font-bold text-slate-800 dark:text-slate-100 text-sm">{s.name}</span>
+                    <span className="text-xs text-slate-400 font-mono ml-3">ID: {s.id.substring(0, 8)}...</span>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteSpecialty(s.id, s.name)}
+                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded transition-colors"
+                    title="Excluir especialidade"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 h-fit">
-            <h4 className="font-bold text-slate-900 text-base mb-4">Nova Especialidade</h4>
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 h-fit">
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-4">Nova Especialidade</h4>
             <form onSubmit={handleAddSpecialty} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Nome</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Nome</label>
                 <input
                   type="text"
                   placeholder="Ex: Endocrinologia"
                   value={newSpecName}
                   onChange={(e) => setNewSpecName(e.target.value)}
                   required
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-purple-500 focus:outline-none"
                 />
               </div>
               <button
@@ -261,73 +430,84 @@ export const AdminPortal = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
             {locations.map((l) => (
-              <div key={l.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex justify-between items-start">
+              <div key={l.id} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 flex justify-between items-start">
                 <div>
-                  <h4 className="font-bold text-slate-900 text-base">{l.name}</h4>
-                  <p className="text-xs text-slate-600 mt-1">{l.address_st} - {l.address_city}/{l.address_state}</p>
-                  <p className="text-xs text-slate-500 mt-1">Tel: {l.phone || "Não informado"}</p>
+                  <h4 className="font-bold text-slate-900 dark:text-white text-base">{l.name}</h4>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">{l.address_st} - {l.address_city}/{l.address_state}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Tel: {l.phone || "Não informado"}</p>
                 </div>
-                <span className="px-2.5 py-1 bg-purple-100 text-purple-800 rounded-full text-[10px] font-bold uppercase">Unidade Ativa</span>
+                <div className="flex items-center gap-3">
+                  <span className="px-2.5 py-1 bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 rounded-full text-[10px] font-bold uppercase">
+                    Unidade Ativa
+                  </span>
+                  <button
+                    onClick={() => handleDeleteLocation(l.id, l.name)}
+                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded transition-colors"
+                    title="Excluir unidade"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 h-fit">
-            <h4 className="font-bold text-slate-900 text-base mb-4">Cadastrar Nova Unidade</h4>
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 h-fit">
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-4">Cadastrar Nova Unidade</h4>
             <form onSubmit={handleAddLocation} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Nome da Unidade *</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Nome da Unidade *</label>
                 <input
                   type="text"
                   placeholder="Ex: Med.na Unidade Pinheiros"
                   value={newLocName}
                   onChange={(e) => setNewLocName(e.target.value)}
                   required
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Endereço *</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Endereço *</label>
                 <input
                   type="text"
                   placeholder="Ex: R. Teodoro Sampaio, 1200"
                   value={newLocSt}
                   onChange={(e) => setNewLocSt(e.target.value)}
                   required
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Cidade *</label>
+                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Cidade *</label>
                   <input
                     type="text"
                     value={newLocCity}
                     onChange={(e) => setNewLocCity(e.target.value)}
                     required
-                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-slate-600 mb-1">UF *</label>
+                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">UF *</label>
                   <input
                     type="text"
                     maxLength={2}
                     value={newLocState}
                     onChange={(e) => setNewLocState(e.target.value.toUpperCase())}
                     required
-                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Telefone (opcional)</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Telefone (opcional)</label>
                 <input
                   type="text"
                   placeholder="(11) 3000-4000"
                   value={newLocPhone}
                   onChange={(e) => setNewLocPhone(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <button
@@ -344,55 +524,66 @@ export const AdminPortal = () => {
       {/* TAB 3: INSURANCES */}
       {activeTab === "insurances" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-5 border-b border-slate-200 bg-slate-50">
-              <h3 className="font-bold text-slate-900 text-base">Operadoras e Convênios Aceitos</h3>
+          <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">Operadoras e Convênios Aceitos</h3>
             </div>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 dark:divide-slate-700">
               {insurances.map((i) => (
-                <div key={i.id} className="p-4 flex items-center justify-between hover:bg-slate-50">
+                <div key={i.id} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50">
                   <div>
-                    <h4 className="font-bold text-slate-800 text-sm">{i.name}</h4>
-                    <p className="text-xs text-slate-500">Cód ANS: {i.ans_code || "N/A"} | CNPJ: {i.cnpj || "N/A"}</p>
+                    <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm">{i.name}</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Cód ANS: {i.ans_code || "N/A"} | CNPJ: {i.cnpj || "N/A"}</p>
                   </div>
-                  <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[10px] font-bold uppercase">Credenciado</span>
+                  <div className="flex items-center gap-3">
+                    <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 rounded text-[10px] font-bold uppercase">
+                      Credenciado
+                    </span>
+                    <button
+                      onClick={() => handleDeleteInsurance(i.id, i.name)}
+                      className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded transition-colors"
+                      title="Excluir convênio"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 h-fit">
-            <h4 className="font-bold text-slate-900 text-base mb-4">Cadastrar Convênio</h4>
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 h-fit">
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-4">Cadastrar Convênio</h4>
             <form onSubmit={handleAddInsurance} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Nome da Operadora *</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Nome da Operadora *</label>
                 <input
                   type="text"
                   placeholder="Ex: NotreDame Intermédica"
                   value={newInsName}
                   onChange={(e) => setNewInsName(e.target.value)}
                   required
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">Código ANS (opcional)</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Código ANS (opcional)</label>
                 <input
                   type="text"
                   placeholder="Ex: 352501"
                   value={newAnsCode}
                   onChange={(e) => setNewAnsCode(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 mb-1">CNPJ (opcional)</label>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">CNPJ (opcional)</label>
                 <input
                   type="text"
                   placeholder="00000000000000"
                   value={newCnpj}
                   onChange={(e) => setNewCnpj(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
                 />
               </div>
               <button
@@ -408,35 +599,52 @@ export const AdminPortal = () => {
 
       {/* TAB 4: USERS */}
       {activeTab === "users" && (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="p-5 border-b border-slate-200 bg-slate-50">
-            <h3 className="font-bold text-slate-900 text-base">Todos os Usuários Cadastrados no Sistema</h3>
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+            <h3 className="font-bold text-slate-900 dark:text-white text-base">Todos os Usuários Cadastrados no Sistema</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-600 text-xs font-bold uppercase border-b border-slate-200">
+              <thead className="bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 text-xs font-bold uppercase border-b border-slate-200 dark:border-slate-700">
                 <tr>
                   <th className="px-6 py-3">Nome</th>
                   <th className="px-6 py-3">Email</th>
                   <th className="px-6 py-3">Telefone</th>
                   <th className="px-6 py-3">Papel / Role</th>
                   <th className="px-6 py-3">Status</th>
+                  <th className="px-6 py-3 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700 font-medium">
                 {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-3.5 font-bold text-slate-900">{u.first_name} {u.last_name}</td>
-                    <td className="px-6 py-3.5 text-slate-600">{u.email}</td>
-                    <td className="px-6 py-3.5 text-slate-500 text-xs">{u.phone || "N/A"}</td>
+                  <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                    <td className="px-6 py-3.5 font-bold text-slate-900 dark:text-white">{u.first_name} {u.last_name}</td>
+                    <td className="px-6 py-3.5 text-slate-600 dark:text-slate-300">{u.email}</td>
+                    <td className="px-6 py-3.5 text-slate-500 dark:text-slate-400 text-xs">{u.phone || "N/A"}</td>
                     <td className="px-6 py-3.5">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                        u.role === "ADMIN" ? "bg-purple-100 text-purple-800" : u.role === "DOCTOR" ? "bg-emerald-100 text-emerald-800" : u.role === "EMPLOYEE" ? "bg-amber-100 text-amber-800" : "bg-blue-100 text-blue-800"
+                        u.role === "ADMIN" ? "bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300" : u.role === "DOCTOR" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300" : u.role === "EMPLOYEE" ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300" : "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
                       }`}>
                         {u.role}
                       </span>
                     </td>
-                    <td className="px-6 py-3.5 text-xs text-emerald-600 font-bold">Ativo</td>
+                    <td className="px-6 py-3.5 text-xs font-bold">
+                      <span className={u.is_active !== false ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}>
+                        {u.is_active !== false ? "Ativo" : "Inativo"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-3.5 text-right">
+                      <button
+                        onClick={() => handleToggleUserActive(u.id, u.is_active !== false, `${u.first_name} ${u.last_name}`)}
+                        className={`text-xs font-bold px-2.5 py-1 rounded border transition-colors ${
+                          u.is_active !== false
+                            ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-300"
+                            : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300"
+                        }`}
+                      >
+                        {u.is_active !== false ? "Desativar" : "Reativar"}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

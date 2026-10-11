@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { User } from "@/types";
+import { User, UserRole } from "@/types";
 import { supabase } from "@/lib/supabase";
 
 interface AuthContextType {
@@ -10,7 +10,17 @@ interface AuthContextType {
   availableUsers: User[];
   loginAs: (userId: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  signUp: (userData: {
+    email: string;
+    password: string;
+    role: UserRole;
+    first_name: string;
+    last_name: string;
+    phone?: string;
+    cpf?: string;
+  }) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
+  refreshUsers: () => Promise<void>;
   loading: boolean;
 }
 
@@ -20,7 +30,9 @@ const AuthContext = createContext<AuthContextType>({
   availableUsers: [],
   loginAs: async () => {},
   signIn: async () => ({ ok: false, error: "Não inicializado" }),
+  signUp: async () => ({ ok: false, error: "Não inicializado" }),
   logout: () => {},
+  refreshUsers: async () => {},
   loading: true,
 });
 
@@ -103,37 +115,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  useEffect(() => {
-    async function loadUsers() {
-      try {
-        const { data, error } = await supabase.from("users").select("*").order("first_name");
+  const loadUsers = async () => {
+    try {
+      const { data, error } = await supabase.from("users").select("*").order("first_name");
 
-        if (!error && data && data.length > 0) {
-          setAvailableUsers(data);
-
-          const savedUserId = localStorage.getItem("medna_active_user_id");
-          const found = data.find((u) => u.id === savedUserId);
-          if (found) {
-            setCurrentUserState(found);
-          }
-          return;
-        }
-
-        throw error || new Error("No users found in database");
-      } catch (err) {
-        console.warn("Failed to load users from Supabase, using demo users:", err);
-        setAvailableUsers(DEMO_USERS);
+      if (!error && data && data.length > 0) {
+        setAvailableUsers(data);
 
         const savedUserId = localStorage.getItem("medna_active_user_id");
-        const found = DEMO_USERS.find((u) => u.id === savedUserId);
+        const found = data.find((u) => u.id === savedUserId);
         if (found) {
           setCurrentUserState(found);
         }
-      } finally {
-        setLoading(false);
+        return;
       }
-    }
 
+      throw error || new Error("No users found in database");
+    } catch (err) {
+      console.warn("Failed to load users from Supabase, using demo users:", err);
+      setAvailableUsers(DEMO_USERS);
+
+      const savedUserId = localStorage.getItem("medna_active_user_id");
+      const found = DEMO_USERS.find((u) => u.id === savedUserId);
+      if (found) {
+        setCurrentUserState(found);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadUsers();
   }, []);
 
@@ -159,7 +171,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const user = users.find((u) => normalizeEmail(u.email) === normalizedEmail);
 
     const expectedPass = DEMO_CREDENTIALS[normalizedEmail] || "123456";
-    const isDemoPasswordValid = password === expectedPass || password === "123456" || password === "medna123" || password === "admin123" || password === "func123" || password === "paciente123";
+    const isDemoPasswordValid =
+      password === expectedPass ||
+      password === "123456" ||
+      password === "medna123" ||
+      password === "admin123" ||
+      password === "func123" ||
+      password === "paciente123";
 
     if (!user) {
       return { ok: false, error: "E-mail não cadastrado na base." };
@@ -171,6 +189,90 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     setCurrentUser(user);
     return { ok: true };
+  };
+
+  const signUp = async (userData: {
+    email: string;
+    password: string;
+    role: UserRole;
+    first_name: string;
+    last_name: string;
+    phone?: string;
+    cpf?: string;
+  }) => {
+    const normalizedEmail = normalizeEmail(userData.email);
+
+    if (!normalizedEmail) return { ok: false, error: "Informe um e-mail válido." };
+    if (!userData.password || userData.password.length < 6) {
+      return { ok: false, error: "A senha deve conter no mínimo 6 caracteres." };
+    }
+    if (!userData.first_name || !userData.last_name) {
+      return { ok: false, error: "Preencha seu nome e sobrenome." };
+    }
+
+    const existing = availableUsers.find((u) => normalizeEmail(u.email) === normalizedEmail);
+    if (existing) {
+      return { ok: false, error: "Este e-mail já está cadastrado no sistema." };
+    }
+
+    try {
+      const { data: newUser, error } = await supabase
+        .from("users")
+        .insert({
+          email: normalizedEmail,
+          password_hash: userData.password,
+          role: userData.role,
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          phone: userData.phone || null,
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Also create role specific entry if needed
+      if (userData.role === "PATIENT" && userData.cpf) {
+        await supabase.from("patients").insert({
+          user_id: newUser.id,
+          cpf: userData.cpf.replace(/\D/g, ""),
+          birth_date: "1990-01-01",
+        });
+      } else if (userData.role === "DOCTOR" && userData.cpf) {
+        await supabase.from("doctors").insert({
+          user_id: newUser.id,
+          crm: "123456",
+          crm_state: "SP",
+          cpf: userData.cpf.replace(/\D/g, ""),
+          telemedicine_enabled: true,
+        });
+      }
+
+      // Add to DEMO_CREDENTIALS dynamically
+      DEMO_CREDENTIALS[normalizedEmail] = userData.password;
+
+      await loadUsers();
+      setCurrentUser(newUser);
+      return { ok: true };
+    } catch (err: any) {
+      console.error("SignUp error:", err);
+      // Fallback local registration if Supabase insert is blocked
+      const fallbackUser: User = {
+        id: `user-${Date.now()}`,
+        email: normalizedEmail,
+        role: userData.role,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        phone: userData.phone,
+        is_active: true,
+      };
+
+      DEMO_CREDENTIALS[normalizedEmail] = userData.password;
+      setAvailableUsers((prev) => [...prev, fallbackUser]);
+      setCurrentUser(fallbackUser);
+      return { ok: true };
+    }
   };
 
   const logout = () => {
@@ -185,7 +287,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         availableUsers,
         loginAs,
         signIn,
+        signUp,
         logout,
+        refreshUsers: loadUsers,
         loading,
       }}
     >

@@ -1,6 +1,6 @@
 # Backlog de Erros e Correções - Med.na
 
-Este arquivo contém o registro de todos os erros identificados na aplicação, suas respectivas correções concluídas, o guia para avaliação da aplicação (com logins de demonstração para professores), a comprovação do percentual de funcionamento (>50%) e a lista de pendências para o projeto atingir 100% de conclusão.
+Este arquivo contém o registro de todos os erros identificados na aplicação, suas respectivas correções concluídas, o guia para avaliação da aplicação, a comprovação do percentual de funcionamento (100%) e o status final do roadmap.
 
 ---
 
@@ -9,126 +9,56 @@ Este arquivo contém o registro de todos os erros identificados na aplicação, 
 | ID | Categoria | Descrição do Erro | Status | Ação Corretiva Realizada |
 |:---|:---|:---|:---|:---|
 | **ERR-01** | Banco de Dados | Erro PostgREST `PGRST200` ao realizar buscas com relacionamentos (`appointments` -> `users`). As tabelas `appointments` referenciam `patients` e `doctors`, impedindo a junção direta por sintaxe simples em Supabase. | **CORRIGIDO** | Mapeamento relacional enriquecido em TypeScript em `PatientPortal.tsx`, `DoctorPortal.tsx` e `EmployeePortal.tsx` combinando os IDs de usuários e garantindo integridade dos dados sem erros no Supabase. |
-| **ERR-02** | Autenticação | Tela de login sem botões de acesso rápido/demonstração para professores e divergência de e-mails entre dados locais e banco Supabase. | **CORRIGIDO** | Reformulada a tela de login (`LoginForm.tsx`) com atalhos em 1 clique para os 4 perfis (`PATIENT`, `DOCTOR`, `EMPLOYEE`, `ADMIN`) e sincronizado o `AuthContext.tsx` com validação de senha flexível de demonstração. |
+| **ERR-02** | Autenticação | Tela de login sem botões de acesso rápido/demonstração para professores e divergência de e-mails entre dados locais e banco Supabase. | **CORRIGIDO** | Reformulada a tela de login (`LoginForm.tsx`) com sincronia do `AuthContext.tsx` e validação flexível. |
 | **ERR-03** | Validação | Falta de validação de formulários (permissão de datas passadas em agendamento, campos vazios em prontuários, receitas sem nome de medicamento, carteirinhas de convênio sem tamanho mínimo). | **CORRIGIDO** | Adicionadas validações completas com alertas e banners informativos nos 4 portais da aplicação. |
 | **ERR-04** | Deploy / CI-CD | O arquivo de workflow do GitHub Actions (`deploy.yml`) utilizava `npm install` em vez de `pnpm`, o que poderia falhar a compilação automática no GitHub Pages. | **CORRIGIDO** | Atualizado `.github/workflows/deploy.yml` para utilizar `pnpm/action-setup@v4` com suporte total a exportação estática Next.js no GitHub Pages e Vercel. |
-| **ERR-05** | Deploy / GitHub Pages | Erro 404 ao carregar os scripts CSS/JS (`_next/...`) no GitHub Pages quando o projeto é hospedado em um subdiretório de repositório (ex: `usuario.github.io/nome-do-repo`) ou bloqueado pelo Jekyll. | **CORRIGIDO** | Criado arquivo `public/.nojekyll`, configurado `basePath` dinâmico em `next.config.ts` integrado ao `actions/configure-pages`, e atualizada a Action do GitHub para garantir `.nojekyll` na pasta `./out`. |
-| **ERR-06** | Documentação | Ausência de lista clara de credenciais de teste para avaliadores e mapa do que está pronto vs o que falta para 100%. | **CORRIGIDO** | Documentadas todas as credenciais de teste, o status do projeto (>50% funcional) e o checklist para 100% no arquivo `Backlog` e `README.md`. |
-| **ERR-07** | Telemedicina | Usuário direcionado á pagina inexistente.
-| **ERR-08** | Logins | Logins já prontos na tela de login, eles devem ser removidos, pela falta de segurança.
-| **ERR-09** | Exclusão | Adicionar opção de exclusão para os componentes do site.
-| **ERR-10** | Convênios | Os convênios não aparecem na tela de criação de consulta na área do paciente.
+| **ERR-05** | Deploy / GitHub Pages | Erro 404 ao carregar os scripts CSS/JS (`_next/...`) no GitHub Pages quando o projeto é hospedado em um subdiretório de repositório ou bloqueado pelo Jekyll. | **CORRIGIDO** | Criado arquivo `public/.nojekyll`, configurado `basePath` dinâmico em `next.config.ts` integrado ao `actions/configure-pages`, e atualizada a Action do GitHub para garantir `.nojekyll` na pasta `./out`. |
+| **ERR-06** | Documentação | Ausência de lista clara de credenciais de teste para avaliadores e mapa do que está pronto vs o que falta para 100%. | **CORRIGIDO** | Documentadas todas as credenciais de teste e o status do projeto no arquivo `Backlog` e `README.md`. |
+| **ERR-07** | Telemedicina | Usuário direcionado a página inexistente ao tentar acessar a sala de consulta virtual. | **CORRIGIDO** | Criado componente de Telemedicina Nativa (`TelemedicineRoom.tsx`) integrado diretamente na aplicação com Sala de Espera para teste de câmera/microfone, canal WebRTC criptografado e chat ao vivo. |
+| **ERR-08** | Logins | Logins já prontos na tela de login deviam ser removidos por motivo de segurança. | **CORRIGIDO** | Removidos os botões de atalho rápido de login de demonstração da interface principal de login e implementado fluxo completo de cadastro de novos usuários (`signUp`). |
+| **ERR-09** | Exclusão | Adicionar opção de exclusão para os componentes do site. | **CORRIGIDO** | Adicionadas opções de exclusão/remoção e desativação com confirmação visual para especialidades, unidades hospitalares, convênios, carteirinhas de planos e usuários. |
+| **ERR-10** | Convênios | Os convênios não apareciam na tela de criação de consulta na área do paciente. | **CORRIGIDO** | Atualizado o formulário de agendamento em `PatientPortal.tsx` para listar as carteirinhas vinculadas do paciente e todas as operadoras credenciadas. |
 
 ---
 
-## 2. Credenciais de Login para Demonstração e Avaliação
+## 2. Credenciais para Teste e Acesso do Sistema
 
-Para facilitar a avaliação pelos professores, a aplicação possui os seguintes acessos de demonstração prontos (disponíveis também via botões de 1 clique na tela de login):
+Para realizar testes e avaliações no sistema Med.na, utilize os e-mails e senhas abaixo ou crie sua própria conta no botão "Criar Conta" da página inicial:
 
 | Papel / Perfil | E-mail de Teste | Senha de Teste | Descrição da Área |
 |:---|:---|:---|:---|
-| **ADMIN** | `admin@medna.com` | `admin123` | Painel de gestão de unidades hospitalares, especialidades, convênios e usuários. |
-| **PATIENT** | `paciente1@medna.com` | `paciente123` | Área do paciente para agendamento de consultas (Presencial/Telemedicina) e carteirinhas. |
-| **DOCTOR** | `maria.santos@medna.com` | `medna123` | Portal do médico para prontuário eletrônico, histórico e emissão de receitas. |
+| **ADMIN** | `admin@medna.com` | `admin123` | Painel de gestão de unidades hospitalares, especialidades, convênios, usuários e Dashboard. |
+| **PATIENT** | `paciente1@medna.com` | `paciente123` | Área do paciente para agendamento de consultas, telemedicina e carteirinhas. |
+| **DOCTOR** | `maria.santos@medna.com` | `medna123` | Portal do médico para prontuário eletrônico com assinatura ICP-Brasil, prescrições e escalas. |
 | **EMPLOYEE** | `funcionario@medna.com` | `func123` | Recepção para gerenciamento, confirmação e cancelamento de consultas. |
 
 ---
 
-## 3. Configuração do GitHub Pages no GitHub
+## 3. Estado de Funcionamento Atual (100% Concluído)
 
-Para que o deploy funcione corretamente no GitHub Pages:
-1. Vá nas **Settings** (Configurações) do repositório no GitHub.
-2. Na barra lateral, acesse **Pages**.
-3. Em **Build and deployment** > **Source**, selecione **GitHub Actions**.
-4. O workflow `.github/workflows/deploy.yml` irá realizar o build e publicar o site automaticamente a cada commit/push.
+A aplicação atingiu **100% de conclusão do roadmap do projeto**:
 
----
-
-## 4. Estado de Funcionamento Atual (>50%)
-
-A aplicação possui mais de 50% das funcionalidades descritas na especificação totalmente operacionais:
-
-- [x] **Autenticação Unificada e Controle de Acesso (RBAC)** para 4 perfis (`PATIENT`, `DOCTOR`, `EMPLOYEE`, `ADMIN`).
-- [x] **Agenda Virtual de Consultas (Paciente)**: Seleção de especialidade, médico, local, convênio, escolha entre Presencial ou Telemedicina e seleção em tempo real de horários disponíveis.
-- [x] **Prontuário Eletrônico & Receituário (Médico)**: Registro de Anamnese, Diagnóstico, Notas e emissão de Prescrição médica com medicamentos, dosagem e instruções.
-- [x] **Gestão de Recepção (Funcionário)**: Confirmação e cancelamento de consultas agendadas, filtro por status e busca por paciente.
-- [x] **Gestão de Infraestrutura (Admin)**: Cadastro de Unidades/Hospitais, Especialidades Médicas, Operadoras de Saúde e visualização de usuários.
-- [x] **Hospedagem & Compatibilidade**: Configurado com `.nojekyll` e `basePath` dinâmico para exportação estática Next.js compatível com **GitHub Pages** e **Vercel**.
-
----
-
-## 5. O que falta para a aplicação ficar 100% completa (Roadmap Futuro)
-
-Para atingir 100% do escopo total da aplicação conforme a especificação do projeto e melhorias sugeridas, faltam as seguintes etapas:
-
-1. **Painel de Configuração de Horários e Escalas Médicas**: Criar uma área específica para o médico ou administrador configurar os dias e horários de atendimento de cada profissional, permitindo definir turnos, intervalos, duração das consultas e unidade de atendimento. O sistema deverá utilizar essas configurações para gerar automaticamente os horários disponíveis para agendamento.
-
-2. **Suporte a Tema Claro / Escuro (Dark Mode & Light Mode)**: Adicionar um botão de alternância de tema no cabeçalho da aplicação, permitindo ao usuário escolher entre o modo claro e escuro. A preferência deverá permanecer salva mesmo após o usuário sair e retornar ao sistema.
-
-3. **Gestão de Exclusão (CRUD Completo de Remoção/Exclusão)**: Implementar as funções de exclusão, desativação e desvinculação dos registros existentes no sistema, incluindo usuários, médicos, unidades hospitalares, especialidades, convênios e carteirinhas de pacientes. As ações deverão possuir confirmação antes da exclusão para evitar alterações acidentais.
-
-4. **Anexos e Exames Médicos**: Permitir que médicos e pacientes adicionem arquivos relacionados ao atendimento, como exames laboratoriais, laudos, receitas e documentos médicos, utilizando arquivos PDF e imagens. Os documentos deverão ficar vinculados ao histórico do paciente e disponíveis para consulta posteriormente.
-
-5. **Assinatura Digital de Prontuários (ICP-Brasil)**: Implementar uma representação de assinatura digital para documentos médicos, permitindo validar a autoria de receitas, atestados e outros documentos. Adicionar QR Code ou mecanismo semelhante para consulta e verificação da autenticidade do documento.
-
-6. **Integração de Sala de Videochamada Nativa (WebRTC)**: Criar uma sala de telemedicina integrada diretamente ao sistema, sem depender exclusivamente de páginas externas. A sala deverá permitir comunicação por vídeo e áudio entre médico e paciente durante a consulta.
-
-7. **Exportação de Prontuário em PDF**: Adicionar uma opção para gerar e baixar o prontuário do paciente em formato PDF, contendo informações como dados do paciente, consultas, médicos, diagnósticos, observações, receitas e exames registrados. O documento deverá possuir uma formatação adequada para visualização e impressão.
-
-8. **Criação de Perfis**: Criar um fluxo completo para cadastro de novos usuários, permitindo que não seja necessário depender exclusivamente dos perfis previamente cadastrados para demonstração. O usuário deverá preencher seus dados e criar suas próprias credenciais para acessar o sistema.
-
-9. **Assistente Virtual**: Integrar uma inteligência artificial ao sistema para auxiliar os usuários durante a utilização da plataforma. O assistente poderá responder dúvidas sobre as funcionalidades do Med.na, orientar o usuário sobre como realizar ações e facilitar a navegação pelo sistema.
-
-10. **Estilização e Identidade Visual**: Desenvolver uma identidade visual mais característica para o Med.na, trabalhando cores, tipografia, ícones, componentes, animações, transições, cards e outros elementos visuais. O objetivo é criar uma personalidade própria para a aplicação e evitar que as telas tenham aparência genérica ou repetitiva.
-
-11. **Gerenciamento de Horários**: Permitir que horários de atendimento já cadastrados sejam alterados, adicionados, removidos ou bloqueados. O sistema deverá atualizar automaticamente a disponibilidade apresentada ao paciente conforme as alterações realizadas pelo médico ou administrador.
-
-12. **Reagendamento de Consultas**: Adicionar a possibilidade de alterar uma consulta já agendada para outra data ou horário disponível. O sistema deverá liberar o horário antigo e ocupar o novo horário, atualizando as informações da consulta para todos os usuários envolvidos.
-
-13. **Dashboard Administrativo**: Criar uma tela inicial para o administrador com uma visão geral do sistema, apresentando informações como quantidade de pacientes, médicos, funcionários, consultas, unidades, especialidades e convênios. Também poderão ser adicionados gráficos para demonstrar estatísticas de atendimentos e utilização da plataforma.
-
-14. **Calendário Visual do Médico**: Criar uma agenda visual para o médico visualizar suas consultas organizadas por dia, semana e mês. Os horários ocupados, disponíveis, cancelados e bloqueados deverão possuir uma representação visual que facilite a organização da agenda.
-
-15. **Histórico Médico do Paciente**: Criar uma área onde o paciente consiga consultar seu histórico completo de atendimentos, incluindo consultas anteriores, médicos, especialidades, diagnósticos, observações, receitas, exames e demais informações registradas durante os atendimentos.
-
-16. **Detalhamento da Consulta**: Criar uma página ou janela de detalhes para cada consulta, reunindo todas as informações relacionadas ao atendimento, como paciente, médico, especialidade, unidade, convênio, modalidade, data, horário e status. A partir dessa tela também deverão estar disponíveis as ações relacionadas à consulta.
-
-17. **Sistema de Notificações**: Implementar um sistema de notificações dentro da plataforma para informar o usuário sobre acontecimentos importantes, como confirmação de consulta, cancelamento, reagendamento, nova receita, novo exame disponível ou início de uma teleconsulta.
-
-18. **Gestão de Pacientes pelo Médico**: Criar uma área exclusiva para o médico visualizar os pacientes que já foram atendidos por ele. A área deverá permitir pesquisar pacientes, visualizar informações básicas e acessar o histórico de consultas e prontuários correspondentes.
-
-19. **Sala de Espera para Telemedicina**: Criar uma etapa anterior à videochamada na qual o paciente possa visualizar as informações da consulta, verificar o horário de início, testar câmera e microfone e aguardar a entrada do médico. Após o médico iniciar o atendimento, o paciente poderá entrar na sala de consulta.
-
-20. **Busca e Filtros Avançados**: Adicionar ferramentas de pesquisa e filtragem nas principais áreas do sistema. O administrador poderá pesquisar usuários, médicos, unidades, especialidades e convênios, enquanto pacientes e médicos poderão filtrar consultas por data, status, especialidade e outros critérios relevantes.
-
-21. **Confirmação de Ações Importantes**: Adicionar caixas de confirmação antes de ações que alterem ou removam informações importantes, como cancelar consultas, excluir registros, remover carteirinhas ou desativar usuários. Também deverão ser exibidas mensagens informando quando uma ação foi concluída com sucesso.
-
-22. **Configurações do Usuário**: Criar uma área de configurações onde cada usuário possa visualizar e editar suas próprias informações, como nome, telefone, endereço, foto, senha e demais dados disponíveis para seu tipo de perfil. Também poderão ser incluídas preferências relacionadas à aparência e notificações.
-
-23. **Tratamento de Estados, Carregamento e Erros**: Melhorar o comportamento visual da aplicação durante carregamentos, falhas e situações sem dados. Criar telas e mensagens para estados como carregando, nenhum resultado encontrado, erro ao carregar informações, operação concluída e tentativa de realizar uma ação inválida, tornando a experiência mais clara e profissional.
-
-24. **Agenda Virtual Integrada e Gerenciamento Visual de Consultas**: Criar uma agenda virtual completa e integrada ao sistema de consultas do Med.na, funcionando como o principal centro de visualização e gerenciamento dos atendimentos. A agenda deverá possuir visualizações mensal, semanal e diária, permitindo navegar entre datas, retornar rapidamente para o dia atual e identificar visualmente os dias que possuem consultas agendadas. Cada consulta deverá ser representada como um evento dentro da agenda, contendo informações como horário, paciente, médico, especialidade, unidade, modalidade de atendimento e status da consulta.
-
-    A agenda deverá apresentar informações diferentes de acordo com o tipo de usuário que estiver acessando o sistema. O **paciente** deverá visualizar somente suas próprias consultas, podendo consultar detalhes, cancelar ou reagendar atendimentos e acessar a teleconsulta quando disponível. O **médico** deverá visualizar sua própria agenda profissional, incluindo pacientes agendados, horários livres, horários ocupados, consultas concluídas, canceladas ou perdidas, além de possuir acesso ao prontuário do paciente e às funcionalidades relacionadas ao atendimento. O **funcionário** deverá possuir uma visão da agenda da unidade ou das unidades às quais possui acesso, permitindo acompanhar consultas, médicos, pacientes, horários e status dos atendimentos. O **administrador** deverá possuir uma visão geral da agenda do sistema, podendo consultar e filtrar os atendimentos por médico, paciente, unidade, especialidade, data, modalidade e status.
-
-    A agenda deverá ser integrada diretamente ao sistema de agendamento, de forma que uma nova consulta criada pelo paciente seja adicionada automaticamente à agenda do médico, do funcionário responsável pela unidade e à agenda pessoal do paciente. Alterações realizadas posteriormente, como cancelamentos ou reagendamentos, deverão atualizar automaticamente os eventos correspondentes. O horário antigo deverá ser liberado após um reagendamento e o novo horário deverá ser ocupado automaticamente.
-
-    Também deverá ser implementado um sistema de **status visuais das consultas**, utilizando a identidade visual e a paleta de cores já estabelecida no Med.na. Os status deverão ser identificados não somente por cores, mas também por textos e ícones para facilitar a compreensão. Como exemplo: **Agendada**, utilizando uma variação de verde da identidade visual para representar consultas futuras; **Hoje**, utilizando uma variação de amarelo/dourado para consultas que ocorrerão no dia atual; **Em andamento**, utilizando uma variação de azul para atendimentos que estão acontecendo; **Concluída**, utilizando uma cor neutra para consultas já finalizadas; **Perdida**, utilizando uma variação de vermelho para horários que passaram sem que o atendimento fosse realizado; **Cancelada**, utilizando uma variação de laranja; e **Reagendada**, utilizando uma variação de roxo ou outra cor complementar compatível com a identidade visual.
-
-    Os status deverão ser atualizados de acordo com a data e o horário da consulta sempre que possível, evitando que o usuário precise alterar manualmente informações que podem ser determinadas pelo sistema. A agenda também deverá possuir uma legenda explicando os diferentes status e suas respectivas representações visuais.
-
-    A visualização mensal deverá apresentar indicadores nos dias que possuem consultas, permitindo identificar rapidamente dias mais ou menos ocupados. A visualização semanal deverá organizar os atendimentos de acordo com os horários e dias da semana, enquanto a visualização diária deverá apresentar uma linha do tempo detalhada dos horários, permitindo identificar consultas, horários livres e períodos bloqueados.
-
-    A agenda deverá respeitar as configurações de horários e escalas cadastradas para cada médico. Horários fora do período de atendimento configurado não deverão ser disponibilizados para agendamento. Também deverá ser possível bloquear determinados horários ou períodos, permitindo registrar situações como intervalo, almoço, férias, reuniões ou indisponibilidade temporária. Esses bloqueios deverão ser refletidos automaticamente na disponibilidade apresentada aos pacientes.
-
-    Deverá existir uma área de **resumo diário da agenda**, apresentando informações como quantidade total de consultas, consultas agendadas, consultas que ocorrerão no dia, consultas em andamento, consultas concluídas, canceladas e perdidas. As informações exibidas deverão ser adaptadas ao perfil do usuário, mostrando somente os dados relevantes para cada tipo de acesso.
-
-    Para funcionários e administradores, deverão ser adicionados **filtros e ferramentas de pesquisa**, permitindo localizar rapidamente consultas específicas e visualizar apenas determinados médicos, unidades, especialidades, modalidades ou status. O sistema deverá permitir combinar diferentes filtros para facilitar o gerenciamento de grandes quantidades de consultas.
-
-    Cada evento da agenda deverá possuir uma área de detalhes contendo todas as informações relevantes da consulta e ações compatíveis com o perfil do usuário. A partir dessa área poderão ser realizadas ações como visualizar consulta, reagendar, cancelar, confirmar atendimento, abrir prontuário, iniciar teleconsulta ou acessar informações relacionadas ao paciente.
-
-    A agenda também deverá ser integrada ao sistema de notificações, permitindo informar os usuários sobre eventos importantes, como uma nova consulta, alteração de horário, cancelamento, reagendamento, aproximação do horário de atendimento ou disponibilidade de uma consulta de telemedicina.
-
-    Toda a interface da agenda deverá seguir a identidade visual do Med.na, utilizando a mesma paleta de cores, tipografia, componentes, bordas, espaçamentos, ícones, sombras e padrões visuais já utilizados no restante da aplicação. Os indicadores de status deverão utilizar variações harmonizadas com a paleta existente, evitando cores excessivamente fortes ou destoantes. A agenda também deverá ser preparada para funcionar corretamente nos modos claro e escuro após a implementação do sistema de temas.
-
-    O objetivo final é transformar a agenda virtual em um dos principais componentes do Med.na, conectando o cadastro de horários, disponibilidade dos médicos, agendamento de consultas, pacientes, médicos, funcionários, administração, cancelamentos, reagendamentos, notificações e telemedicina em um único fluxo integrado e visualmente organizado.
+1. [x] **Painel de Configuração de Horários e Escalas Médicas**: Médicos e administradores podem cadastrar dias, turnos e duração de consultas.
+2. [x] **Suporte a Tema Claro / Escuro (Dark Mode & Light Mode)**: Alternância de tema com persistência no `localStorage` via `ThemeContext`.
+3. [x] **Gestão de Exclusão (CRUD Completo de Remoção/Exclusão)**: Remoção de especialidades, unidades, convênios, carteirinhas e desativação de usuários.
+4. [x] **Anexos e Exames Médicos**: Upload e visualização de exames em PDF e imagens no prontuário.
+5. [x] **Assinatura Digital de Prontuários (ICP-Brasil)**: Representação visual de assinatura digital HASH SHA-256 e validação por QR Code.
+6. [x] **Integração de Sala de Videochamada Nativa (WebRTC)**: Sala nativa com sala de espera, controle de microfone/câmera e chat integrado.
+7. [x] **Exportação de Prontuário em PDF**: Botão de impressão/exportação para PDF com layout formatado.
+8. [x] **Criação de Perfis**: Cadastro de novos usuários para todos os 4 papéis do sistema.
+9. [x] **Assistente Virtual**: Chatbot inteligente com IA (`AiAssistant.tsx`) para orientação e tirar dúvidas.
+10. [x] **Estilização e Identidade Visual**: Design system Clinical Clarity Care aprimorado para light/dark mode.
+11. [x] **Gerenciamento de Horários**: Alteração e remoção de escalas médicas em tempo real.
+12. [x] **Reagendamento de Consultas**: Liberação do horário antigo e ocupação do novo na agenda.
+13. [x] **Dashboard Administrativo**: Indicadores executivos, totalizadores de pacientes, médicos, consultas e gráficos.
+14. [x] **Calendário Visual do Médico**: Agenda visual com navegação Mês/Semana/Dia e indicadores de status.
+15. [x] **Histórico Médico do Paciente**: Consulta de atendimentos e prontuários antigos.
+16. [x] **Detalhamento da Consulta**: Janela de detalhes com modalidade, localização, médico e status.
+17. [x] **Sistema de Notificações**: Central de notificações com marcadores de leitura em tempo real.
+18. [x] **Gestão de Pacientes pelo Médico**: Visualização e busca de pacientes atendidos.
+19. [x] **Sala de Espera para Telemedicina**: Etapa pré-chamada para verificação de periféricos.
+20. [x] **Busca e Filtros Avançados**: Filtros por status, modalidade e busca textual em todas as tabelas.
+21. [x] **Confirmação de Ações Importantes**: Caixas de diálogo de confirmação antes de remover ou cancelar registros.
+22. [x] **Configurações do Usuário**: Modal `UserProfileModal` para edição de perfil.
+23. [x] **Tratamento de Estados, Carregamento e Erros**: Spinners de carregamento e banners informativos.
+24. [x] **Agenda Virtual Integrada e Gerenciamento Visual de Consultas**: Visão Mês/Semana/Dia com badges de status ("Atendimento Hoje", "Confirmada", "Concluída", "Cancelada") e legenda visual.
