@@ -103,11 +103,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleAiAssistant }) => {
               onChange={(e) => loginAs(e.target.value)}
               className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs font-semibold rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-teal-500 outline-none"
             >
-              {availableUsers.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.first_name} {u.last_name} ({u.role})
-                </option>
-              ))}
+              {availableUsers
+                .filter((u) => u.is_active !== false)
+                .map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.first_name} {u.last_name} ({u.role})
+                  </option>
+                ))}
             </select>
           </div>
 

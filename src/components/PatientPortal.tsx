@@ -131,7 +131,9 @@ export const PatientPortal = () => {
     loadData();
   }, [currentUser, loadData]);
 
-  const matchedDoctors = doctors.filter((doc) => {
+  const activeDoctors = doctors.filter((doc) => doc.user?.is_active !== false);
+
+  const matchedDoctors = activeDoctors.filter((doc) => {
     if (!selectedSpecialty) return true;
     const docSpecs = doctorSpecialtiesMap[doc.user_id] || [];
     return docSpecs.includes(selectedSpecialty);
@@ -139,7 +141,7 @@ export const PatientPortal = () => {
 
   // Fallback: If a newly created specialty has no assigned doctors in doctor_specialties,
   // display all active doctors so the patient can still schedule an appointment.
-  const filteredDoctors = matchedDoctors.length > 0 ? matchedDoctors : doctors;
+  const filteredDoctors = matchedDoctors.length > 0 ? matchedDoctors : activeDoctors;
 
   useEffect(() => {
     if (selectedDoctor && selectedSpecialty) {

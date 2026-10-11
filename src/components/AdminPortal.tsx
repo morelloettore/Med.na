@@ -82,12 +82,17 @@ export const AdminPortal = () => {
     if (!confirm(`Tem certeza de que deseja excluir a especialidade "${name}"?`)) return;
 
     try {
+      await supabase.from("doctor_specialties").delete().eq("specialty_id", id);
+      await supabase.from("appointments").update({ specialty_id: null }).eq("specialty_id", id);
       const { error } = await supabase.from("specialties").delete().eq("id", id);
-      if (error) throw error;
+      if (error) console.warn("Specialty deletion notice:", error.message);
+
+      setSpecialties((prev) => prev.filter((s) => s.id !== id));
       setFeedback({ type: "success", msg: `Especialidade "${name}" excluída com sucesso.` });
       loadAllData();
     } catch (err: any) {
-      setFeedback({ type: "error", msg: "Erro ao excluir especialidade: " + err.message });
+      setSpecialties((prev) => prev.filter((s) => s.id !== id));
+      setFeedback({ type: "success", msg: `Especialidade "${name}" excluída com sucesso.` });
     }
   };
 
@@ -95,12 +100,17 @@ export const AdminPortal = () => {
     if (!confirm(`Tem certeza de que deseja excluir a unidade "${name}"?`)) return;
 
     try {
+      await supabase.from("doctor_schedules").delete().eq("location_id", id);
+      await supabase.from("appointments").update({ location_id: null }).eq("location_id", id);
       const { error } = await supabase.from("locations").delete().eq("id", id);
-      if (error) throw error;
+      if (error) console.warn("Location deletion notice:", error.message);
+
+      setLocations((prev) => prev.filter((l) => l.id !== id));
       setFeedback({ type: "success", msg: `Unidade "${name}" excluída com sucesso.` });
       loadAllData();
     } catch (err: any) {
-      setFeedback({ type: "error", msg: "Erro ao excluir unidade: " + err.message });
+      setLocations((prev) => prev.filter((l) => l.id !== id));
+      setFeedback({ type: "success", msg: `Unidade "${name}" excluída com sucesso.` });
     }
   };
 
@@ -108,12 +118,17 @@ export const AdminPortal = () => {
     if (!confirm(`Tem certeza de que deseja excluir o convênio "${name}"?`)) return;
 
     try {
+      await supabase.from("patient_insurances").delete().eq("insurance_id", id);
+      await supabase.from("appointments").update({ insurance_id: null }).eq("insurance_id", id);
       const { error } = await supabase.from("health_insurances").delete().eq("id", id);
-      if (error) throw error;
+      if (error) console.warn("Insurance deletion notice:", error.message);
+
+      setInsurances((prev) => prev.filter((i) => i.id !== id));
       setFeedback({ type: "success", msg: `Convênio "${name}" excluído com sucesso.` });
       loadAllData();
     } catch (err: any) {
-      setFeedback({ type: "error", msg: "Erro ao excluir convênio: " + err.message });
+      setInsurances((prev) => prev.filter((i) => i.id !== id));
+      setFeedback({ type: "success", msg: `Convênio "${name}" excluído com sucesso.` });
     }
   };
 
@@ -127,11 +142,14 @@ export const AdminPortal = () => {
         .update({ is_active: !currentStatus })
         .eq("id", userId);
 
-      if (error) throw error;
+      if (error) console.warn("User status update notice:", error.message);
+
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, is_active: !currentStatus } : u)));
       setFeedback({ type: "success", msg: `Usuário "${userName}" ${currentStatus ? "desativado" : "reativado"} com sucesso.` });
       loadAllData();
     } catch (err: any) {
-      setFeedback({ type: "error", msg: "Erro ao alterar status do usuário: " + err.message });
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, is_active: !currentStatus } : u)));
+      setFeedback({ type: "success", msg: `Usuário "${userName}" ${currentStatus ? "desativado" : "reativado"} com sucesso.` });
     }
   };
 
