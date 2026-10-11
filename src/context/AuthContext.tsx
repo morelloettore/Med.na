@@ -322,6 +322,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           cpf: userData.cpf.replace(/\D/g, ""),
           telemedicine_enabled: true,
         });
+
+        // Assign at least 3 specialties to the new doctor
+        const { data: specs } = await supabase.from("specialties").select("id");
+        if (specs && specs.length > 0) {
+          const selectedSpecs = specs.slice(0, 3);
+          const docSpecLinks = selectedSpecs.map((s) => ({
+            doctor_id: insertedUser.id,
+            specialty_id: s.id,
+          }));
+          await supabase.from("doctor_specialties").insert(docSpecLinks);
+        }
       }
     } catch (err: any) {
       console.warn("Supabase insert failed/fallback used:", err);
