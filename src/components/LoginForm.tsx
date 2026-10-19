@@ -60,19 +60,23 @@ export function LoginForm() {
 
     // Validate authorization key requirement for non-patient roles
     if (regRole !== "PATIENT") {
-      const validCodeMap: Record<UserRole, string> = {
-        DOCTOR: "MEDNA-MEDICO-2025",
-        EMPLOYEE: "MEDNA-FUNC-2025",
-        ADMIN: "MEDNA-ADMIN-2025",
-        PATIENT: "",
+      const validCodesMap: Record<UserRole, string[]> = {
+        DOCTOR: ["MEDNA-MEDICO-2025", "MEDNA-DOCTOR-2025"],
+        EMPLOYEE: ["MEDNA-FUNC-2025", "MEDNA-EMPLOYEE-2025", "MEDNA-FUNCIONARIO-2025"],
+        ADMIN: ["MEDNA-ADMIN-2025", "MEDNA-ADMINISTRADOR-2025"],
+        PATIENT: [],
       };
 
-      const requiredCode = validCodeMap[regRole];
-      if (!regAuthCode || regAuthCode.trim().toUpperCase() !== requiredCode) {
+      const allowedCodes = validCodesMap[regRole] || [];
+      const inputCode = regAuthCode ? regAuthCode.trim().toUpperCase() : "";
+
+      if (!inputCode || !allowedCodes.includes(inputCode)) {
         setError(
           `Código de autorização inválido ou ausente para a criação de conta como ${
             regRole === "ADMIN" ? "Administrador" : regRole === "DOCTOR" ? "Médico" : "Funcionário"
-          }. Entre em contato com a administração hospitalar Med.na.`
+          }. Utilize o código institucional (ex: MEDNA-${
+            regRole === "DOCTOR" ? "MEDICO" : regRole === "EMPLOYEE" ? "FUNC" : "ADMIN"
+          }-2025) ou contate a administração hospitalar Med.na.`
         );
         return;
       }
@@ -318,14 +322,18 @@ export function LoginForm() {
             {regRole !== "PATIENT" && (
               <div>
                 <label className="block text-[11px] font-bold uppercase text-amber-600 dark:text-amber-400 mb-1 flex justify-between">
-                  <span>Código de Autorização Institucional</span>
-                  <span className="text-[10px] font-normal lowercase text-slate-400">(ex: MEDNA-{regRole}-2025)</span>
+                  <span>Código de Autorização Institucional *</span>
+                  <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                    ex: MEDNA-{regRole === "DOCTOR" ? "MEDICO" : regRole === "EMPLOYEE" ? "FUNC" : "ADMIN"}-2025
+                  </span>
                 </label>
                 <input
                   type="text"
                   value={regAuthCode}
                   onChange={(e) => setRegAuthCode(e.target.value)}
-                  placeholder={`Informe o código para ${regRole}`}
+                  placeholder={`Digite o código institucional de ${
+                    regRole === "ADMIN" ? "Administrador" : regRole === "DOCTOR" ? "Médico" : "Funcionário"
+                  }`}
                   required
                   className="w-full rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/20 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-amber-500 font-mono"
                 />
