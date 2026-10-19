@@ -8,6 +8,7 @@ interface AuthContextType {
   currentUser: User | null;
   setCurrentUser: (user: User | null) => void;
   availableUsers: User[];
+  loggedInUserIds: string[];
   loginAs: (userId: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   signUp: (userData: {
@@ -28,6 +29,7 @@ const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   setCurrentUser: () => {},
   availableUsers: [],
+  loggedInUserIds: [],
   loginAs: async () => {},
   signIn: async () => ({ ok: false, error: "Não inicializado" }),
   signUp: async () => ({ ok: false, error: "Não inicializado" }),
@@ -139,15 +141,48 @@ const saveCustomCredential = (email: string, pass: string) => {
   }
 };
 
+const getLoggedInUserIds = (): string[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const data = localStorage.getItem("medna_logged_in_user_ids");
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+};
+
+const recordLoggedInUserId = (userId: string): string[] => {
+  if (typeof window === "undefined" || !userId) return getLoggedInUserIds();
+  try {
+    const current = getLoggedInUserIds();
+    if (!current.includes(userId)) {
+      const updated = [...current, userId];
+      localStorage.setItem("medna_logged_in_user_ids", JSON.stringify(updated));
+      return updated;
+    }
+    return current;
+  } catch (err) {
+    console.error("Failed to record logged in user id:", err);
+    return getLoggedInUserIds();
+  }
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUserState] = useState<User | null>(null);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+  const [loggedInUserIds, setLoggedInUserIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    setLoggedInUserIds(getLoggedInUserIds());
+  }, []);
 
   const setCurrentUser = (user: User | null) => {
     setCurrentUserState(user);
     if (user) {
       localStorage.setItem("medna_active_user_id", user.id);
+      const updatedIds = recordLoggedInUserId(user.id);
+      setLoggedInUserIds(updatedIds);
     } else {
       localStorage.removeItem("medna_active_user_id");
     }
@@ -175,6 +210,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const found = allUsers.find((u) => u.id === savedUserId);
       if (found) {
         setCurrentUserState(found);
+        const updatedIds = recordLoggedInUserId(found.id);
+        setLoggedInUserIds(updatedIds);
       }
     } catch (err) {
       console.warn("Failed to load users, using demo & custom users:", err);
@@ -186,6 +223,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const found = allUsers.find((u) => u.id === savedUserId);
       if (found) {
         setCurrentUserState(found);
+        const updatedIds = recordLoggedInUserId(found.id);
+        setLoggedInUserIds(updatedIds);
       }
     } finally {
       setLoading(false);
@@ -372,6 +411,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         currentUser,
         setCurrentUser,
         availableUsers,
+        loggedInUserIds,
         loginAs,
         signIn,
         signUp,

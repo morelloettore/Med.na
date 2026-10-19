@@ -22,9 +22,16 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ onToggleAiAssistant }) => {
-  const { currentUser, availableUsers, loginAs, logout } = useAuth();
+  const { currentUser, availableUsers, loggedInUserIds, loginAs, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [profileOpen, setProfileOpen] = useState(false);
+
+  // Filter availableUsers to only include users that have logged in during this session/device history (plus current user)
+  const selectableUsers = availableUsers.filter((u) => {
+    if (u.is_active === false) return false;
+    if (currentUser && u.id === currentUser.id) return true;
+    return loggedInUserIds.includes(u.id);
+  });
 
   const getRoleBadge = (role?: string) => {
     switch (role) {
@@ -95,21 +102,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleAiAssistant }) => {
           {/* Notification Center */}
           <NotificationCenter />
 
-          {/* Role Switcher */}
+          {/* Role Switcher - displays only users logged in on this device */}
           <div className="hidden lg:flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 p-1.5 pl-3 rounded-xl text-sm">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Perfil:</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Trocar Conta:</span>
             <select
               value={currentUser?.id || ""}
               onChange={(e) => loginAs(e.target.value)}
               className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs font-semibold rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-teal-500 outline-none"
             >
-              {availableUsers
-                .filter((u) => u.is_active !== false)
-                .map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.first_name} {u.last_name} ({u.role})
-                  </option>
-                ))}
+              {selectableUsers.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.first_name} {u.last_name} ({u.role})
+                </option>
+              ))}
             </select>
           </div>
 

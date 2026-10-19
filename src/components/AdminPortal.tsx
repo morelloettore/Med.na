@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Specialty, Location, HealthInsurance, User, Appointment } from "@/types";
+import { getFriendlyErrorMessage } from "@/lib/errorUtils";
 import {
   ShieldAlert,
   Building,
@@ -186,7 +187,7 @@ export const AdminPortal = () => {
       setFeedback({ type: "success", msg: "Especialidade cadastrada e vinculada aos médicos com sucesso!" });
       loadAllData();
     } catch (err: any) {
-      setFeedback({ type: "error", msg: "Erro ao adicionar especialidade: " + err.message });
+      setFeedback({ type: "error", msg: getFriendlyErrorMessage(err, "Erro ao adicionar especialidade.") });
     }
   };
 
@@ -220,7 +221,7 @@ export const AdminPortal = () => {
       setFeedback({ type: "success", msg: "Unidade hospitalar cadastrada com sucesso!" });
       loadAllData();
     } catch (err: any) {
-      setFeedback({ type: "error", msg: "Erro ao adicionar unidade: " + err.message });
+      setFeedback({ type: "error", msg: getFriendlyErrorMessage(err, "Erro ao adicionar unidade.") });
     }
   };
 
@@ -247,7 +248,7 @@ export const AdminPortal = () => {
       setFeedback({ type: "success", msg: "Convênio/operadora cadastrado com sucesso!" });
       loadAllData();
     } catch (err: any) {
-      setFeedback({ type: "error", msg: "Erro ao cadastrar convênio: " + err.message });
+      setFeedback({ type: "error", msg: getFriendlyErrorMessage(err, "Erro ao cadastrar convênio.") });
     }
   };
 

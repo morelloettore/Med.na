@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Appointment, HealthInsurance, User } from "@/types";
+import { getFriendlyErrorMessage } from "@/lib/errorUtils";
 import {
   CheckCircle2,
   XCircle,
@@ -87,7 +88,7 @@ export const EmployeePortal = () => {
       await loadData();
     } catch (err: any) {
       console.error("Update status error:", err);
-      alert("Erro ao atualizar status: " + err.message);
+      alert(getFriendlyErrorMessage(err, "Erro ao atualizar status da consulta."));
     }
   };
 
