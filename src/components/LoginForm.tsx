@@ -30,6 +30,7 @@ export function LoginForm() {
   const [regPhone, setRegPhone] = useState("");
   const [regCpf, setRegCpf] = useState("");
   const [regRole, setRegRole] = useState<UserRole>("PATIENT");
+  const [regAuthCode, setRegAuthCode] = useState("");
   const [regPassword, setRegPassword] = useState("");
 
   const [error, setError] = useState("");
@@ -56,6 +57,27 @@ export function LoginForm() {
     e.preventDefault();
     setError("");
     setSuccessMsg("");
+
+    // Validate authorization key requirement for non-patient roles
+    if (regRole !== "PATIENT") {
+      const validCodeMap: Record<UserRole, string> = {
+        DOCTOR: "MEDNA-MEDICO-2025",
+        EMPLOYEE: "MEDNA-FUNC-2025",
+        ADMIN: "MEDNA-ADMIN-2025",
+        PATIENT: "",
+      };
+
+      const requiredCode = validCodeMap[regRole];
+      if (!regAuthCode || regAuthCode.trim().toUpperCase() !== requiredCode) {
+        setError(
+          `Código de autorização inválido ou ausente para a criação de conta como ${
+            regRole === "ADMIN" ? "Administrador" : regRole === "DOCTOR" ? "Médico" : "Funcionário"
+          }. Entre em contato com a administração hospitalar Med.na.`
+        );
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     const result = await signUp({
@@ -279,15 +301,36 @@ export function LoginForm() {
               <label className="block text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Perfil / Perfil de Acesso</label>
               <select
                 value={regRole}
-                onChange={(e) => setRegRole(e.target.value as UserRole)}
+                onChange={(e) => {
+                  setRegRole(e.target.value as UserRole);
+                  setRegAuthCode("");
+                  setError("");
+                }}
                 className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 font-semibold outline-none focus:border-teal-500"
               >
                 <option value="PATIENT">Paciente</option>
-                <option value="DOCTOR">Médico</option>
-                <option value="EMPLOYEE">Funcionário / Recepção</option>
-                <option value="ADMIN">Administrador</option>
+                <option value="DOCTOR">Médico (Requer Código Institucional)</option>
+                <option value="EMPLOYEE">Funcionário / Recepção (Requer Código Institucional)</option>
+                <option value="ADMIN">Administrador (Requer Código Institucional)</option>
               </select>
             </div>
+
+            {regRole !== "PATIENT" && (
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-amber-600 dark:text-amber-400 mb-1 flex justify-between">
+                  <span>Código de Autorização Institucional</span>
+                  <span className="text-[10px] font-normal lowercase text-slate-400">(ex: MEDNA-{regRole}-2025)</span>
+                </label>
+                <input
+                  type="text"
+                  value={regAuthCode}
+                  onChange={(e) => setRegAuthCode(e.target.value)}
+                  placeholder={`Informe o código para ${regRole}`}
+                  required
+                  className="w-full rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/20 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-amber-500 font-mono"
+                />
+              </div>
+            )}
 
             <div>
               <label className="block text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Senha (mínimo 6 dígitos)</label>

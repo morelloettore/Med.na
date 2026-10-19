@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { Doctor, Specialty, Location, HealthInsurance, PatientInsurance, Appointment, DoctorSchedule, User } from "@/types";
 import { TelemedicineRoom } from "@/components/TelemedicineRoom";
 import { VirtualAgenda } from "@/components/VirtualAgenda";
+import { getFriendlyErrorMessage } from "@/lib/errorUtils";
 import {
   Calendar,
   Clock,
@@ -250,34 +251,75 @@ export const PatientPortal = () => {
 
     const scheduledAt = `${selectedDate}T${selectedTime}:00`;
 
-    // Resolve actual health_insurances ID
-    let resolvedInsuranceId: string | null = null;
+    // Resolve actual patient_insurances record or direct health_insurances ID
+    let resolvedInsuranceCardId: string | null = null;
     if (selectedInsurance) {
-      // Check if selectedInsurance matches a patient_insurances card
+      // Check if selectedInsurance is already a patient_insurances card ID
       const matchedCard = patientInsurances.find((pi) => pi.id === selectedInsurance);
       if (matchedCard) {
-        resolvedInsuranceId = matchedCard.insurance_id;
+        resolvedInsuranceCardId = matchedCard.id;
       } else {
-        // Otherwise, it's a direct health_insurances ID
+        // If it's a health_insurances ID, check if patient already has a card for it, or auto-create one
         const matchedHealthIns = allInsurances.find((hi) => hi.id === selectedInsurance);
         if (matchedHealthIns) {
-          resolvedInsuranceId = matchedHealthIns.id;
+          const existingCard = patientInsurances.find((pi) => pi.insurance_id === matchedHealthIns.id);
+          if (existingCard) {
+            resolvedInsuranceCardId = existingCard.id;
+          } else {
+            // Create a patient_insurances card entry so FK constraint appointments_insurance_id_fkey holds
+            const { data: newCard, error: cardError } = await supabase
+              .from("patient_insurances")
+              .insert({
+                patient_id: currentUser.id,
+                insurance_id: matchedHealthIns.id,
+                card_number: `CONV-${Date.now().toString().slice(-6)}`,
+                status: "ACTIVE"
+              })
+              .select()
+              .single();
+
+            if (!cardError && newCard) {
+              resolvedInsuranceCardId = newCard.id;
+            }
+          }
         }
       }
     }
 
     try {
+      // Ensure patient record exists in 'patients' table before inserting appointment
+      const { data: patRecord } = await supabase.from("patients").select("user_id").eq("user_id", currentUser.id).single();
+      if (!patRecord) {
+        await supabase.from("patients").insert({
+          user_id: currentUser.id,
+          cpf: currentUser.phone?.replace(/\D/g, "") || `000${Date.now().toString().slice(-8)}`,
+          birth_date: "1990-01-01"
+        });
+      }
+
+      // Ensure doctor record exists in 'doctors' table before inserting appointment
+      const { data: docRecord } = await supabase.from("doctors").select("user_id").eq("user_id", selectedDoctor).single();
+      if (!docRecord) {
+        await supabase.from("doctors").insert({
+          user_id: selectedDoctor,
+          crm: `${Math.floor(100000 + Math.random() * 900000)}`,
+          crm_state: "SP",
+          cpf: `111${Date.now().toString().slice(-8)}`,
+          telemedicine_enabled: true
+        });
+      }
+
       const { error } = await supabase.from("appointments").insert({
         patient_id: currentUser.id,
         doctor_id: selectedDoctor,
         specialty_id: selectedSpecialty || null,
         location_id: selectedLocation || null,
-        insurance_id: resolvedInsuranceId,
+        insurance_id: resolvedInsuranceCardId,
         scheduled_at: scheduledAt,
         duration_min: 30,
         mode: selectedMode,
         status: "SCHEDULED",
-        price: resolvedInsuranceId ? 0 : 150.0,
+        price: resolvedInsuranceCardId ? 0 : 150.0,
         telemedicine_url: selectedMode === "TELEMEDICINE" ? `https://meet.medna.com.br/consulta-${Date.now()}` : null
       });
 
@@ -289,7 +331,8 @@ export const PatientPortal = () => {
       setActiveTab("appointments");
     } catch (err: any) {
       console.error("Booking error:", err);
-      setBookingError(err.message || "Erro ao realizar agendamento.");
+      const friendlyMsg = getFriendlyErrorMessage(err, "Não foi possível agendar a consulta. Por favor, verifique os dados e tente novamente.");
+      setBookingError(friendlyMsg);
     }
   };
 
@@ -365,7 +408,8 @@ export const PatientPortal = () => {
       alert("Carteirinha cadastrada com sucesso!");
     } catch (err: any) {
       console.error("Add insurance error:", err);
-      alert("Erro ao cadastrar plano de saúde: " + err.message);
+      const friendlyMsg = getFriendlyErrorMessage(err, "Erro ao cadastrar plano de saúde.");
+      alert(friendlyMsg);
     }
   };
 

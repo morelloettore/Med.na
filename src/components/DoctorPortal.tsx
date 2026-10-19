@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { Appointment, MedicalRecord, MedicationItem, Prescription, DoctorSchedule, User } from "@/types";
 import { TelemedicineRoom } from "@/components/TelemedicineRoom";
 import { VirtualAgenda } from "@/components/VirtualAgenda";
+import { getFriendlyErrorMessage } from "@/lib/errorUtils";
 import { MedicalRecordDocumentView } from "@/components/MedicalRecordDocumentView";
 import {
   Calendar,
@@ -208,7 +209,7 @@ export const DoctorPortal = () => {
       await loadDoctorData();
     } catch (err: any) {
       console.error("Error saving medical record:", err);
-      alert("Erro ao salvar prontuário: " + err.message);
+      alert(getFriendlyErrorMessage(err, "Erro ao salvar prontuário."));
     } finally {
       setSaving(false);
     }
@@ -232,7 +233,7 @@ export const DoctorPortal = () => {
       alert("Escala de atendimento cadastrada com sucesso!");
     } catch (err: any) {
       console.error("Error adding schedule:", err);
-      alert("Erro ao adicionar escala: " + err.message);
+      alert(getFriendlyErrorMessage(err, "Erro ao adicionar escala."));
     }
   };
 
@@ -243,7 +244,7 @@ export const DoctorPortal = () => {
       if (error) throw error;
       await loadDoctorData();
     } catch (err: any) {
-      alert("Erro ao remover escala: " + err.message);
+      alert(getFriendlyErrorMessage(err, "Erro ao remover escala."));
     }
   };
 
