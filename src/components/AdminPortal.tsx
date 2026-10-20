@@ -81,14 +81,21 @@ export const AdminPortal = () => {
   const teleCount = appointments.filter((a) => a.mode === "TELEMEDICINE").length;
   const inPersonCount = appointments.filter((a) => a.mode === "IN_PERSON").length;
 
+  const isValidUUID = (str: string | null | undefined) => {
+    if (!str) return false;
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+  };
+
   const handleDeleteSpecialty = async (id: string, name: string) => {
     if (!confirm(`Tem certeza de que deseja excluir a especialidade "${name}"?`)) return;
 
     try {
-      await supabase.from("doctor_specialties").delete().eq("specialty_id", id);
-      await supabase.from("appointments").update({ specialty_id: null }).eq("specialty_id", id);
-      const { error } = await supabase.from("specialties").delete().eq("id", id);
-      if (error) console.warn("Specialty deletion notice:", error.message);
+      if (isValidUUID(id)) {
+        await supabase.from("doctor_specialties").delete().eq("specialty_id", id);
+        await supabase.from("appointments").update({ specialty_id: null }).eq("specialty_id", id);
+        const { error } = await supabase.from("specialties").delete().eq("id", id);
+        if (error) console.warn("Specialty deletion notice:", error.message);
+      }
 
       setSpecialties((prev) => prev.filter((s) => s.id !== id));
       setFeedback({ type: "success", msg: `Especialidade "${name}" excluída com sucesso.` });
@@ -103,10 +110,12 @@ export const AdminPortal = () => {
     if (!confirm(`Tem certeza de que deseja excluir a unidade "${name}"?`)) return;
 
     try {
-      await supabase.from("doctor_schedules").delete().eq("location_id", id);
-      await supabase.from("appointments").update({ location_id: null }).eq("location_id", id);
-      const { error } = await supabase.from("locations").delete().eq("id", id);
-      if (error) console.warn("Location deletion notice:", error.message);
+      if (isValidUUID(id)) {
+        await supabase.from("doctor_schedules").delete().eq("location_id", id);
+        await supabase.from("appointments").update({ location_id: null }).eq("location_id", id);
+        const { error } = await supabase.from("locations").delete().eq("id", id);
+        if (error) console.warn("Location deletion notice:", error.message);
+      }
 
       setLocations((prev) => prev.filter((l) => l.id !== id));
       setFeedback({ type: "success", msg: `Unidade "${name}" excluída com sucesso.` });
@@ -121,10 +130,12 @@ export const AdminPortal = () => {
     if (!confirm(`Tem certeza de que deseja excluir o convênio "${name}"?`)) return;
 
     try {
-      await supabase.from("patient_insurances").delete().eq("insurance_id", id);
-      await supabase.from("appointments").update({ insurance_id: null }).eq("insurance_id", id);
-      const { error } = await supabase.from("health_insurances").delete().eq("id", id);
-      if (error) console.warn("Insurance deletion notice:", error.message);
+      if (isValidUUID(id)) {
+        await supabase.from("patient_insurances").delete().eq("insurance_id", id);
+        await supabase.from("appointments").update({ insurance_id: null }).eq("insurance_id", id);
+        const { error } = await supabase.from("health_insurances").delete().eq("id", id);
+        if (error) console.warn("Insurance deletion notice:", error.message);
+      }
 
       setInsurances((prev) => prev.filter((i) => i.id !== id));
       setFeedback({ type: "success", msg: `Convênio "${name}" excluído com sucesso.` });
