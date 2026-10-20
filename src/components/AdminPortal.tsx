@@ -44,6 +44,8 @@ export const AdminPortal = () => {
   const [newInsName, setNewInsName] = useState("");
   const [newAnsCode, setNewAnsCode] = useState("");
   const [newCnpj, setNewCnpj] = useState("");
+  const [newMonthlyFee, setNewMonthlyFee] = useState("180.00");
+  const [newCoverageDetails, setNewCoverageDetails] = useState("Atendimento nacional completo com consultas virtuais e exames.");
 
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; msg: string } | null>(null);
 
@@ -238,7 +240,9 @@ export const AdminPortal = () => {
       const { error } = await supabase.from("health_insurances").insert({
         name: newInsName.trim(),
         ans_code: newAnsCode.trim() || null,
-        cnpj: newCnpj.trim() || null
+        cnpj: newCnpj.trim() || null,
+        monthly_fee: parseFloat(newMonthlyFee) || 180.0,
+        coverage_details: newCoverageDetails.trim() || "Cobertura completa."
       });
       if (error) throw error;
 
@@ -569,7 +573,10 @@ export const AdminPortal = () => {
                 <div key={i.id} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50">
                   <div>
                     <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm">{i.name}</h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Cód ANS: {i.ans_code || "N/A"} | CNPJ: {i.cnpj || "N/A"}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Cód ANS: {i.ans_code || "N/A"} | Mensalidade: <span className="text-emerald-600 font-bold">R$ {i.monthly_fee ? i.monthly_fee.toFixed(2) : "180,00"}/mês</span>
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">{i.coverage_details || "Cobertura nacional para telemedicina e presencial."}</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 rounded text-[10px] font-bold uppercase">
