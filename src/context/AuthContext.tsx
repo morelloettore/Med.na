@@ -19,7 +19,8 @@ interface AuthContextType {
     last_name: string;
     phone?: string;
     cpf?: string;
-  }) => Promise<{ ok: boolean; error?: string }>;
+    is_active?: boolean;
+  }) => Promise<{ ok: boolean; error?: string; pendingApproval?: boolean }>;
   logout: () => void;
   refreshUsers: () => Promise<void>;
   loading: boolean;
@@ -320,6 +321,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     last_name: string;
     phone?: string;
     cpf?: string;
+    is_active?: boolean;
   }) => {
     const cleanEmail = normalizeEmail(userData.email);
 
@@ -331,6 +333,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return { ok: false, error: "Preencha seu nome e sobrenome." };
     }
 
+    const isActiveStatus = userData.is_active !== undefined ? userData.is_active : true;
     let newUserObject: User | null = null;
 
     try {
@@ -343,7 +346,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           first_name: userData.first_name,
           last_name: userData.last_name,
           phone: userData.phone || null,
-          is_active: true,
+          is_active: isActiveStatus,
         })
         .select()
         .single();
@@ -386,7 +389,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         first_name: userData.first_name,
         last_name: userData.last_name,
         phone: userData.phone,
-        is_active: true,
+        is_active: isActiveStatus,
       };
     }
 
@@ -394,6 +397,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       saveCustomCredential(cleanEmail, userData.password);
       saveCustomUser(newUserObject);
       setAvailableUsers((prev) => [...prev.filter((u) => normalizeEmail(u.email) !== cleanEmail), newUserObject!]);
+
+      if (!isActiveStatus) {
+        return { ok: true, pendingApproval: true };
+      }
+
       setCurrentUser(newUserObject);
       return { ok: true };
     }

@@ -635,12 +635,60 @@ export const AdminPortal = () => {
 
       {/* TAB 4: USERS */}
       {activeTab === "users" && (
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-          <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">Todos os Usuários Cadastrados no Sistema</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+        <div className="space-y-6">
+          {/* Pending Approvals Notification Section */}
+          {users.filter((u) => u.is_active === false).length > 0 && (
+            <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 rounded-2xl p-5 text-amber-900 dark:text-amber-200 shadow-sm">
+              <h3 className="font-bold text-base flex items-center gap-2 mb-2 text-amber-800 dark:text-amber-300">
+                <AlertCircle className="w-5 h-5 text-amber-600" />
+                Solicitações de Cadastro Pendentes de Aprovação ({users.filter((u) => u.is_active === false).length})
+              </h3>
+              <p className="text-xs text-amber-800 dark:text-amber-300 mb-4">
+                Os usuários abaixo solicitaram cadastro para perfis restritos (Médico, Funcionário ou Administrador) e aguardam autorização enviada por e-mail para ter acesso liberado ao sistema.
+              </p>
+
+              <div className="space-y-3">
+                {users
+                  .filter((u) => u.is_active === false)
+                  .map((pending) => (
+                    <div
+                      key={pending.id}
+                      className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-amber-200 dark:border-amber-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-900 dark:text-white text-sm">
+                            {pending.first_name} {pending.last_name}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                            Solicitou: {pending.role}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          E-mail: {pending.email} | Tel: {pending.phone || "Não informado"}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleToggleUserActive(pending.id, false, `${pending.first_name} ${pending.last_name}`)}
+                          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Aprovar & Liberar Acesso
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">Todos os Usuários Cadastrados no Sistema</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 text-xs font-bold uppercase border-b border-slate-200 dark:border-slate-700">
                 <tr>
                   <th className="px-6 py-3">Nome</th>
@@ -687,6 +735,7 @@ export const AdminPortal = () => {
             </table>
           </div>
         </div>
+      </div>
       )}
     </div>
   );
