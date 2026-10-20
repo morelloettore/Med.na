@@ -289,7 +289,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (user.is_active === false) {
-      return { ok: false, error: "Esta conta de usuário foi desativada pelo administrador." };
+      return {
+        ok: false,
+        error: "Esta conta está aguardando aprovação do administrador (morelloettore79@gmail.com). Seu acesso só será liberado após a aprovação.",
+      };
     }
 
     const storedPass = customCreds[cleanEmail] || DEMO_CREDENTIALS[cleanEmail] || DEMO_CREDENTIALS[user.email];
