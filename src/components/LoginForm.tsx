@@ -30,11 +30,11 @@ export function LoginForm() {
   const [regPhone, setRegPhone] = useState("");
   const [regCpf, setRegCpf] = useState("");
   const [regRole, setRegRole] = useState<UserRole>("PATIENT");
-  const [regAuthCode, setRegAuthCode] = useState("");
   const [regPassword, setRegPassword] = useState("");
 
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [pendingApprovalNotice, setPendingApprovalNotice] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmitSignIn = async (e: React.FormEvent) => {
@@ -57,32 +57,11 @@ export function LoginForm() {
     e.preventDefault();
     setError("");
     setSuccessMsg("");
-
-    // Validate authorization key requirement for non-patient roles
-    if (regRole !== "PATIENT") {
-      const validCodesMap: Record<UserRole, string[]> = {
-        DOCTOR: ["MEDNA-MEDICO-2025", "MEDNA-DOCTOR-2025"],
-        EMPLOYEE: ["MEDNA-FUNC-2025", "MEDNA-EMPLOYEE-2025", "MEDNA-FUNCIONARIO-2025"],
-        ADMIN: ["MEDNA-ADMIN-2025", "MEDNA-ADMINISTRADOR-2025"],
-        PATIENT: [],
-      };
-
-      const allowedCodes = validCodesMap[regRole] || [];
-      const inputCode = regAuthCode ? regAuthCode.trim().toUpperCase() : "";
-
-      if (!inputCode || !allowedCodes.includes(inputCode)) {
-        setError(
-          `Código de autorização inválido ou ausente para a criação de conta como ${
-            regRole === "ADMIN" ? "Administrador" : regRole === "DOCTOR" ? "Médico" : "Funcionário"
-          }. Utilize o código institucional (ex: MEDNA-${
-            regRole === "DOCTOR" ? "MEDICO" : regRole === "EMPLOYEE" ? "FUNC" : "ADMIN"
-          }-2025) ou contate a administração hospitalar Med.na.`
-        );
-        return;
-      }
-    }
-
+    setPendingApprovalNotice(false);
     setSubmitting(true);
+
+    // Non-patient roles (DOCTOR, EMPLOYEE, ADMIN) require Administrator approval via email notification
+    const requiresApproval = regRole !== "PATIENT";
 
     const result = await signUp({
       email: regEmail,
@@ -92,10 +71,17 @@ export function LoginForm() {
       last_name: regLastName,
       phone: regPhone,
       cpf: regCpf,
+      is_active: !requiresApproval,
     });
 
     if (!result.ok) {
       setError(result.error || "Erro ao realizar cadastro.");
+      setSubmitting(false);
+      return;
+    }
+
+    if (result.pendingApproval) {
+      setPendingApprovalNotice(true);
       setSubmitting(false);
       return;
     }
@@ -307,36 +293,47 @@ export function LoginForm() {
                 value={regRole}
                 onChange={(e) => {
                   setRegRole(e.target.value as UserRole);
-                  setRegAuthCode("");
                   setError("");
                 }}
                 className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 font-semibold outline-none focus:border-teal-500"
               >
                 <option value="PATIENT">Paciente</option>
-                <option value="DOCTOR">Médico (Requer Código Institucional)</option>
-                <option value="EMPLOYEE">Funcionário / Recepção (Requer Código Institucional)</option>
-                <option value="ADMIN">Administrador (Requer Código Institucional)</option>
+                <option value="DOCTOR">Médico (Requer Aprovação)</option>
+                <option value="EMPLOYEE">Funcionário / Recepção (Requer Aprovação)</option>
+                <option value="ADMIN">Administrador (Requer Aprovação)</option>
               </select>
             </div>
 
             {regRole !== "PATIENT" && (
-              <div>
-                <label className="block text-[11px] font-bold uppercase text-amber-600 dark:text-amber-400 mb-1 flex justify-between">
-                  <span>Código de Autorização Institucional *</span>
-                  <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400">
-                    ex: MEDNA-{regRole === "DOCTOR" ? "MEDICO" : regRole === "EMPLOYEE" ? "FUNC" : "ADMIN"}-2025
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  value={regAuthCode}
-                  onChange={(e) => setRegAuthCode(e.target.value)}
-                  placeholder={`Digite o código institucional de ${
-                    regRole === "ADMIN" ? "Administrador" : regRole === "DOCTOR" ? "Médico" : "Funcionário"
-                  }`}
-                  required
-                  className="w-full rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/20 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-amber-500 font-mono"
-                />
+              <div className="p-3 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50/80 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 text-xs space-y-1">
+                <span className="font-bold block">✉ Requer Aprovação do Administrador</span>
+                <p className="text-[11px] leading-relaxed">
+                  Para o perfil de <strong>{regRole === "ADMIN" ? "Administrador" : regRole === "DOCTOR" ? "Médico" : "Funcionário"}</strong>, um e-mail de solicitação de cadastro será enviado para <strong>morelloettore79@gmail.com</strong> para autorizar sua conta.
+                </p>
+              </div>
+            )}
+
+            {pendingApprovalNotice && (
+              <div className="p-4 bg-teal-50 dark:bg-teal-950/50 border border-teal-300 dark:border-teal-700 text-teal-900 dark:text-teal-200 rounded-2xl text-xs space-y-2">
+                <div className="font-bold flex items-center gap-2 text-sm text-teal-700 dark:text-teal-300">
+                  <Mail className="w-4 h-4 text-teal-600" /> Solicitação de Cadastro Enviada por E-mail!
+                </div>
+                <p>
+                  Sua solicitação de cadastro como <strong>{regRole}</strong> foi enviada para aprovação do Administrador (<strong>admin@medna.com</strong>).
+                </p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Assim que o administrador aprovar seu acesso no painel de administração, você poderá realizar login normalmente com seu e-mail e senha.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRegister(false);
+                    setPendingApprovalNotice(false);
+                  }}
+                  className="mt-2 w-full py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-xs transition-colors"
+                >
+                  Voltar para a Tela de Login
+                </button>
               </div>
             )}
 
