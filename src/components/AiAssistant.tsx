@@ -22,7 +22,7 @@ export const AiAssistant = ({ isOpen, onClose }: { isOpen: boolean; onClose: () 
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: "bot",
-      text: "Olá! Sou o Assistente Med.na IA 🤖. Estou aqui para guiar você em todas as áreas do sistema médico hospitalar. Como posso te ajudar hoje?",
+      text: "Olá! Sou o Assistente Med.na 🤖. Estou aqui para guiar você em todas as áreas do sistema médico hospitalar. Como posso te ajudar hoje?",
       time: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
@@ -102,7 +102,7 @@ export const AiAssistant = ({ isOpen, onClose }: { isOpen: boolean; onClose: () 
           </div>
           <div>
             <h3 className="font-extrabold text-sm tracking-tight flex items-center gap-1">
-              Assistente Med.na <span className="text-teal-300 font-black">IA</span>
+              Assistente Med.na
             </h3>
             <p className="text-[10px] text-teal-100/80 font-semibold tracking-wider uppercase">Suporte Médico Virtual 24/7</p>
           </div>

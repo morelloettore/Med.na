@@ -83,10 +83,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleAiAssistant }) => {
             <button
               onClick={onToggleAiAssistant}
               className="px-3 py-1.5 text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/50 hover:bg-teal-100 dark:hover:bg-teal-900/50 border border-teal-200/60 dark:border-teal-800/60 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold shadow-xs hover:shadow-sm"
-              title="Abrir Assistente Virtual Med.na IA"
+              title="Abrir Assistente Med.na"
             >
               <Bot className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-              <span className="hidden md:inline">IA Med.na</span>
+              <span className="hidden md:inline">Assistente Med.na</span>
             </button>
           )}
 
