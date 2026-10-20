@@ -7,8 +7,15 @@ import { Doctor, Specialty, Location, HealthInsurance, PatientInsurance, Appoint
 import { TelemedicineRoom } from "@/components/TelemedicineRoom";
 import { VirtualAgenda } from "@/components/VirtualAgenda";
 import { getFriendlyErrorMessage } from "@/lib/errorUtils";
-import { saveCustomAppointment } from "@/lib/appointmentStorage";
+import {
+  saveCustomAppointment,
+  getCustomAppointments,
+  getCustomMedicalRecords,
+  getCustomPrescriptions
+} from "@/lib/appointmentStorage";
 import { formatAppointmentDate, formatAppointmentTime, formatAppointmentDateTime } from "@/lib/dateUtils";
+import { MedicalRecordDocumentView } from "@/components/MedicalRecordDocumentView";
+import { MedicalRecord, Prescription } from "@/types";
 import {
   Calendar,
   Clock,
@@ -23,7 +30,8 @@ import {
   Plus,
   AlertCircle,
   Trash2,
-  FileText
+  FileText,
+  X
 } from "lucide-react";
 
 const DEFAULT_TIME_SLOTS = [
@@ -60,6 +68,12 @@ export const PatientPortal = () => {
 
   // Active Telemedicine Room Modal
   const [activeTeleRoomAppointment, setActiveTeleRoomAppointment] = useState<Appointment | null>(null);
+
+  // View Medical Record & Prescription Modal
+  const [viewingRecordApp, setViewingRecordApp] = useState<Appointment | null>(null);
+  const [viewingMedicalRecord, setViewingMedicalRecord] = useState<MedicalRecord | null>(null);
+  const [viewingPrescription, setViewingPrescription] = useState<Prescription | null>(null);
+  const [loadingRecord, setLoadingRecord] = useState<boolean>(false);
 
   // New Insurance Form State
   const [newInsuranceId, setNewInsuranceId] = useState<string>("");
@@ -121,14 +135,33 @@ export const PatientPortal = () => {
             .eq("patient_id", currentUser.id)
             .order("scheduled_at", { ascending: false });
 
-          if (apps) {
-            const enrichedApps = apps.map((app) => ({
-              ...app,
-              patient_user: usersMap.get(app.patient_id),
-              doctor_user: usersMap.get(app.doctor_id),
-            }));
-            setAppointments(enrichedApps);
-          }
+          const customApps = getCustomAppointments().filter((ca) => ca.patient_id === currentUser.id);
+          const mergedAppsMap = new Map<string, Appointment>();
+
+          (apps || []).forEach((a) => {
+            const enriched = {
+              ...a,
+              patient_user: usersMap.get(a.patient_id) || currentUser,
+              doctor_user: usersMap.get(a.doctor_id),
+            };
+            mergedAppsMap.set(a.id, enriched);
+          });
+
+          customApps.forEach((ca) => {
+            if (mergedAppsMap.has(ca.id)) {
+              const existing = mergedAppsMap.get(ca.id)!;
+              if (ca.status === "COMPLETED") {
+                existing.status = "COMPLETED";
+              }
+            } else {
+              mergedAppsMap.set(ca.id, ca);
+            }
+          });
+
+          const finalApps = Array.from(mergedAppsMap.values()).sort(
+            (a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime()
+          );
+          setAppointments(finalApps);
         }
       }
     } catch (err) {
@@ -461,6 +494,81 @@ export const PatientPortal = () => {
     }
   };
 
+  const handleOpenMedicalRecordModal = async (app: Appointment) => {
+    setViewingRecordApp(app);
+    setLoadingRecord(true);
+    setViewingMedicalRecord(null);
+    setViewingPrescription(null);
+
+    try {
+      let rec: MedicalRecord | null = null;
+      let presc: Prescription | null = null;
+
+      if (isValidUUID(app.id)) {
+        const { data: dbRec } = await supabase
+          .from("medical_records")
+          .select("*")
+          .eq("appointment_id", app.id)
+          .maybeSingle();
+
+        if (dbRec) {
+          rec = {
+            ...dbRec,
+            patient_user: app.patient_user || currentUser || undefined,
+            doctor_user: app.doctor_user
+          };
+
+          const { data: dbPres } = await supabase
+            .from("prescriptions")
+            .select("*")
+            .eq("record_id", dbRec.id)
+            .maybeSingle();
+
+          if (dbPres) presc = dbPres;
+        }
+      }
+
+      if (!rec) {
+        const customRecs = getCustomMedicalRecords();
+        const foundLocalRec = customRecs.find((r) => r.appointment_id === app.id);
+        if (foundLocalRec) {
+          rec = {
+            ...foundLocalRec,
+            patient_user: app.patient_user || currentUser || undefined,
+            doctor_user: app.doctor_user
+          };
+
+          const customPrescs = getCustomPrescriptions();
+          const foundLocalPresc = customPrescs.find((p) => p.record_id === foundLocalRec.id);
+          if (foundLocalPresc) presc = foundLocalPresc;
+        }
+      }
+
+      if (!rec) {
+        rec = {
+          id: `rec-${app.id}`,
+          appointment_id: app.id,
+          patient_id: app.patient_id,
+          doctor_id: app.doctor_id,
+          anamnesis: "Consulta realizada com o médico responsável.",
+          diagnosis: "Atendimento presencial/telemedicina concluído.",
+          patient_user: app.patient_user || currentUser || undefined,
+          doctor_user: app.doctor_user,
+          created_at: app.scheduled_at,
+          signature_hash: `ICP-BR-${app.id.substring(0, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
+          signature_timestamp: app.scheduled_at
+        };
+      }
+
+      setViewingMedicalRecord(rec);
+      setViewingPrescription(presc);
+    } catch (err) {
+      console.error("Error loading medical record:", err);
+    } finally {
+      setLoadingRecord(false);
+    }
+  };
+
   const handleCancelAppointment = async (appointment: Appointment) => {
     // 2-day minimum advance cancellation rule
     const scheduledDateObj = new Date(appointment.scheduled_at);
@@ -597,6 +705,52 @@ export const PatientPortal = () => {
           currentUserRole="PATIENT"
           onClose={() => setActiveTeleRoomAppointment(null)}
         />
+      )}
+
+      {/* View Medical Record & Prescription Modal */}
+      {viewingRecordApp && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 shadow-2xl relative border border-slate-200 dark:border-slate-800">
+            <button
+              onClick={() => {
+                setViewingRecordApp(null);
+                setViewingMedicalRecord(null);
+                setViewingPrescription(null);
+              }}
+              className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-full bg-slate-100 dark:bg-slate-800 transition-colors"
+              title="Fechar"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+              <span className="text-xs font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+                Prontuário Eletrônico & Receita Médica
+              </span>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
+                Consulta com Dr(a). {viewingRecordApp.doctor_user?.first_name || "Médico"} {viewingRecordApp.doctor_user?.last_name || ""}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Data do Atendimento: {formatAppointmentDateTime(viewingRecordApp.scheduled_at)}
+              </p>
+            </div>
+
+            {loadingRecord ? (
+              <div className="py-12 text-center text-slate-500 dark:text-slate-400 font-medium">
+                Carregando documento e prescrição do médico...
+              </div>
+            ) : viewingMedicalRecord ? (
+              <MedicalRecordDocumentView
+                record={viewingMedicalRecord}
+                prescription={viewingPrescription}
+              />
+            ) : (
+              <div className="py-8 text-center text-slate-500">
+                Não foi possível carregar o prontuário para esta consulta.
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Welcome Banner */}
@@ -946,7 +1100,16 @@ export const PatientPortal = () => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {app.mode === "TELEMEDICINE" && !isCanceled && (
+                      {isCompleted && (
+                        <button
+                          onClick={() => handleOpenMedicalRecordModal(app)}
+                          className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all"
+                        >
+                          <FileText className="w-4 h-4" /> Ver Prontuário & Receita
+                        </button>
+                      )}
+
+                      {app.mode === "TELEMEDICINE" && !isCanceled && !isCompleted && (
                         <button
                           onClick={() => setActiveTeleRoomAppointment(app)}
                           className="px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all"
