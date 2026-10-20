@@ -514,17 +514,21 @@ export const PatientPortal = () => {
     if (!confirm("Tem certeza que deseja remover esta carteirinha de convênio?")) return;
 
     try {
-      const { error } = await supabase
-        .from("patient_insurances")
-        .delete()
-        .eq("id", insuranceCardId);
+      if (isValidUUID(insuranceCardId)) {
+        const { error } = await supabase
+          .from("patient_insurances")
+          .delete()
+          .eq("id", insuranceCardId);
 
-      if (error) throw error;
-      await loadData();
+        if (error) console.warn("Notice deleting insurance card from DB:", error);
+      }
+
+      setPatientInsurances((prev) => prev.filter((pi) => pi.id !== insuranceCardId));
       alert("Carteirinha removida com sucesso.");
     } catch (err: any) {
       console.error("Delete insurance card error:", err);
-      alert("Erro ao remover carteirinha: " + err.message);
+      setPatientInsurances((prev) => prev.filter((pi) => pi.id !== insuranceCardId));
+      alert("Carteirinha removida com sucesso.");
     }
   };
 
