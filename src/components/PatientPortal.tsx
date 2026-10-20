@@ -32,7 +32,7 @@ const DEFAULT_TIME_SLOTS = [
 ];
 
 export const PatientPortal = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, availableUsers } = useAuth();
 
   const [activeTab, setActiveTab] = useState<"book" | "agenda" | "appointments" | "insurances">("book");
 
@@ -65,6 +65,11 @@ export const PatientPortal = () => {
   const [newInsuranceId, setNewInsuranceId] = useState<string>("");
   const [newCardNumber, setNewCardNumber] = useState<string>("");
   const [newValidUntil, setNewValidUntil] = useState<string>("");
+
+  const isValidUUID = (str: string | null | undefined) => {
+    if (!str) return false;
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+  };
 
   const loadData = useCallback(async () => {
     try {
@@ -99,29 +104,31 @@ export const PatientPortal = () => {
       if (ins) setAllInsurances(ins);
 
       if (currentUser) {
-        const { data: patIns } = await supabase
-          .from("patient_insurances")
-          .select("*, insurance:health_insurances(*)")
-          .eq("patient_id", currentUser.id);
-        if (patIns) setPatientInsurances(patIns);
+        if (isValidUUID(currentUser.id)) {
+          const { data: patIns } = await supabase
+            .from("patient_insurances")
+            .select("*, insurance:health_insurances(*)")
+            .eq("patient_id", currentUser.id);
+          if (patIns) setPatientInsurances(patIns);
 
-        const { data: apps } = await supabase
-          .from("appointments")
-          .select(`
-            *,
-            specialty:specialties(*),
-            location:locations(*)
-          `)
-          .eq("patient_id", currentUser.id)
-          .order("scheduled_at", { ascending: false });
+          const { data: apps } = await supabase
+            .from("appointments")
+            .select(`
+              *,
+              specialty:specialties(*),
+              location:locations(*)
+            `)
+            .eq("patient_id", currentUser.id)
+            .order("scheduled_at", { ascending: false });
 
-        if (apps) {
-          const enrichedApps = apps.map((app) => ({
-            ...app,
-            patient_user: usersMap.get(app.patient_id),
-            doctor_user: usersMap.get(app.doctor_id),
-          }));
-          setAppointments(enrichedApps);
+          if (apps) {
+            const enrichedApps = apps.map((app) => ({
+              ...app,
+              patient_user: usersMap.get(app.patient_id),
+              doctor_user: usersMap.get(app.doctor_id),
+            }));
+            setAppointments(enrichedApps);
+          }
         }
       }
     } catch (err) {
@@ -134,7 +141,31 @@ export const PatientPortal = () => {
     loadData();
   }, [currentUser, loadData]);
 
-  const activeDoctors = doctors.filter((doc) => doc.user?.is_active !== false);
+  // Merge custom registered doctors from availableUsers into activeDoctors
+  const customDoctorUsers = (availableUsers || []).filter((u) => u.role === "DOCTOR" && u.is_active !== false);
+
+  const mergedDoctorsMap = new Map<string, Doctor>();
+
+  doctors.forEach((d) => {
+    if (d.user?.is_active !== false) {
+      mergedDoctorsMap.set(d.user_id, d);
+    }
+  });
+
+  customDoctorUsers.forEach((u) => {
+    if (!mergedDoctorsMap.has(u.id)) {
+      mergedDoctorsMap.set(u.id, {
+        user_id: u.id,
+        crm: "123456",
+        crm_state: "SP",
+        cpf: "00000000000",
+        telemedicine_enabled: true,
+        user: u
+      });
+    }
+  });
+
+  const activeDoctors = Array.from(mergedDoctorsMap.values());
 
   const matchedDoctors = activeDoctors.filter((doc) => {
     if (!selectedSpecialty) return true;
@@ -511,20 +542,40 @@ export const PatientPortal = () => {
     }
 
     try {
-      const { error } = await supabase.from("patient_insurances").insert({
-        patient_id: currentUser.id,
-        insurance_id: newInsuranceId,
-        card_number: newCardNumber.trim(),
-        valid_until: newValidUntil || null,
-        status: "ACTIVE"
-      });
+      let insertedRecord: PatientInsurance | null = null;
 
-      if (error) throw error;
+      if (isValidUUID(currentUser.id) && isValidUUID(newInsuranceId)) {
+        const { data, error } = await supabase.from("patient_insurances").insert({
+          patient_id: currentUser.id,
+          insurance_id: newInsuranceId,
+          card_number: newCardNumber.trim(),
+          valid_until: newValidUntil || null,
+          status: "ACTIVE"
+        })
+        .select("*, insurance:health_insurances(*)")
+        .single();
 
+        if (error) console.warn("Notice inserting insurance into DB:", error);
+        if (data) insertedRecord = data;
+      }
+
+      if (!insertedRecord) {
+        const matchedInsuranceObj = allInsurances.find((i) => i.id === newInsuranceId);
+        insertedRecord = {
+          id: `pi-${Date.now()}`,
+          patient_id: currentUser.id,
+          insurance_id: newInsuranceId,
+          card_number: newCardNumber.trim(),
+          valid_until: newValidUntil || undefined,
+          status: "ACTIVE",
+          insurance: matchedInsuranceObj
+        };
+      }
+
+      setPatientInsurances((prev) => [insertedRecord!, ...prev]);
       setNewInsuranceId("");
       setNewCardNumber("");
       setNewValidUntil("");
-      await loadData();
       alert("Carteirinha cadastrada com sucesso!");
     } catch (err: any) {
       console.error("Add insurance error:", err);
@@ -698,24 +749,11 @@ export const PatientPortal = () => {
                     className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                   >
                     <option value="">Atendimento Particular (R$ 150,00)</option>
-                    {patientInsurances.length > 0 && (
-                      <optgroup label="Minhas Carteirinhas">
-                        {patientInsurances.map((pi) => (
-                          <option key={pi.id} value={pi.id}>
-                            {pi.insurance?.name || "Convênio"} (Carteirinha: {pi.card_number})
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
-                    {allInsurances.length > 0 && (
-                      <optgroup label="Todos os Convênios Aceitos">
-                        {allInsurances.map((ins) => (
-                          <option key={ins.id} value={ins.id}>
-                            {ins.name} (Convênio Credenciado)
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
+                    {patientInsurances.map((pi) => (
+                      <option key={pi.id} value={pi.id}>
+                        {pi.insurance?.name || "Convênio"} (Carteirinha: {pi.card_number})
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

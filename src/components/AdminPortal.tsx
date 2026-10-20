@@ -609,15 +609,28 @@ export const AdminPortal = () => {
                   className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Código ANS (opcional)</label>
-                <input
-                  type="text"
-                  placeholder="Ex: 352501"
-                  value={newAnsCode}
-                  onChange={(e) => setNewAnsCode(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
-                />
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Código ANS</label>
+                  <input
+                    type="text"
+                    placeholder="352501"
+                    value={newAnsCode}
+                    onChange={(e) => setNewAnsCode(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Mensalidade (R$)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="180.00"
+                    value={newMonthlyFee}
+                    onChange={(e) => setNewMonthlyFee(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">CNPJ (opcional)</label>
@@ -626,6 +639,16 @@ export const AdminPortal = () => {
                   placeholder="00000000000000"
                   value={newCnpj}
                   onChange={(e) => setNewCnpj(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Detalhes da Cobertura</label>
+                <textarea
+                  rows={2}
+                  placeholder="Descreva o que o plano cobre..."
+                  value={newCoverageDetails}
+                  onChange={(e) => setNewCoverageDetails(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-purple-500"
                 />
               </div>
