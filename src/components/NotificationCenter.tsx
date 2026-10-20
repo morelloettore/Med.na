@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { AppNotification } from "@/types";
 import {
   Bell,
@@ -13,39 +14,67 @@ import {
   Trash2
 } from "lucide-react";
 
-const DEMO_NOTIFICATIONS: AppNotification[] = [
-  {
-    id: "notif-1",
-    user_id: "all",
-    title: "Consulta Agendada",
-    message: "Sua consulta com Dr(a). Maria Santos foi agendada para hoje às 14:00.",
-    type: "APPOINTMENT",
-    read: false,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "notif-2",
-    user_id: "all",
-    title: "Telemedicina Disponível",
-    message: "A sala virtual da sua teleconsulta já está pronta para uso.",
-    type: "TELEMEDICINE",
-    read: false,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "notif-3",
-    user_id: "all",
-    title: "Nova Receita Emitida",
-    message: "Você possui uma prescrição médica assinada digitalmente (ICP-Brasil).",
-    type: "PRESCRIPTION",
-    read: true,
-    created_at: new Date(Date.now() - 86400000).toISOString(),
-  },
-];
-
 export const NotificationCenter = () => {
+  const { currentUser } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<AppNotification[]>(DEMO_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+
+  useEffect(() => {
+    if (!currentUser) {
+      setNotifications([]);
+      return;
+    }
+
+    if (currentUser.role === "ADMIN") {
+      setNotifications([
+        {
+          id: "notif-admin-1",
+          user_id: currentUser.id,
+          title: "Painel de Administração",
+          message: "Acompanhe as métricas do sistema e aprovações pendentes de cadastro.",
+          type: "SYSTEM",
+          read: false,
+          created_at: new Date().toISOString(),
+        },
+      ]);
+    } else if (currentUser.role === "PATIENT") {
+      setNotifications([
+        {
+          id: "notif-patient-1",
+          user_id: currentUser.id,
+          title: "Bem-vindo à Med.na",
+          message: `Olá, ${currentUser.first_name}! Agende suas consultas virtuais ou presenciais pelo seu painel.`,
+          type: "APPOINTMENT",
+          read: false,
+          created_at: new Date().toISOString(),
+        },
+      ]);
+    } else if (currentUser.role === "DOCTOR") {
+      setNotifications([
+        {
+          id: "notif-doctor-1",
+          user_id: currentUser.id,
+          title: "Agenda Médica Ativa",
+          message: "Consulte seus pacientes agendados e realize teleconsultas pelo seu portal.",
+          type: "TELEMEDICINE",
+          read: false,
+          created_at: new Date().toISOString(),
+        },
+      ]);
+    } else if (currentUser.role === "EMPLOYEE") {
+      setNotifications([
+        {
+          id: "notif-employee-1",
+          user_id: currentUser.id,
+          title: "Fila de Recepção",
+          message: "Gerencie check-in e confirmação de consultas de pacientes na recepção.",
+          type: "SYSTEM",
+          read: false,
+          created_at: new Date().toISOString(),
+        },
+      ]);
+    }
+  }, [currentUser]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
