@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Appointment, AppointmentStatus, AppointmentMode, User } from "@/types";
+import { formatAppointmentDate, formatAppointmentTime, formatAppointmentDateTime } from "@/lib/dateUtils";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -401,8 +402,7 @@ export const VirtualAgenda: React.FC<VirtualAgendaProps> = ({
               <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
                 <div>
                   <span className="font-bold">Data/Hora: </span>
-                  {new Date(selectedAppointment.scheduled_at).toLocaleDateString("pt-BR")} às{" "}
-                  {new Date(selectedAppointment.scheduled_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                  {formatAppointmentDateTime(selectedAppointment.scheduled_at)}
                 </div>
                 <div>
                   <span className="font-bold">Modalidade: </span>

@@ -93,6 +93,9 @@ export interface HealthInsurance {
   name: string;
   ans_code?: string;
   cnpj?: string;
+  monthly_fee?: number;
+  coverage_details?: string;
+  copay_rate?: string;
 }
 
 export interface PatientInsurance {

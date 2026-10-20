@@ -5,6 +5,8 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Appointment, HealthInsurance, User } from "@/types";
 import { getFriendlyErrorMessage } from "@/lib/errorUtils";
+import { formatAppointmentDate, formatAppointmentTime, formatAppointmentDateTime } from "@/lib/dateUtils";
+import { getCustomAppointments, updateCustomAppointmentStatus } from "@/lib/appointmentStorage";
 import {
   CheckCircle2,
   XCircle,
@@ -46,14 +48,23 @@ export const EmployeePortal = () => {
         `)
         .order("scheduled_at", { ascending: false });
 
-      if (apps) {
-        const enrichedApps = apps.map((app) => ({
-          ...app,
-          patient_user: usersMap.get(app.patient_id),
-          doctor_user: usersMap.get(app.doctor_id),
-        }));
-        setAppointments(enrichedApps);
-      }
+      const customApps = getCustomAppointments();
+      const allAppList = apps ? [...apps] : [];
+
+      // Merge custom/local appointments if not already present
+      customApps.forEach((ca) => {
+        if (!allAppList.some((a) => a.id === ca.id)) {
+          allAppList.push(ca);
+        }
+      });
+
+      const enrichedApps = allAppList.map((app) => ({
+        ...app,
+        patient_user: app.patient_user || usersMap.get(app.patient_id),
+        doctor_user: app.doctor_user || usersMap.get(app.doctor_id),
+      }));
+
+      setAppointments(enrichedApps.sort((a, b) => (a.scheduled_at < b.scheduled_at ? 1 : -1)));
 
       const { data: ins } = await supabase.from("health_insurances").select("*").order("name");
       if (ins) setInsurances(ins);
@@ -84,11 +95,18 @@ export const EmployeePortal = () => {
         })
         .eq("id", appointmentId);
 
-      if (error) throw error;
-      await loadData();
+      if (error) console.warn("Supabase update status notice:", error);
+      updateCustomAppointmentStatus(appointmentId, status, cancelReason);
+
+      setAppointments((prev) =>
+        prev.map((app) => (app.id === appointmentId ? { ...app, status, cancel_reason: cancelReason || app.cancel_reason } : app))
+      );
     } catch (err: any) {
       console.error("Update status error:", err);
-      alert(getFriendlyErrorMessage(err, "Erro ao atualizar status da consulta."));
+      updateCustomAppointmentStatus(appointmentId, status, cancelReason);
+      setAppointments((prev) =>
+        prev.map((app) => (app.id === appointmentId ? { ...app, status, cancel_reason: cancelReason || app.cancel_reason } : app))
+      );
     }
   };
 

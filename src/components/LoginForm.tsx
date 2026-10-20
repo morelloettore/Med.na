@@ -23,6 +23,22 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // Formatters for CPF and Phone
+  const formatCPF = (val: string) => {
+    const digits = val.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+  };
+
+  const formatPhone = (val: string) => {
+    const digits = val.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 2) return digits ? `(${digits}` : "";
+    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  };
+
   // Sign Up State
   const [regFirstName, setRegFirstName] = useState("");
   const [regLastName, setRegLastName] = useState("");
@@ -270,7 +286,8 @@ export function LoginForm() {
                 <input
                   type="text"
                   value={regPhone}
-                  onChange={(e) => setRegPhone(e.target.value)}
+                  maxLength={15}
+                  onChange={(e) => setRegPhone(formatPhone(e.target.value))}
                   placeholder="(11) 99999-9999"
                   className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-teal-500"
                 />
@@ -280,7 +297,8 @@ export function LoginForm() {
                 <input
                   type="text"
                   value={regCpf}
-                  onChange={(e) => setRegCpf(e.target.value)}
+                  maxLength={14}
+                  onChange={(e) => setRegCpf(formatCPF(e.target.value))}
                   placeholder="000.000.000-00"
                   className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-teal-500"
                 />

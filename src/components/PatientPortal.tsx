@@ -7,6 +7,8 @@ import { Doctor, Specialty, Location, HealthInsurance, PatientInsurance, Appoint
 import { TelemedicineRoom } from "@/components/TelemedicineRoom";
 import { VirtualAgenda } from "@/components/VirtualAgenda";
 import { getFriendlyErrorMessage } from "@/lib/errorUtils";
+import { saveCustomAppointment } from "@/lib/appointmentStorage";
+import { formatAppointmentDate, formatAppointmentTime, formatAppointmentDateTime } from "@/lib/dateUtils";
 import {
   Calendar,
   Clock,
@@ -179,8 +181,8 @@ export const PatientPortal = () => {
 
         bookedTimes = new Set(
           existingApps?.map((a) => {
-            const d = new Date(a.scheduled_at);
-            return d.toTimeString().substring(0, 5);
+            const timePart = a.scheduled_at.split(/[T ]/)[1]?.substring(0, 5);
+            return timePart || formatAppointmentTime(a.scheduled_at);
           }) || []
         );
       }
@@ -217,12 +219,20 @@ export const PatientPortal = () => {
         rawSlots = DEFAULT_TIME_SLOTS;
       }
 
+      // Include local state appointments in booked times check
+      appointments.forEach((a) => {
+        if (a.doctor_id === selectedDoctor && a.status !== "CANCELED" && a.scheduled_at.startsWith(selectedDate)) {
+          const slotTime = formatAppointmentTime(a.scheduled_at);
+          bookedTimes.add(slotTime);
+        }
+      });
+
       const finalSlots = Array.from(new Set(rawSlots)).filter((slot) => !bookedTimes.has(slot)).sort();
-      setAvailableSlots(finalSlots.length > 0 ? finalSlots : DEFAULT_TIME_SLOTS);
+      setAvailableSlots(finalSlots);
     }
 
     generateSlots();
-  }, [selectedDoctor, selectedDate]);
+  }, [selectedDoctor, selectedDate, appointments]);
 
   const handleBookAppointment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -250,6 +260,30 @@ export const PatientPortal = () => {
     }
 
     const scheduledAt = `${selectedDate}T${selectedTime}:00`;
+
+    // Validation 1: Prevent double-booking for the same doctor at the same date and time
+    const doctorOverlapping = appointments.some(
+      (a) =>
+        a.doctor_id === selectedDoctor &&
+        a.status !== "CANCELED" &&
+        (a.scheduled_at === scheduledAt || formatAppointmentTime(a.scheduled_at) === selectedTime && a.scheduled_at.startsWith(selectedDate))
+    );
+    if (doctorOverlapping) {
+      setBookingError("O médico selecionado já possui um atendimento agendado para este mesmo dia e horário.");
+      return;
+    }
+
+    // Validation 2: Prevent the patient from booking multiple appointments for themselves at the same date and time
+    const patientOverlapping = appointments.some(
+      (a) =>
+        a.patient_id === currentUser.id &&
+        a.status !== "CANCELED" &&
+        (a.scheduled_at === scheduledAt || formatAppointmentTime(a.scheduled_at) === selectedTime && a.scheduled_at.startsWith(selectedDate))
+    );
+    if (patientOverlapping) {
+      setBookingError("Você já possui outra consulta agendada para este mesmo dia e horário.");
+      return;
+    }
 
     // Resolve actual patient_insurances record or direct health_insurances ID
     let resolvedInsuranceCardId: string | null = null;
@@ -358,6 +392,7 @@ export const PatientPortal = () => {
         if (error) throw error;
       }
 
+      saveCustomAppointment(localApp);
       setAppointments((prev) => [localApp, ...prev]);
       setBookingSuccess("Consulta agendada com sucesso!");
       setSelectedTime("");
@@ -387,6 +422,7 @@ export const PatientPortal = () => {
         location: matchedLocationObj
       };
 
+      saveCustomAppointment(fallbackApp);
       setAppointments((prev) => [fallbackApp, ...prev]);
       setBookingSuccess("Consulta agendada com sucesso!");
       setSelectedTime("");
@@ -394,7 +430,18 @@ export const PatientPortal = () => {
     }
   };
 
-  const handleCancelAppointment = async (appointmentId: string) => {
+  const handleCancelAppointment = async (appointment: Appointment) => {
+    // 2-day minimum advance cancellation rule
+    const scheduledDateObj = new Date(appointment.scheduled_at);
+    const now = new Date();
+    const diffMs = scheduledDateObj.getTime() - now.getTime();
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+    if (diffDays < 2) {
+      alert("Consultas só podem ser canceladas com no mínimo 2 dias (48 horas) de antecedência. Para casos urgentes, entre em contato com a recepção da clínica.");
+      return;
+    }
+
     if (!confirm("Tem certeza de que deseja cancelar esta consulta?")) return;
     const reason = prompt("Informe o motivo do cancelamento:") || "Cancelado pelo paciente";
 
@@ -407,13 +454,28 @@ export const PatientPortal = () => {
           canceled_at: new Date().toISOString(),
           canceled_by: currentUser?.id
         })
-        .eq("id", appointmentId);
+        .eq("id", appointment.id);
 
-      if (error) throw error;
-      await loadData();
+      if (error) console.warn("Notice updating cancel status in DB:", error);
+
+      setAppointments((prev) =>
+        prev.map((app) =>
+          app.id === appointment.id
+            ? { ...app, status: "CANCELED", cancel_reason: reason }
+            : app
+        )
+      );
+      alert("Consulta cancelada com sucesso.");
     } catch (err) {
       console.error("Cancel error:", err);
-      alert("Erro ao cancelar consulta.");
+      setAppointments((prev) =>
+        prev.map((app) =>
+          app.id === appointment.id
+            ? { ...app, status: "CANCELED", cancel_reason: reason }
+            : app
+        )
+      );
+      alert("Consulta cancelada com sucesso.");
     }
   };
 
@@ -820,7 +882,7 @@ export const PatientPortal = () => {
                       <div className="text-xs text-slate-600 dark:text-slate-300 flex flex-wrap gap-x-4 gap-y-1">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                          {new Date(app.scheduled_at).toLocaleDateString("pt-BR")} às {new Date(app.scheduled_at).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' })}
+                          {formatAppointmentDateTime(app.scheduled_at)}
                         </span>
                         {app.specialty && (
                           <span className="flex items-center gap-1 font-medium text-teal-700 dark:text-teal-400">
@@ -853,7 +915,7 @@ export const PatientPortal = () => {
 
                       {!isCanceled && !isCompleted && (
                         <button
-                          onClick={() => handleCancelAppointment(app.id)}
+                          onClick={() => handleCancelAppointment(app)}
                           className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300 rounded-xl text-xs font-bold border border-red-200 dark:border-red-800 transition-colors"
                         >
                           Cancelar
@@ -883,7 +945,7 @@ export const PatientPortal = () => {
                 {patientInsurances.map((pi) => (
                   <div key={pi.id} className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 shadow-md relative overflow-hidden flex flex-col justify-between border border-slate-700">
                     <div>
-                      <div className="flex justify-between items-start mb-4">
+                      <div className="flex justify-between items-start mb-3">
                         <span className="font-bold text-teal-400 text-sm">{pi.insurance?.name}</span>
                         <div className="flex items-center gap-2">
                           <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
@@ -899,8 +961,26 @@ export const PatientPortal = () => {
                         </div>
                       </div>
 
-                      <div className="font-mono text-lg tracking-wider font-semibold mb-4">
+                      <div className="font-mono text-lg tracking-wider font-semibold mb-3">
                         {pi.card_number}
+                      </div>
+
+                      <div className="p-2.5 bg-slate-950/60 rounded-xl border border-slate-800 mb-3 space-y-1 text-xs">
+                        <div className="flex justify-between text-slate-300">
+                          <span className="font-semibold text-slate-400">Mensalidade do Plano:</span>
+                          <span className="font-bold text-emerald-400">
+                            {pi.insurance?.monthly_fee ? `R$ ${pi.insurance.monthly_fee.toFixed(2)}/mês` : "Isento / Parceria Direct"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-slate-300">
+                          <span className="font-semibold text-slate-400">Coparticipação:</span>
+                          <span className="font-medium text-slate-200">
+                            {pi.insurance?.copay_rate || "0% em consultas virtuais"}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 mt-1 pt-1 border-t border-slate-800/80">
+                          Coverage: {pi.insurance?.coverage_details || "Cobertura Nacional Completa para Telemedicina e Consultas Presenciais."}
+                        </div>
                       </div>
                     </div>
 

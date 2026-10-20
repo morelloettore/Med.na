@@ -7,6 +7,7 @@ import { Appointment, MedicalRecord, MedicationItem, Prescription, DoctorSchedul
 import { TelemedicineRoom } from "@/components/TelemedicineRoom";
 import { VirtualAgenda } from "@/components/VirtualAgenda";
 import { getFriendlyErrorMessage } from "@/lib/errorUtils";
+import { formatAppointmentDate, formatAppointmentTime, formatAppointmentDateTime } from "@/lib/dateUtils";
 import { MedicalRecordDocumentView } from "@/components/MedicalRecordDocumentView";
 import {
   Calendar,
@@ -354,7 +355,7 @@ export const DoctorPortal = () => {
                       <div className="text-xs text-slate-500 dark:text-slate-400 flex flex-wrap gap-x-3 gap-y-1">
                         <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300">
                           <Clock className="w-3.5 h-3.5 text-slate-400" />
-                          {new Date(app.scheduled_at).toLocaleDateString("pt-BR")} às {new Date(app.scheduled_at).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' })}
+                          {formatAppointmentDateTime(app.scheduled_at)}
                         </span>
                         <span className="flex items-center gap-1">
                           {app.mode === "TELEMEDICINE" ? <Video className="w-3.5 h-3.5 text-sky-600" /> : <Building className="w-3.5 h-3.5 text-slate-400" />}
