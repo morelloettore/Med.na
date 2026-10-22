@@ -63,7 +63,10 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
     if (node) {
       localVideoRefs.current.add(node);
       if (mediaStreamRef.current) {
-        node.srcObject = mediaStreamRef.current;
+        if (node.srcObject !== mediaStreamRef.current) {
+          node.srcObject = mediaStreamRef.current;
+        }
+        node.play().catch(() => {});
       }
     }
   }, []);
@@ -71,8 +74,12 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
   // Helper to bind remote video element
   const registerRemoteVideo = useCallback((node: HTMLVideoElement | null) => {
     remoteVideoRef.current = node;
-    if (node && remoteStreamRef.current) {
+    if (node) {
+      if (!remoteStreamRef.current) {
+        remoteStreamRef.current = new MediaStream();
+      }
       node.srcObject = remoteStreamRef.current;
+      node.play().catch(() => {});
     }
   }, []);
 
@@ -102,12 +109,13 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
         mediaStreamRef.current = stream;
 
         // Apply initial mic and video states
-        stream.getAudioTracks().forEach((t) => (t.enabled = true));
-        stream.getVideoTracks().forEach((t) => (t.enabled = true));
+        stream.getAudioTracks().forEach((t) => (t.enabled = micEnabled));
+        stream.getVideoTracks().forEach((t) => (t.enabled = videoEnabled));
 
         // Attach to all local video refs
         localVideoRefs.current.forEach((video) => {
           video.srcObject = stream;
+          video.play().catch(() => {});
         });
 
         // Add tracks to existing PeerConnection if initialized before media stream
@@ -134,6 +142,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
         mediaStreamRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // WebRTC & Supabase Realtime + BroadcastChannel Setup
@@ -226,15 +235,24 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
 
       // Handle remote incoming tracks
       pc.ontrack = (event) => {
+        if (!remoteStreamRef.current) {
+          remoteStreamRef.current = new MediaStream();
+        }
         if (event.streams && event.streams[0]) {
-          remoteStreamRef.current = event.streams[0];
+          event.streams[0].getTracks().forEach((track) => {
+            if (!remoteStreamRef.current?.getTracks().includes(track)) {
+              remoteStreamRef.current?.addTrack(track);
+            }
+          });
         } else if (event.track) {
-          if (!remoteStreamRef.current) remoteStreamRef.current = new MediaStream();
-          remoteStreamRef.current.addTrack(event.track);
+          if (!remoteStreamRef.current.getTracks().includes(event.track)) {
+            remoteStreamRef.current.addTrack(event.track);
+          }
         }
 
-        if (remoteVideoRef.current && remoteStreamRef.current) {
+        if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = remoteStreamRef.current;
+          remoteVideoRef.current.play().catch(() => {});
         }
         setRemoteConnected(true);
       };
@@ -268,6 +286,14 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
       try {
         if (payload.type === "offer" && payload.offer) {
           setPeerJoined(true);
+          const isCollision = pc.signalingState !== "stable";
+          if (isCollision) {
+            if (currentUserRole === "PATIENT") {
+              await pc.setLocalDescription({ type: "rollback" });
+            } else {
+              return;
+            }
+          }
           await pc.setRemoteDescription(new RTCSessionDescription(payload.offer));
           await drainIceCandidates(pc);
           const answer = await pc.createAnswer();
@@ -289,13 +315,15 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
           }
         } else if (payload.type === "peer-joined" || payload.type === "request-offer") {
           setPeerJoined(true);
-          const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
-          await pc.setLocalDescription(offer);
-          sendSignalMessage({
-            type: "offer",
-            offer,
-            senderRole: currentUserRole,
-          });
+          if (currentUserRole === "DOCTOR") {
+            const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+            await pc.setLocalDescription(offer);
+            sendSignalMessage({
+              type: "offer",
+              offer,
+              senderRole: currentUserRole,
+            });
+          }
         }
       } catch (err) {
         console.error("Error handling WebRTC signal:", err);
@@ -362,6 +390,8 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
           { urls: "stun:stun.l.google.com:19302" },
           { urls: "stun:stun1.l.google.com:19302" },
           { urls: "stun:stun2.l.google.com:19302" },
+          { urls: "stun:stun3.l.google.com:19302" },
+          { urls: "stun:stun4.l.google.com:19302" },
         ],
       });
       if (mediaStreamRef.current) {
@@ -371,56 +401,66 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
       }
       peerConnectionRef.current = newPc;
       pc = newPc;
-    }
-
-    const signalMsg = {
-      type: "request-offer",
-      senderRole: currentUserRole,
-      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    };
-    processedSignalIdsRef.current.add(signalMsg.id);
-
-    if (channelRef.current) {
-      channelRef.current.send({
-        type: "broadcast",
-        event: "signal",
-        payload: signalMsg,
-      });
-    }
-    if (broadcastChannelRef.current) {
-      broadcastChannelRef.current.postMessage({
-        event: "signal",
-        payload: signalMsg,
+    } else if (mediaStreamRef.current) {
+      const senders = pc.getSenders();
+      mediaStreamRef.current.getTracks().forEach((track) => {
+        const alreadyAdded = senders.some((s) => s.track === track);
+        if (!alreadyAdded) {
+          pc?.addTrack(track, mediaStreamRef.current!);
+        }
       });
     }
 
-    try {
-      const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
-      await pc.setLocalDescription(offer);
+    if (currentUserRole === "DOCTOR") {
+      try {
+        const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+        await pc.setLocalDescription(offer);
 
-      const offerMsg = {
-        type: "offer",
-        offer,
+        const offerMsg = {
+          type: "offer",
+          offer,
+          senderRole: currentUserRole,
+          id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        };
+        processedSignalIdsRef.current.add(offerMsg.id);
+
+        if (channelRef.current) {
+          channelRef.current.send({
+            type: "broadcast",
+            event: "signal",
+            payload: offerMsg,
+          });
+        }
+        if (broadcastChannelRef.current) {
+          broadcastChannelRef.current.postMessage({
+            event: "signal",
+            payload: offerMsg,
+          });
+        }
+      } catch (err) {
+        console.error("Error creating doctor offer:", err);
+      }
+    } else {
+      const requestMsg = {
+        type: "request-offer",
         senderRole: currentUserRole,
         id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       };
-      processedSignalIdsRef.current.add(offerMsg.id);
+      processedSignalIdsRef.current.add(requestMsg.id);
 
       if (channelRef.current) {
         channelRef.current.send({
           type: "broadcast",
           event: "signal",
-          payload: offerMsg,
+          payload: requestMsg,
         });
       }
       if (broadcastChannelRef.current) {
         broadcastChannelRef.current.postMessage({
           event: "signal",
-          payload: offerMsg,
+          payload: requestMsg,
         });
       }
-    } catch (err) {
-      console.error("Error creating initial offer:", err);
     }
   };
 
