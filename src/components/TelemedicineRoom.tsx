@@ -45,13 +45,20 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
   const [inputMsg, setInputMsg] = useState("");
 
   const mediaStreamRef = useRef<MediaStream | null>(null);
+  const remoteStreamRef = useRef<MediaStream | null>(null);
+  const iceCandidatesQueueRef = useRef<RTCIceCandidateInit[]>([]);
+  const processedSignalIdsRef = useRef<Set<string>>(new Set());
+  const processedChatIdsRef = useRef<Set<string>>(new Set());
+
   const localVideoRefs = useRef<Set<HTMLVideoElement>>(new Set());
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
 
-  // Helper to bind media stream to a video element
+  // Helper to bind media stream to a local video element
   const registerLocalVideo = useCallback((node: HTMLVideoElement | null) => {
     if (node) {
       localVideoRefs.current.add(node);
@@ -64,15 +71,17 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
   // Helper to bind remote video element
   const registerRemoteVideo = useCallback((node: HTMLVideoElement | null) => {
     remoteVideoRef.current = node;
-    if (node && peerConnectionRef.current) {
-      const receivers = peerConnectionRef.current.getReceivers();
-      const remoteTracks = receivers.map((r) => r.track).filter(Boolean);
-      if (remoteTracks.length > 0) {
-        const stream = new MediaStream(remoteTracks);
-        node.srcObject = stream;
-      }
+    if (node && remoteStreamRef.current) {
+      node.srcObject = remoteStreamRef.current;
     }
   }, []);
+
+  // Auto scroll chat to bottom
+  useEffect(() => {
+    if (chatOpen && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, chatOpen]);
 
   // Initialize camera and microphone media stream
   useEffect(() => {
@@ -93,13 +102,24 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
         mediaStreamRef.current = stream;
 
         // Apply initial mic and video states
-        stream.getAudioTracks().forEach((t) => (t.enabled = micEnabled));
-        stream.getVideoTracks().forEach((t) => (t.enabled = videoEnabled));
+        stream.getAudioTracks().forEach((t) => (t.enabled = true));
+        stream.getVideoTracks().forEach((t) => (t.enabled = true));
 
         // Attach to all local video refs
         localVideoRefs.current.forEach((video) => {
           video.srcObject = stream;
         });
+
+        // Add tracks to existing PeerConnection if initialized before media stream
+        if (peerConnectionRef.current) {
+          const senders = peerConnectionRef.current.getSenders();
+          stream.getTracks().forEach((track) => {
+            const alreadyAdded = senders.some((s) => s.track === track);
+            if (!alreadyAdded) {
+              peerConnectionRef.current?.addTrack(track, stream);
+            }
+          });
+        }
       } catch (err) {
         console.warn("Could not access camera/mic:", err);
       }
@@ -116,14 +136,58 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
     };
   }, []);
 
-  // WebRTC & Supabase Realtime Setup
+  // WebRTC & Supabase Realtime + BroadcastChannel Setup
   useEffect(() => {
-    const channelName = `telemed-${appointment.id.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+    const roomKey = appointment.id.replace(/[^a-zA-Z0-9_-]/g, "_");
+    const channelName = `telemed-${roomKey}`;
+
+    // 1. Supabase Realtime Channel
     const channel = supabase.channel(channelName, {
       config: { broadcast: { self: false } },
     });
-
     channelRef.current = channel;
+
+    // 2. Browser Local BroadcastChannel (Cross-tab instant sync)
+    let bc: BroadcastChannel | null = null;
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+      bc = new BroadcastChannel(channelName);
+      broadcastChannelRef.current = bc;
+    }
+
+    const drainIceCandidates = async (pc: RTCPeerConnection) => {
+      while (iceCandidatesQueueRef.current.length > 0) {
+        const candidate = iceCandidatesQueueRef.current.shift();
+        if (candidate) {
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+          } catch (err) {
+            console.warn("Error adding queued ICE candidate:", err);
+          }
+        }
+      }
+    };
+
+    const sendSignalMessage = (signalPayload: any) => {
+      const signalMsg = {
+        ...signalPayload,
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      };
+      processedSignalIdsRef.current.add(signalMsg.id);
+
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: "broadcast",
+          event: "signal",
+          payload: signalMsg,
+        });
+      }
+      if (broadcastChannelRef.current) {
+        broadcastChannelRef.current.postMessage({
+          event: "signal",
+          payload: signalMsg,
+        });
+      }
+    };
 
     const createPeerConnection = () => {
       if (peerConnectionRef.current) {
@@ -134,39 +198,45 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
           { urls: "stun:stun1.l.google.com:19302" },
+          { urls: "stun:stun2.l.google.com:19302" },
         ],
       });
 
-      // Add local tracks to peer connection
+      if (!remoteStreamRef.current) {
+        remoteStreamRef.current = new MediaStream();
+      }
+
+      // Add local tracks to peer connection if available
       if (mediaStreamRef.current) {
         mediaStreamRef.current.getTracks().forEach((track) => {
           pc.addTrack(track, mediaStreamRef.current!);
         });
       }
 
-      // Handle ICE candidates
+      // Handle local ICE candidates
       pc.onicecandidate = (event) => {
         if (event.candidate) {
-          channel.send({
-            type: "broadcast",
-            event: "signal",
-            payload: {
-              type: "candidate",
-              candidate: event.candidate,
-              senderRole: currentUserRole,
-            },
+          sendSignalMessage({
+            type: "candidate",
+            candidate: event.candidate,
+            senderRole: currentUserRole,
           });
         }
       };
 
-      // Handle remote tracks
+      // Handle remote incoming tracks
       pc.ontrack = (event) => {
         if (event.streams && event.streams[0]) {
-          if (remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = event.streams[0];
-          }
-          setRemoteConnected(true);
+          remoteStreamRef.current = event.streams[0];
+        } else if (event.track) {
+          if (!remoteStreamRef.current) remoteStreamRef.current = new MediaStream();
+          remoteStreamRef.current.addTrack(event.track);
         }
+
+        if (remoteVideoRef.current && remoteStreamRef.current) {
+          remoteVideoRef.current.srcObject = remoteStreamRef.current;
+        }
+        setRemoteConnected(true);
       };
 
       pc.onconnectionstatechange = () => {
@@ -185,79 +255,97 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
       return pc;
     };
 
-    channel
-      .on("broadcast", { event: "signal" }, async ({ payload }) => {
-        if (!payload || payload.senderRole === currentUserRole) return;
+    const handleSignalPayload = async (payload: any) => {
+      if (!payload || !payload.id || payload.senderRole === currentUserRole) return;
+      if (processedSignalIdsRef.current.has(payload.id)) return;
+      processedSignalIdsRef.current.add(payload.id);
 
-        let pc = peerConnectionRef.current;
-        if (!pc) {
-          pc = createPeerConnection();
-        }
+      let pc = peerConnectionRef.current;
+      if (!pc) {
+        pc = createPeerConnection();
+      }
 
-        try {
-          if (payload.type === "offer") {
-            setPeerJoined(true);
-            await pc.setRemoteDescription(new RTCSessionDescription(payload.offer));
-            const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-            channel.send({
-              type: "broadcast",
-              event: "signal",
-              payload: {
-                type: "answer",
-                answer,
-                senderRole: currentUserRole,
-              },
-            });
-          } else if (payload.type === "answer") {
-            setPeerJoined(true);
-            await pc.setRemoteDescription(new RTCSessionDescription(payload.answer));
-          } else if (payload.type === "candidate") {
+      try {
+        if (payload.type === "offer" && payload.offer) {
+          setPeerJoined(true);
+          await pc.setRemoteDescription(new RTCSessionDescription(payload.offer));
+          await drainIceCandidates(pc);
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          sendSignalMessage({
+            type: "answer",
+            answer,
+            senderRole: currentUserRole,
+          });
+        } else if (payload.type === "answer" && payload.answer) {
+          setPeerJoined(true);
+          await pc.setRemoteDescription(new RTCSessionDescription(payload.answer));
+          await drainIceCandidates(pc);
+        } else if (payload.type === "candidate" && payload.candidate) {
+          if (pc.remoteDescription && pc.remoteDescription.type) {
             await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
-          } else if (payload.type === "peer-joined") {
-            setPeerJoined(true);
-            // Initiate WebRTC offer if doctor or first to start
-            if (currentUserRole === "DOCTOR") {
-              const offer = await pc.createOffer();
-              await pc.setLocalDescription(offer);
-              channel.send({
-                type: "broadcast",
-                event: "signal",
-                payload: {
-                  type: "offer",
-                  offer,
-                  senderRole: currentUserRole,
-                },
-              });
-            }
+          } else {
+            iceCandidatesQueueRef.current.push(payload.candidate);
           }
-        } catch (err) {
-          console.error("Error handling WebRTC signal:", err);
+        } else if (payload.type === "peer-joined" || payload.type === "request-offer") {
+          setPeerJoined(true);
+          const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+          await pc.setLocalDescription(offer);
+          sendSignalMessage({
+            type: "offer",
+            offer,
+            senderRole: currentUserRole,
+          });
         }
-      })
-      .on("broadcast", { event: "chat" }, ({ payload }) => {
-        if (payload && payload.senderRole !== currentUserRole) {
-          setMessages((prev) => [...prev, payload.message]);
-        }
-      })
+      } catch (err) {
+        console.error("Error handling WebRTC signal:", err);
+      }
+    };
+
+    const handleChatPayload = (payload: any) => {
+      if (!payload || !payload.id || payload.senderRole === currentUserRole) return;
+      if (processedChatIdsRef.current.has(payload.id)) return;
+      processedChatIdsRef.current.add(payload.id);
+
+      setMessages((prev) => [...prev, payload.message]);
+    };
+
+    // Attach BroadcastChannel listener
+    if (bc) {
+      bc.onmessage = (evt) => {
+        const { event, payload } = evt.data || {};
+        if (event === "signal") handleSignalPayload(payload);
+        if (event === "chat") handleChatPayload(payload);
+      };
+    }
+
+    // Attach Supabase Realtime listeners
+    channel
+      .on("broadcast", { event: "signal" }, ({ payload }) => handleSignalPayload(payload))
+      .on("broadcast", { event: "chat" }, ({ payload }) => handleChatPayload(payload))
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
-          // Announce presence in the room
-          channel.send({
-            type: "broadcast",
-            event: "signal",
-            payload: {
-              type: "peer-joined",
-              senderRole: currentUserRole,
-            },
+          sendSignalMessage({
+            type: "peer-joined",
+            senderRole: currentUserRole,
           });
         }
       });
+
+    // Also announce over local BroadcastChannel immediately
+    sendSignalMessage({
+      type: "peer-joined",
+      senderRole: currentUserRole,
+    });
 
     return () => {
       if (peerConnectionRef.current) {
         peerConnectionRef.current.close();
         peerConnectionRef.current = null;
+      }
+      if (broadcastChannelRef.current) {
+        broadcastChannelRef.current.close();
+        broadcastChannelRef.current = null;
       }
       supabase.removeChannel(channel);
     };
@@ -269,11 +357,11 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
 
     let pc = peerConnectionRef.current;
     if (!pc) {
-      // Create PC if not already created
       const newPc = new RTCPeerConnection({
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
           { urls: "stun:stun1.l.google.com:19302" },
+          { urls: "stun:stun2.l.google.com:19302" },
         ],
       });
       if (mediaStreamRef.current) {
@@ -285,34 +373,54 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
       pc = newPc;
     }
 
+    const signalMsg = {
+      type: "request-offer",
+      senderRole: currentUserRole,
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    };
+    processedSignalIdsRef.current.add(signalMsg.id);
+
     if (channelRef.current) {
-      // Re-announce peer joined to trigger negotiation if necessary
       channelRef.current.send({
         type: "broadcast",
         event: "signal",
-        payload: {
-          type: "peer-joined",
-          senderRole: currentUserRole,
-        },
+        payload: signalMsg,
       });
+    }
+    if (broadcastChannelRef.current) {
+      broadcastChannelRef.current.postMessage({
+        event: "signal",
+        payload: signalMsg,
+      });
+    }
 
-      if (currentUserRole === "DOCTOR") {
-        try {
-          const offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
-          channelRef.current.send({
-            type: "broadcast",
-            event: "signal",
-            payload: {
-              type: "offer",
-              offer,
-              senderRole: currentUserRole,
-            },
-          });
-        } catch (err) {
-          console.error("Error creating initial offer:", err);
-        }
+    try {
+      const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+      await pc.setLocalDescription(offer);
+
+      const offerMsg = {
+        type: "offer",
+        offer,
+        senderRole: currentUserRole,
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      };
+      processedSignalIdsRef.current.add(offerMsg.id);
+
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: "broadcast",
+          event: "signal",
+          payload: offerMsg,
+        });
       }
+      if (broadcastChannelRef.current) {
+        broadcastChannelRef.current.postMessage({
+          event: "signal",
+          payload: offerMsg,
+        });
+      }
+    } catch (err) {
+      console.error("Error creating initial offer:", err);
     }
   };
 
@@ -341,6 +449,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
         ? `Dr(a). ${appointment.doctor_user?.first_name || ""}`
         : appointment.patient_user?.first_name || "Paciente";
 
+    const msgId = `chat-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const msgObj = {
       sender: senderName,
       text: inputMsg.trim(),
@@ -349,15 +458,25 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
 
     setMessages((prev) => [...prev, msgObj]);
     setInputMsg("");
+    processedChatIdsRef.current.add(msgId);
+
+    const chatPayload = {
+      id: msgId,
+      senderRole: currentUserRole,
+      message: msgObj,
+    };
 
     if (channelRef.current) {
       channelRef.current.send({
         type: "broadcast",
         event: "chat",
-        payload: {
-          message: msgObj,
-          senderRole: currentUserRole,
-        },
+        payload: chatPayload,
+      });
+    }
+    if (broadcastChannelRef.current) {
+      broadcastChannelRef.current.postMessage({
+        event: "chat",
+        payload: chatPayload,
       });
     }
   };
@@ -594,6 +713,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
                       <p className="leading-relaxed">{m.text}</p>
                     </div>
                   ))}
+                  <div ref={chatEndRef} />
                 </div>
 
                 <form onSubmit={handleSendMessage} className="p-3 border-t border-slate-800 flex gap-2">
