@@ -291,7 +291,20 @@ export const PatientPortal = () => {
         }
       });
 
-      const finalSlots = Array.from(new Set(rawSlots)).filter((slot) => !bookedTimes.has(slot)).sort();
+      const now = new Date();
+      const todayStr = now.toISOString().split("T")[0];
+      const isSelectedDateToday = selectedDate === todayStr;
+      const currentHHMM = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+
+      const finalSlots = Array.from(new Set(rawSlots))
+        .filter((slot) => {
+          if (bookedTimes.has(slot)) return false;
+          // Filter out slots that have already passed if selecting today
+          if (isSelectedDateToday && slot <= currentHHMM) return false;
+          return true;
+        })
+        .sort();
+
       setAvailableSlots(finalSlots);
     }
 
@@ -320,6 +333,13 @@ export const PatientPortal = () => {
     const today = new Date().toISOString().split("T")[0];
     if (selectedDate < today) {
       setBookingError("Não é possível agendar consultas em datas passadas.");
+      return;
+    }
+
+    const now = new Date();
+    const currentHHMM = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+    if (selectedDate === today && selectedTime <= currentHHMM) {
+      setBookingError("Não é possível agendar um horário que já passou hoje.");
       return;
     }
 

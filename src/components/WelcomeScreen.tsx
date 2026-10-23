@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Logo } from "@/components/Logo";
+import { playWelcomeSound, playClickSound } from "@/lib/soundUtils";
 import { LogIn, Power, ShieldCheck, HeartPulse, Stethoscope, Sparkles } from "lucide-react";
 
 interface WelcomeScreenProps {
@@ -13,6 +14,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter }) => {
   const [closedApp, setClosedApp] = useState(false);
 
   useEffect(() => {
+    playWelcomeSound();
     const timer = setTimeout(() => {
       setAnimating(false);
     }, 2400);
@@ -83,7 +85,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter }) => {
 
           <div className="space-y-3 pt-2">
             <button
-              onClick={onEnter}
+              onClick={() => {
+                playClickSound();
+                onEnter();
+              }}
               className="w-full py-4 bg-gradient-to-r from-teal-500 to-sky-600 hover:from-teal-400 hover:to-sky-500 text-white font-bold rounded-2xl shadow-lg shadow-teal-500/20 transition-all flex items-center justify-center gap-3 text-sm group"
             >
               <LogIn className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -91,7 +96,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter }) => {
             </button>
 
             <button
-              onClick={handleExitApp}
+              onClick={() => {
+                playClickSound();
+                handleExitApp();
+              }}
               className="w-full py-3.5 bg-slate-800/80 hover:bg-slate-800 text-slate-400 hover:text-red-400 border border-slate-700/80 hover:border-red-500/30 font-bold rounded-2xl transition-all flex items-center justify-center gap-2.5 text-xs"
             >
               <Power className="w-4 h-4" />

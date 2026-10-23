@@ -49,14 +49,21 @@ export const EmployeePortal = () => {
         .order("scheduled_at", { ascending: false });
 
       const customApps = getCustomAppointments();
-      const allAppList = apps ? [...apps] : [];
 
-      // Merge custom/local appointments if not already present
+      // Deduplicate appointments by ID to prevent duplicate table rows
+      const appsMap = new Map<string, Appointment>();
+
+      (apps || []).forEach((a) => {
+        appsMap.set(a.id, a);
+      });
+
       customApps.forEach((ca) => {
-        if (!allAppList.some((a) => a.id === ca.id)) {
-          allAppList.push(ca);
+        if (!appsMap.has(ca.id)) {
+          appsMap.set(ca.id, ca);
         }
       });
+
+      const allAppList = Array.from(appsMap.values());
 
       const enrichedApps = allAppList.map((app) => ({
         ...app,

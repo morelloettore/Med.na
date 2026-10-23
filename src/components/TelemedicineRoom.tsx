@@ -435,7 +435,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
     const senderName =
       currentUserRole === "DOCTOR"
         ? `Dr(a). ${appointment.doctor_user?.first_name || ""}`
-        : appointment.patient_user?.first_name || "Paciente";
+        : `${appointment.patient_user?.first_name || "Paciente"}`;
 
     const msgId = `chat-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const msgObj = {
