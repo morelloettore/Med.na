@@ -17,6 +17,7 @@ import {
 import { Appointment } from "@/types";
 import { supabase } from "@/lib/supabase";
 import { RealtimeChannel } from "@supabase/supabase-js";
+import { playCallJoinSound, playMessageNotificationSound } from "@/lib/soundUtils";
 
 interface TelemedicineRoomProps {
   appointment: Appointment;
@@ -174,6 +175,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
         remoteVideoRef.current.srcObject = remoteStreamRef.current;
         remoteVideoRef.current.play().catch(() => {});
       }
+        playCallJoinSound();
       setRemoteConnected(true);
     };
 
@@ -343,6 +345,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
       if (processedChatIdsRef.current.has(payload.id)) return;
       processedChatIdsRef.current.add(payload.id);
 
+      playMessageNotificationSound();
       setMessages((prev) => [...prev, payload.message]);
     };
 
