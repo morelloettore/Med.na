@@ -50,6 +50,9 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
   const processedSignalIdsRef = useRef<Set<string>>(new Set());
   const processedChatIdsRef = useRef<Set<string>>(new Set());
 
+  // Unique client instance ID per tab/window to prevent self-loop dropping during local/multi-tab testing
+  const clientIdRef = useRef<string>(`client-${Math.random().toString(36).substring(2, 9)}`);
+
   const localVideoRefs = useRef<Set<HTMLVideoElement>>(new Set());
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -179,6 +182,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
     const sendSignalMessage = (signalPayload: any) => {
       const signalMsg = {
         ...signalPayload,
+        senderClientId: clientIdRef.current,
         id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       };
       processedSignalIdsRef.current.add(signalMsg.id);
@@ -313,7 +317,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
     };
 
     const handleSignalPayload = async (payload: any) => {
-      if (!payload || !payload.id || payload.senderRole === currentUserRole) return;
+      if (!payload || !payload.id || payload.senderClientId === clientIdRef.current) return;
       if (processedSignalIdsRef.current.has(payload.id)) return;
       processedSignalIdsRef.current.add(payload.id);
 
@@ -327,7 +331,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
           setPeerJoined(true);
           const isCollision = pc.signalingState !== "stable";
           if (isCollision) {
-            if (currentUserRole === "PATIENT") {
+            if (currentUserRole === "PATIENT" || clientIdRef.current < payload.senderClientId) {
               await pc.setLocalDescription({ type: "rollback" });
             } else {
               return;
@@ -354,12 +358,20 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
           }
         } else if (payload.type === "peer-joined" || payload.type === "request-offer") {
           setPeerJoined(true);
-          if (currentUserRole === "DOCTOR") {
+          const isDoctor = currentUserRole === "DOCTOR";
+          const isHigherClient = clientIdRef.current > payload.senderClientId;
+
+          if (isDoctor || isHigherClient) {
             const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
             await pc.setLocalDescription(offer);
             sendSignalMessage({
               type: "offer",
               offer,
+              senderRole: currentUserRole,
+            });
+          } else if (payload.type === "peer-joined") {
+            sendSignalMessage({
+              type: "request-offer",
               senderRole: currentUserRole,
             });
           }
@@ -370,7 +382,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
     };
 
     const handleChatPayload = (payload: any) => {
-      if (!payload || !payload.id || payload.senderRole === currentUserRole) return;
+      if (!payload || !payload.id || payload.senderClientId === clientIdRef.current) return;
       if (processedChatIdsRef.current.has(payload.id)) return;
       processedChatIdsRef.current.add(payload.id);
 
@@ -512,6 +524,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
 
     const chatPayload = {
       id: msgId,
+      senderClientId: clientIdRef.current,
       senderRole: currentUserRole,
       message: msgObj,
     };

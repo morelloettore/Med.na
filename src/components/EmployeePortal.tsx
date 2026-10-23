@@ -282,10 +282,10 @@ export const EmployeePortal = () => {
                       <tr key={app.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                         <td className="px-6 py-4 text-xs">
                           <div className="font-bold text-slate-900 dark:text-white">
-                            {new Date(app.scheduled_at).toLocaleDateString("pt-BR")}
+                            {formatAppointmentDate(app.scheduled_at)}
                           </div>
                           <div className="text-slate-500 dark:text-slate-400">
-                            {new Date(app.scheduled_at).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' })}
+                            {formatAppointmentTime(app.scheduled_at)}
                           </div>
                         </td>
 
