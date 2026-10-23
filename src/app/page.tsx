@@ -35,7 +35,7 @@ function MainApp() {
   }
 
   if (!currentUser) {
-    return <LoginForm />;
+    return <LoginForm onBackToSplash={() => setEntered(false)} />;
   }
 
   return (
