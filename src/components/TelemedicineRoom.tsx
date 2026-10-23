@@ -44,6 +44,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
   ]);
   const [inputMsg, setInputMsg] = useState("");
 
+  const clientIdRef = useRef<string>(`client-${Math.random().toString(36).substring(2, 9)}`);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const remoteStreamRef = useRef<MediaStream | null>(null);
   const iceCandidatesQueueRef = useRef<RTCIceCandidateInit[]>([]);
@@ -179,6 +180,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
     const sendSignalMessage = (signalPayload: any) => {
       const signalMsg = {
         ...signalPayload,
+        senderClientId: clientIdRef.current,
         senderRole: currentUserRole,
         id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       };
@@ -283,7 +285,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
     };
 
     const handleSignalPayload = async (payload: any) => {
-      if (!payload || !payload.id || payload.senderRole === currentUserRole) return;
+      if (!payload || !payload.id || payload.senderClientId === clientIdRef.current) return;
       if (processedSignalIdsRef.current.has(payload.id)) return;
       processedSignalIdsRef.current.add(payload.id);
 
@@ -315,8 +317,9 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
           }
         } else if (payload.type === "peer-joined" || payload.type === "request-offer") {
           setPeerJoined(true);
-          // Doctor or first participant creates offer
-          if (currentUserRole === "DOCTOR") {
+          // High client ID or DOCTOR role initiates offer
+          const shouldOffer = currentUserRole === "DOCTOR" || clientIdRef.current > payload.senderClientId;
+          if (shouldOffer) {
             const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
             await pc.setLocalDescription(offer);
             sendSignalMessage({
@@ -335,7 +338,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
     };
 
     const handleChatPayload = (payload: any) => {
-      if (!payload || !payload.id || payload.senderRole === currentUserRole) return;
+      if (!payload || !payload.id || payload.senderClientId === clientIdRef.current) return;
       if (processedChatIdsRef.current.has(payload.id)) return;
       processedChatIdsRef.current.add(payload.id);
 
@@ -381,36 +384,6 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
     };
   }, [appointment.id, currentUserRole]);
 
-  // Periodic signaling ping while in IN_CALL until remoteConnected is true
-  useEffect(() => {
-    if (step !== "IN_CALL" || remoteConnected) return;
-
-    const interval = setInterval(() => {
-      const pingSignal = {
-        type: "peer-joined",
-        senderRole: currentUserRole,
-        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      };
-      processedSignalIdsRef.current.add(pingSignal.id);
-
-      if (channelRef.current) {
-        channelRef.current.send({
-          type: "broadcast",
-          event: "signal",
-          payload: pingSignal,
-        });
-      }
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.postMessage({
-          event: "signal",
-          payload: pingSignal,
-        });
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [step, remoteConnected, currentUserRole]);
-
   // Handle joining the call step
   const handleEnterCall = async () => {
     setStep("IN_CALL");
@@ -438,6 +411,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
           const signalMsg = {
             type: "candidate",
             candidate: event.candidate,
+            senderClientId: clientIdRef.current,
             senderRole: currentUserRole,
             id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
           };
@@ -475,6 +449,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
 
     const joinSignal = {
       type: "peer-joined",
+      senderClientId: clientIdRef.current,
       senderRole: currentUserRole,
       id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     };
@@ -502,6 +477,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
         const offerMsg = {
           type: "offer",
           offer,
+          senderClientId: clientIdRef.current,
           senderRole: currentUserRole,
           id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         };
@@ -564,6 +540,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
 
     const chatPayload = {
       id: msgId,
+      senderClientId: clientIdRef.current,
       senderRole: currentUserRole,
       message: msgObj,
     };
