@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { AppNotification } from "@/types";
+import { supabase } from "@/lib/supabase";
+import { getCustomAppointments } from "@/lib/appointmentStorage";
+import { formatAppointmentDateTime } from "@/lib/dateUtils";
 import {
   Bell,
   X,
@@ -25,55 +28,122 @@ export const NotificationCenter = () => {
       return;
     }
 
-    if (currentUser.role === "ADMIN") {
-      setNotifications([
-        {
-          id: "notif-admin-1",
-          user_id: currentUser.id,
-          title: "Painel de Administração",
-          message: "Acompanhe as métricas do sistema e aprovações pendentes de cadastro.",
-          type: "SYSTEM",
-          read: false,
-          created_at: new Date().toISOString(),
-        },
-      ]);
-    } else if (currentUser.role === "PATIENT") {
-      setNotifications([
-        {
-          id: "notif-patient-1",
-          user_id: currentUser.id,
-          title: "Bem-vindo à Med.na",
-          message: `Olá, ${currentUser.first_name}! Agende suas consultas virtuais ou presenciais pelo seu painel.`,
-          type: "APPOINTMENT",
-          read: false,
-          created_at: new Date().toISOString(),
-        },
-      ]);
-    } else if (currentUser.role === "DOCTOR") {
-      setNotifications([
-        {
-          id: "notif-doctor-1",
-          user_id: currentUser.id,
-          title: "Agenda Médica Ativa",
-          message: "Consulte seus pacientes agendados e realize teleconsultas pelo seu portal.",
-          type: "TELEMEDICINE",
-          read: false,
-          created_at: new Date().toISOString(),
-        },
-      ]);
-    } else if (currentUser.role === "EMPLOYEE") {
-      setNotifications([
-        {
-          id: "notif-employee-1",
-          user_id: currentUser.id,
-          title: "Fila de Recepção",
-          message: "Gerencie check-in e confirmação de consultas de pacientes na recepção.",
-          type: "SYSTEM",
-          read: false,
-          created_at: new Date().toISOString(),
-        },
-      ]);
+    async function loadDynamicNotifications() {
+      if (!currentUser) return;
+      const notifs: AppNotification[] = [];
+
+      try {
+        const { data: dbApps } = await supabase
+          .from("appointments")
+          .select("*")
+          .or(`patient_id.eq.${currentUser.id},doctor_id.eq.${currentUser.id}`);
+
+        const localApps = getCustomAppointments().filter(
+          (a) => a.patient_id === currentUser.id || a.doctor_id === currentUser.id
+        );
+
+        const allUserApps = [...(dbApps || [])];
+        localApps.forEach((la) => {
+          if (!allUserApps.some((a) => a.id === la.id)) {
+            allUserApps.push(la);
+          }
+        });
+
+        allUserApps.forEach((app) => {
+          if (app.status === "SCHEDULED") {
+            notifs.push({
+              id: `notif-app-${app.id}`,
+              user_id: currentUser.id,
+              title: "Consulta Agendada",
+              message: `Consulta marcada para ${formatAppointmentDateTime(app.scheduled_at)} (${app.mode === "TELEMEDICINE" ? "Telemedicina" : "Presencial"}).`,
+              type: app.mode === "TELEMEDICINE" ? "TELEMEDICINE" : "APPOINTMENT",
+              read: false,
+              created_at: app.created_at || new Date().toISOString(),
+            });
+          } else if (app.status === "CONFIRMED") {
+            notifs.push({
+              id: `notif-conf-${app.id}`,
+              user_id: currentUser.id,
+              title: "Consulta Confirmada",
+              message: `Sua consulta marcada para ${formatAppointmentDateTime(app.scheduled_at)} foi confirmada pela recepção.`,
+              type: "APPOINTMENT",
+              read: false,
+              created_at: new Date().toISOString(),
+            });
+          } else if (app.status === "COMPLETED") {
+            notifs.push({
+              id: `notif-comp-${app.id}`,
+              user_id: currentUser.id,
+              title: "Prontuário e Receita Disponíveis",
+              message: `O atendimento de ${formatAppointmentDateTime(app.scheduled_at)} foi concluído. Seu prontuário está disponível no portal.`,
+              type: "PRESCRIPTION",
+              read: false,
+              created_at: new Date().toISOString(),
+            });
+          } else if (app.status === "CANCELED") {
+            notifs.push({
+              id: `notif-canc-${app.id}`,
+              user_id: currentUser.id,
+              title: "Consulta Cancelada",
+              message: `A consulta de ${formatAppointmentDateTime(app.scheduled_at)} foi cancelada.${app.cancel_reason ? ` Motivo: ${app.cancel_reason}` : ""}`,
+              type: "SYSTEM",
+              read: false,
+              created_at: new Date().toISOString(),
+            });
+          }
+        });
+      } catch (err) {
+        console.warn("Error fetching notifications:", err);
+      }
+
+      if (notifs.length === 0) {
+        if (currentUser.role === "ADMIN") {
+          notifs.push({
+            id: "notif-admin-1",
+            user_id: currentUser.id,
+            title: "Painel de Administração",
+            message: "Acompanhe as métricas do sistema e aprovações pendentes de cadastro.",
+            type: "SYSTEM",
+            read: false,
+            created_at: new Date().toISOString(),
+          });
+        } else if (currentUser.role === "PATIENT") {
+          notifs.push({
+            id: "notif-patient-1",
+            user_id: currentUser.id,
+            title: "Bem-vindo à Med.na",
+            message: `Olá, ${currentUser.first_name}! Agende suas consultas virtuais ou presenciais pelo seu painel.`,
+            type: "APPOINTMENT",
+            read: false,
+            created_at: new Date().toISOString(),
+          });
+        } else if (currentUser.role === "DOCTOR") {
+          notifs.push({
+            id: "notif-doctor-1",
+            user_id: currentUser.id,
+            title: "Agenda Médica Ativa",
+            message: "Consulte seus pacientes agendados e realize teleconsultas pelo seu portal.",
+            type: "TELEMEDICINE",
+            read: false,
+            created_at: new Date().toISOString(),
+          });
+        } else if (currentUser.role === "EMPLOYEE") {
+          notifs.push({
+            id: "notif-employee-1",
+            user_id: currentUser.id,
+            title: "Fila de Recepção",
+            message: "Gerencie check-in e confirmação de consultas de pacientes na recepção.",
+            type: "SYSTEM",
+            read: false,
+            created_at: new Date().toISOString(),
+          });
+        }
+      }
+
+      setNotifications(notifs);
     }
+
+    loadDynamicNotifications();
   }, [currentUser]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
