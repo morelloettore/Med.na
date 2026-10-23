@@ -18,6 +18,10 @@ function MainApp() {
   const [entered, setEntered] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
 
+  if (!entered) {
+    return <WelcomeScreen onEnter={() => setEntered(true)} />;
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center transition-colors">
@@ -28,10 +32,6 @@ function MainApp() {
         </div>
       </div>
     );
-  }
-
-  if (!entered) {
-    return <WelcomeScreen onEnter={() => setEntered(true)} />;
   }
 
   if (!currentUser) {
