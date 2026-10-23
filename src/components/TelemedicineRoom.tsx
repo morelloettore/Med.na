@@ -210,6 +210,22 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
           { urls: "stun:stun2.l.google.com:19302" },
           { urls: "stun:stun3.l.google.com:19302" },
           { urls: "stun:stun4.l.google.com:19302" },
+          { urls: "stun:global.stun.twilio.com:3478" },
+          {
+            urls: "turn:openrelay.metered.ca:80",
+            username: "openrelayproject",
+            credential: "openrelayproject"
+          },
+          {
+            urls: "turn:openrelay.metered.ca:443",
+            username: "openrelayproject",
+            credential: "openrelayproject"
+          },
+          {
+            urls: "turn:openrelay.metered.ca:443?transport=tcp",
+            username: "openrelayproject",
+            credential: "openrelayproject"
+          }
         ],
       });
 
@@ -217,10 +233,24 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
         remoteStreamRef.current = new MediaStream();
       }
 
+      // Explicitly add Transceivers to guarantee bidirectional SDP audio/video exchange
+      try {
+        pc.addTransceiver("audio", { direction: "sendrecv" });
+        pc.addTransceiver("video", { direction: "sendrecv" });
+      } catch (err) {
+        console.warn("Transceivers error:", err);
+      }
+
       // Add local tracks to peer connection if available
       if (mediaStreamRef.current) {
+        const senders = pc.getSenders();
         mediaStreamRef.current.getTracks().forEach((track) => {
-          pc.addTrack(track, mediaStreamRef.current!);
+          const matchingSender = senders.find((s) => s.track?.kind === track.kind || (!s.track && s.track !== null));
+          if (matchingSender) {
+            matchingSender.replaceTrack(track).catch(() => {});
+          } else {
+            pc.addTrack(track, mediaStreamRef.current!);
+          }
         });
       }
 
@@ -387,6 +417,36 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
       supabase.removeChannel(channel);
     };
   }, [appointment.id, currentUserRole]);
+
+  // Periodic signaling ping while in IN_CALL until remoteConnected is true
+  useEffect(() => {
+    if (step !== "IN_CALL" || remoteConnected) return;
+
+    const interval = setInterval(() => {
+      const pingSignal = {
+        type: "peer-joined",
+        senderRole: currentUserRole,
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      };
+      processedSignalIdsRef.current.add(pingSignal.id);
+
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: "broadcast",
+          event: "signal",
+          payload: pingSignal,
+        });
+      }
+      if (broadcastChannelRef.current) {
+        broadcastChannelRef.current.postMessage({
+          event: "signal",
+          payload: pingSignal,
+        });
+      }
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [step, remoteConnected, currentUserRole]);
 
   // Handle joining the call step
   const handleEnterCall = async () => {
