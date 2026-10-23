@@ -14,6 +14,8 @@ const FAQ_SUGGESTIONS = [
   "Como vincular meu plano / carteirinha de saúde?",
   "Onde consultar prontuário e receita médica ICP-Brasil?",
   "Como utilizar a sala de telemedicina WebRTC?",
+  "Quais são os procedimentos para cancelar com antecedência?",
+  "Como funciona o atendimento por convênio vs particular?",
   "Onde ver escalas e agenda dos médicos?",
   "Como realizar o check-in na recepção?",
 ];
@@ -35,6 +37,10 @@ export const AiAssistant = ({ isOpen, onClose }: { isOpen: boolean; onClose: () 
 
     if (lower.includes("emergência") || lower.includes("urgência") || lower.includes("samu") || lower.includes("socorro")) {
       return "⚠️ **IMPORTANTE DE EMERGÊNCIA**: Caso você esteja vivenciando uma emergência médica grave (dor no peito, falta de ar severa ou trauma), ligue imediatamente para o SAMU (192) ou procure o Pronto-Socorro mais próximo!";
+    }
+
+    if (lower.includes("cancelar") || lower.includes("cancelamento") || lower.includes("desistir")) {
+      return "🚫 **Regras de Cancelamento**:\nConforme as políticas da clínica Med.na, consultas só podem ser canceladas com no mínimo **2 dias (48 horas) de antecedência**. Caso falte menos tempo, entre em contato diretamente com a recepção.";
     }
 
     if (lower.includes("agendar") || lower.includes("consulta") || lower.includes("marcar")) {
