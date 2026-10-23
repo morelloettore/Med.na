@@ -6,6 +6,7 @@ import {
   Lock,
   Mail,
   ArrowRight,
+  ArrowLeft,
   AlertCircle,
   UserPlus,
   LogIn
@@ -14,7 +15,11 @@ import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types";
 import { Logo } from "@/components/Logo";
 
-export function LoginForm() {
+interface LoginFormProps {
+  onBackToSplash?: () => void;
+}
+
+export function LoginForm({ onBackToSplash }: LoginFormProps) {
   const router = useRouter();
   const { signIn, signUp, loading } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
@@ -115,8 +120,17 @@ export function LoginForm() {
       <div className="absolute bottom-10 left-10 w-64 h-64 bg-teal-600/10 rounded-full blur-2xl pointer-events-none" />
 
       <div className="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-teal-500/20 dark:border-teal-500/30 overflow-hidden relative z-10">
-        {/* Banner Header with Logo */}
-        <div className="bg-gradient-to-b from-teal-950 to-slate-900 p-8 text-white flex flex-col items-center justify-center border-b border-teal-800/40">
+        {/* Banner Header with Logo and Back Button */}
+        <div className="bg-gradient-to-b from-teal-950 to-slate-900 p-8 text-white flex flex-col items-center justify-center border-b border-teal-800/40 relative">
+          {onBackToSplash && (
+            <button
+              type="button"
+              onClick={onBackToSplash}
+              className="absolute top-4 left-4 text-xs font-bold text-teal-400 hover:text-teal-200 flex items-center gap-1 bg-teal-900/40 border border-teal-700/50 px-2.5 py-1 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" /> Voltar
+            </button>
+          )}
           <Logo variant="full" size="xl" showSubtitle={true} />
         </div>
 
