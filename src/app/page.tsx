@@ -11,9 +11,11 @@ import { AdminPortal } from "@/components/AdminPortal";
 import { LoginForm } from "@/components/LoginForm";
 import { AiAssistant } from "@/components/AiAssistant";
 import { Logo } from "@/components/Logo";
+import { WelcomeScreen } from "@/components/WelcomeScreen";
 
 function MainApp() {
   const { currentUser, loading } = useAuth();
+  const [entered, setEntered] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
 
   if (loading) {
@@ -26,6 +28,10 @@ function MainApp() {
         </div>
       </div>
     );
+  }
+
+  if (!entered) {
+    return <WelcomeScreen onEnter={() => setEntered(true)} />;
   }
 
   if (!currentUser) {
