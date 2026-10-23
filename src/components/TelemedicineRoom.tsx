@@ -91,6 +91,115 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
     }
   }, [messages, chatOpen]);
 
+  // Helper to send WebRTC signals over Supabase Realtime + BroadcastChannel
+  const sendSignalMessage = useCallback((signalPayload: any) => {
+    const signalMsg = {
+      ...signalPayload,
+      senderClientId: clientIdRef.current,
+      senderRole: currentUserRole,
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    };
+    processedSignalIdsRef.current.add(signalMsg.id);
+
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: "broadcast",
+        event: "signal",
+        payload: signalMsg,
+      });
+    }
+    if (broadcastChannelRef.current) {
+      broadcastChannelRef.current.postMessage({
+        event: "signal",
+        payload: signalMsg,
+      });
+    }
+  }, [currentUserRole]);
+
+  // Central PeerConnection Creator
+  const createPeerConnection = useCallback(() => {
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+    }
+
+    const pc = new RTCPeerConnection({
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" },
+        { urls: "stun:stun2.l.google.com:19302" },
+        { urls: "stun:stun3.l.google.com:19302" },
+        { urls: "stun:stun4.l.google.com:19302" }
+      ],
+    });
+
+    if (!remoteStreamRef.current) {
+      remoteStreamRef.current = new MediaStream();
+    }
+
+    // Add local media tracks
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => {
+        pc.addTrack(track, mediaStreamRef.current!);
+      });
+    }
+
+    // ICE Candidate event listener
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        sendSignalMessage({
+          type: "candidate",
+          candidate: event.candidate,
+        });
+      }
+    };
+
+    // Incoming remote track listener
+    pc.ontrack = (event) => {
+      if (!remoteStreamRef.current) {
+        remoteStreamRef.current = new MediaStream();
+      }
+      if (event.streams && event.streams[0]) {
+        event.streams[0].getTracks().forEach((track) => {
+          if (!remoteStreamRef.current?.getTracks().includes(track)) {
+            remoteStreamRef.current?.addTrack(track);
+          }
+        });
+      } else if (event.track) {
+        if (!remoteStreamRef.current.getTracks().includes(event.track)) {
+          remoteStreamRef.current.addTrack(event.track);
+        }
+      }
+
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = remoteStreamRef.current;
+        remoteVideoRef.current.play().catch(() => {});
+      }
+      setRemoteConnected(true);
+    };
+
+    const updateConnectionState = () => {
+      const state = pc.connectionState;
+      const iceState = pc.iceConnectionState;
+      if (state === "connected" || iceState === "connected" || iceState === "completed") {
+        setRemoteConnected(true);
+      } else if (
+        state === "disconnected" ||
+        state === "failed" ||
+        state === "closed" ||
+        iceState === "failed" ||
+        iceState === "closed"
+      ) {
+        setRemoteConnected(false);
+      }
+    };
+
+    pc.onconnectionstatechange = updateConnectionState;
+    pc.oniceconnectionstatechange = updateConnectionState;
+
+    peerConnectionRef.current = pc;
+    return pc;
+  }, [sendSignalMessage]);
+
   // Initialize camera and microphone media stream
   useEffect(() => {
     let isMounted = true;
@@ -119,7 +228,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
           video.play().catch(() => {});
         });
 
-        // Add tracks to existing PeerConnection if initialized before media stream
+        // Add tracks to existing PeerConnection if initialized
         if (peerConnectionRef.current) {
           const senders = peerConnectionRef.current.getSenders();
           stream.getTracks().forEach((track) => {
@@ -177,113 +286,6 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
       }
     };
 
-    const sendSignalMessage = (signalPayload: any) => {
-      const signalMsg = {
-        ...signalPayload,
-        senderClientId: clientIdRef.current,
-        senderRole: currentUserRole,
-        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      };
-      processedSignalIdsRef.current.add(signalMsg.id);
-
-      if (channelRef.current) {
-        channelRef.current.send({
-          type: "broadcast",
-          event: "signal",
-          payload: signalMsg,
-        });
-      }
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.postMessage({
-          event: "signal",
-          payload: signalMsg,
-        });
-      }
-    };
-
-    const createPeerConnection = () => {
-      if (peerConnectionRef.current) {
-        peerConnectionRef.current.close();
-      }
-
-      const pc = new RTCPeerConnection({
-        iceServers: [
-          { urls: "stun:stun.l.google.com:19302" },
-          { urls: "stun:stun1.l.google.com:19302" },
-          { urls: "stun:stun2.l.google.com:19302" },
-          { urls: "stun:stun3.l.google.com:19302" },
-          { urls: "stun:stun4.l.google.com:19302" }
-        ],
-      });
-
-      if (!remoteStreamRef.current) {
-        remoteStreamRef.current = new MediaStream();
-      }
-
-      // Add local tracks to peer connection if available
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach((track) => {
-          pc.addTrack(track, mediaStreamRef.current!);
-        });
-      }
-
-      // Handle local ICE candidates
-      pc.onicecandidate = (event) => {
-        if (event.candidate) {
-          sendSignalMessage({
-            type: "candidate",
-            candidate: event.candidate,
-          });
-        }
-      };
-
-      // Handle remote incoming tracks
-      pc.ontrack = (event) => {
-        if (!remoteStreamRef.current) {
-          remoteStreamRef.current = new MediaStream();
-        }
-        if (event.streams && event.streams[0]) {
-          event.streams[0].getTracks().forEach((track) => {
-            if (!remoteStreamRef.current?.getTracks().includes(track)) {
-              remoteStreamRef.current?.addTrack(track);
-            }
-          });
-        } else if (event.track) {
-          if (!remoteStreamRef.current.getTracks().includes(event.track)) {
-            remoteStreamRef.current.addTrack(event.track);
-          }
-        }
-
-        if (remoteVideoRef.current) {
-          remoteVideoRef.current.srcObject = remoteStreamRef.current;
-          remoteVideoRef.current.play().catch(() => {});
-        }
-        setRemoteConnected(true);
-      };
-
-      const updateConnectionState = () => {
-        const state = pc.connectionState;
-        const iceState = pc.iceConnectionState;
-        if (state === "connected" || iceState === "connected" || iceState === "completed") {
-          setRemoteConnected(true);
-        } else if (
-          state === "disconnected" ||
-          state === "failed" ||
-          state === "closed" ||
-          iceState === "failed" ||
-          iceState === "closed"
-        ) {
-          setRemoteConnected(false);
-        }
-      };
-
-      pc.onconnectionstatechange = updateConnectionState;
-      pc.oniceconnectionstatechange = updateConnectionState;
-
-      peerConnectionRef.current = pc;
-      return pc;
-    };
-
     const handleSignalPayload = async (payload: any) => {
       if (!payload || !payload.id || payload.senderClientId === clientIdRef.current) return;
       if (processedSignalIdsRef.current.has(payload.id)) return;
@@ -317,7 +319,6 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
           }
         } else if (payload.type === "peer-joined" || payload.type === "request-offer") {
           setPeerJoined(true);
-          // High client ID or DOCTOR role initiates offer
           const shouldOffer = currentUserRole === "DOCTOR" || clientIdRef.current > payload.senderClientId;
           if (shouldOffer) {
             const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
@@ -382,7 +383,7 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
       }
       supabase.removeChannel(channel);
     };
-  }, [appointment.id, currentUserRole]);
+  }, [appointment.id, currentUserRole, createPeerConnection, sendSignalMessage]);
 
   // Handle joining the call step
   const handleEnterCall = async () => {
@@ -390,112 +391,21 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
 
     let pc = peerConnectionRef.current;
     if (!pc) {
-      pc = new RTCPeerConnection({
-        iceServers: [
-          { urls: "stun:stun.l.google.com:19302" },
-          { urls: "stun:stun1.l.google.com:19302" },
-          { urls: "stun:stun2.l.google.com:19302" },
-          { urls: "stun:stun3.l.google.com:19302" },
-          { urls: "stun:stun4.l.google.com:19302" }
-        ],
-      });
-
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach((track) => {
-          pc?.addTrack(track, mediaStreamRef.current!);
-        });
-      }
-
-      pc.onicecandidate = (event) => {
-        if (event.candidate) {
-          const signalMsg = {
-            type: "candidate",
-            candidate: event.candidate,
-            senderClientId: clientIdRef.current,
-            senderRole: currentUserRole,
-            id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-          };
-          processedSignalIdsRef.current.add(signalMsg.id);
-          channelRef.current?.send({ type: "broadcast", event: "signal", payload: signalMsg });
-          broadcastChannelRef.current?.postMessage({ event: "signal", payload: signalMsg });
-        }
-      };
-
-      pc.ontrack = (event) => {
-        if (!remoteStreamRef.current) {
-          remoteStreamRef.current = new MediaStream();
-        }
-        if (event.streams && event.streams[0]) {
-          event.streams[0].getTracks().forEach((track) => {
-            if (!remoteStreamRef.current?.getTracks().includes(track)) {
-              remoteStreamRef.current?.addTrack(track);
-            }
-          });
-        } else if (event.track) {
-          if (!remoteStreamRef.current.getTracks().includes(event.track)) {
-            remoteStreamRef.current.addTrack(event.track);
-          }
-        }
-
-        if (remoteVideoRef.current) {
-          remoteVideoRef.current.srcObject = remoteStreamRef.current;
-          remoteVideoRef.current.play().catch(() => {});
-        }
-        setRemoteConnected(true);
-      };
-
-      peerConnectionRef.current = pc;
+      pc = createPeerConnection();
     }
 
-    const joinSignal = {
+    sendSignalMessage({
       type: "peer-joined",
-      senderClientId: clientIdRef.current,
-      senderRole: currentUserRole,
-      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    };
-    processedSignalIdsRef.current.add(joinSignal.id);
-
-    if (channelRef.current) {
-      channelRef.current.send({
-        type: "broadcast",
-        event: "signal",
-        payload: joinSignal,
-      });
-    }
-    if (broadcastChannelRef.current) {
-      broadcastChannelRef.current.postMessage({
-        event: "signal",
-        payload: joinSignal,
-      });
-    }
+    });
 
     if (currentUserRole === "DOCTOR") {
       try {
         const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
         await pc.setLocalDescription(offer);
-
-        const offerMsg = {
+        sendSignalMessage({
           type: "offer",
           offer,
-          senderClientId: clientIdRef.current,
-          senderRole: currentUserRole,
-          id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        };
-        processedSignalIdsRef.current.add(offerMsg.id);
-
-        if (channelRef.current) {
-          channelRef.current.send({
-            type: "broadcast",
-            event: "signal",
-            payload: offerMsg,
-          });
-        }
-        if (broadcastChannelRef.current) {
-          broadcastChannelRef.current.postMessage({
-            event: "signal",
-            payload: offerMsg,
-          });
-        }
+        });
       } catch (err) {
         console.error("Error creating initial offer:", err);
       }

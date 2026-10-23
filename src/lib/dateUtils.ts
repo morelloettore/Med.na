@@ -1,6 +1,6 @@
 /**
  * Utility functions for consistent formatting of appointment dates and times
- * without unexpected UTC/Timezone offset shifts.
+ * without unexpected UTC/Timezone offset shifts across portals.
  */
 
 export function formatAppointmentDate(scheduledAt: string): string {
