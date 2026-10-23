@@ -168,18 +168,27 @@ export const MedicalRecordDocumentView: React.FC<MedicalRecordDocumentViewProps>
               <Lock className="w-4 h-4" /> Assinatura Digital Verificada (ICP-Brasil)
             </div>
             <p className="font-mono text-[10px] text-slate-300">
-              HASH HASH256: <span className="text-sky-300 font-bold">{digitalSignatureHash}</span>
+              HASH SHA-256: <span className="text-sky-300 font-bold">{digitalSignatureHash}</span>
             </p>
             <p className="text-[10px] text-slate-400">
-              Validado pelo sistema Med.na em {new Date(signatureTimestamp).toLocaleString("pt-BR")}
+              Validado e assinado digitalmente pelo sistema Med.na em {new Date(signatureTimestamp).toLocaleString("pt-BR")}
             </p>
           </div>
 
-          <div className="flex items-center gap-3 bg-white/10 p-2.5 rounded-xl border border-white/20">
-            <QrCode className="w-10 h-10 text-white" />
-            <div className="text-[10px] text-slate-300">
-              <p className="font-bold text-white">Consulte Autenticidade</p>
-              <p>medna.com.br/validar</p>
+          <div className="flex items-center gap-3 bg-white p-2 rounded-xl border border-slate-200 text-slate-900 shadow-md">
+            {/* Scannable QR Code Image pointing to validation portal */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(
+                `https://medna.com.br/validar?hash=${digitalSignatureHash}`
+              )}`}
+              alt="QR Code Autenticidade Prontuário Med.na"
+              className="w-16 h-16 object-contain rounded"
+            />
+            <div className="text-[10px] text-slate-700">
+              <p className="font-bold text-slate-900 uppercase">Validação ICP-Brasil</p>
+              <p className="text-[9px] text-slate-500 font-mono">medna.com.br/validar</p>
+              <p className="text-[8px] text-emerald-600 font-bold mt-0.5">✓ QR Code Escaneável</p>
             </div>
           </div>
         </div>

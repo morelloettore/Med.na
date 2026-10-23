@@ -175,8 +175,23 @@ export const TelemedicineRoom: React.FC<TelemedicineRoomProps> = ({
         remoteVideoRef.current.srcObject = remoteStreamRef.current;
         remoteVideoRef.current.play().catch(() => {});
       }
-        playCallJoinSound();
+      playCallJoinSound();
       setRemoteConnected(true);
+    };
+
+    // Renegotiation handler when tracks are added dynamically
+    pc.onnegotiationneeded = async () => {
+      try {
+        if (pc.signalingState !== "stable") return;
+        const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+        await pc.setLocalDescription(offer);
+        sendSignalMessage({
+          type: "offer",
+          offer,
+        });
+      } catch (err) {
+        console.warn("Error during WebRTC renegotiation:", err);
+      }
     };
 
     const updateConnectionState = () => {
