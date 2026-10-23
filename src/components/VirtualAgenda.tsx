@@ -121,27 +121,61 @@ export const VirtualAgenda: React.FC<VirtualAgendaProps> = ({
     setCurrentDate(new Date());
   };
 
-  // Filtered Appointments
+  // Date Range Filtering based on viewMode & currentDate
   const filteredAppointments = appointments.filter((app) => {
     const matchesStatus = statusFilter === "ALL" || app.status === statusFilter;
     const matchesMode = modeFilter === "ALL" || app.mode === modeFilter;
-    return matchesStatus && matchesMode;
+    if (!matchesStatus || !matchesMode) return false;
+
+    const dateStr = app.scheduled_at.split(/[T ]/)[0]; // e.g. "2026-10-23"
+    if (!dateStr || !dateStr.includes("-")) return true;
+
+    const [appYear, appMonth, appDay] = dateStr.split("-").map(Number);
+    const appDate = new Date(appYear, appMonth - 1, appDay);
+
+    if (viewMode === "DAY") {
+      return (
+        appDate.getFullYear() === currentDate.getFullYear() &&
+        appDate.getMonth() === currentDate.getMonth() &&
+        appDate.getDate() === currentDate.getDate()
+      );
+    }
+
+    if (viewMode === "MONTH") {
+      return (
+        appDate.getFullYear() === currentDate.getFullYear() &&
+        appDate.getMonth() === currentDate.getMonth()
+      );
+    }
+
+    if (viewMode === "WEEK") {
+      const startOfWeek = new Date(currentDate);
+      const dayOfWeek = startOfWeek.getDay();
+      startOfWeek.setDate(startOfWeek.getDate() - dayOfWeek);
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(endOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
+
+      return appDate >= startOfWeek && appDate <= endOfWeek;
+    }
+
+    return true;
   });
 
   // Calculate Daily Summaries
   const todayStr = new Date().toISOString().split("T")[0];
   const totalCount = filteredAppointments.length;
-  const todayCount = filteredAppointments.filter(
-    (a) => new Date(a.scheduled_at).toISOString().split("T")[0] === todayStr
+  const todayCount = appointments.filter(
+    (a) => a.scheduled_at.startsWith(todayStr)
   ).length;
   const confirmedCount = filteredAppointments.filter((a) => a.status === "CONFIRMED").length;
   const completedCount = filteredAppointments.filter((a) => a.status === "COMPLETED").length;
-  const canceledCount = filteredAppointments.filter((a) => a.status === "CANCELED").length;
 
   // Status Badge Styling Function
   const getStatusBadge = (status: AppointmentStatus, scheduledAt: string) => {
-    const appDateStr = new Date(scheduledAt).toISOString().split("T")[0];
-    const isToday = appDateStr === todayStr;
+    const isToday = scheduledAt.startsWith(todayStr);
 
     if (status === "CANCELED") {
       return (
@@ -194,7 +228,7 @@ export const VirtualAgenda: React.FC<VirtualAgendaProps> = ({
         {/* Resumo Diário Badges */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <div className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold border border-slate-200 dark:border-slate-700">
-            Total: <span className="font-bold text-slate-900 dark:text-white">{totalCount}</span>
+            Filtradas: <span className="font-bold text-slate-900 dark:text-white">{totalCount}</span>
           </div>
           <div className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 font-semibold border border-amber-200 dark:border-amber-800">
             Hoje: <span className="font-bold">{todayCount}</span>
@@ -215,6 +249,7 @@ export const VirtualAgenda: React.FC<VirtualAgendaProps> = ({
           <button
             onClick={handlePrev}
             className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-200 transition-colors"
+            title="Anterior"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -227,12 +262,15 @@ export const VirtualAgenda: React.FC<VirtualAgendaProps> = ({
           <button
             onClick={handleNext}
             className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-200 transition-colors"
+            title="Próximo"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
 
           <span className="text-sm font-bold text-slate-800 dark:text-slate-100 ml-2 capitalize">
-            {currentDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
+            {viewMode === "DAY"
+              ? currentDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
+              : currentDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
           </span>
         </div>
 
@@ -297,12 +335,11 @@ export const VirtualAgenda: React.FC<VirtualAgendaProps> = ({
         </div>
       ) : filteredAppointments.length === 0 ? (
         <div className="py-12 text-center text-slate-500 dark:text-slate-400 text-sm border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
-          Nenhuma consulta encontrada no período com os filtros aplicados.
+          Nenhuma consulta encontrada no período selecionado ({viewMode === "MONTH" ? "Mês" : viewMode === "WEEK" ? "Semana" : "Dia"}) com os filtros aplicados.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredAppointments.map((app) => {
-            const dateObj = new Date(app.scheduled_at);
             const isTele = app.mode === "TELEMEDICINE";
 
             return (
@@ -332,7 +369,7 @@ export const VirtualAgenda: React.FC<VirtualAgendaProps> = ({
                 <div className="text-xs text-slate-600 dark:text-slate-300 space-y-1 pt-2 border-t border-slate-200 dark:border-slate-800">
                   <div className="flex items-center gap-1.5 font-medium">
                     <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    {dateObj.toLocaleDateString("pt-BR")} às {dateObj.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                    {formatAppointmentDateTime(app.scheduled_at)}
                   </div>
                   {app.location && (
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
