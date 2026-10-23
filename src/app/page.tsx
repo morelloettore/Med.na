@@ -12,11 +12,13 @@ import { LoginForm } from "@/components/LoginForm";
 import { AiAssistant } from "@/components/AiAssistant";
 import { Logo } from "@/components/Logo";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
+import { LegalDocsModal } from "@/components/LegalDocsModal";
 
 function MainApp() {
   const { currentUser, loading } = useAuth();
   const [entered, setEntered] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+  const [legalDoc, setLegalDoc] = useState<"PRIVACY" | "TERMS" | "ICP_BRASIL" | null>(null);
 
   if (!entered) {
     return <WelcomeScreen onEnter={() => setEntered(true)} />;
@@ -51,16 +53,24 @@ function MainApp() {
 
       <AiAssistant isOpen={aiOpen} onClose={() => setAiOpen(false)} />
 
+      <LegalDocsModal docType={legalDoc} onClose={() => setLegalDoc(null)} />
+
       <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-8 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
           <Logo variant="horizontal" size="sm" />
-          <p>© 2025 Med.na Clínica Médica Virtual & Gestão Hospitalar. Todos os direitos reservados.</p>
+          <p>© 2026 Med.na Clínica Médica Virtual & Gestão Hospitalar. Todos os direitos reservados.</p>
           <div className="flex items-center gap-4 text-[11px] font-semibold text-slate-400">
-            <span>Privacidade</span>
+            <button onClick={() => setLegalDoc("PRIVACY")} className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+              Privacidade
+            </button>
             <span>•</span>
-            <span>Termos de Uso</span>
+            <button onClick={() => setLegalDoc("TERMS")} className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+              Termos de Uso
+            </button>
             <span>•</span>
-            <span>Telemedicina ICP-Brasil</span>
+            <button onClick={() => setLegalDoc("ICP_BRASIL")} className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+              Telemedicina ICP-Brasil
+            </button>
           </div>
         </div>
       </footer>
